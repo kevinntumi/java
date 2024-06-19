@@ -1,2 +1,2 @@
-# java
-Este repositório contém códigos-fontes de aplicações em Java.
+# Java GUI
+Esta branch contém o código-fonte de aplicações de interface gráfica em Java.
