@@ -1,2 +1,2 @@
 # java
-Este repositório contém códigos-fontes de aplicações em Java.
+Este repositório contém o código-fonte do projeto do curso de Services, MicroServices & DevOps.
