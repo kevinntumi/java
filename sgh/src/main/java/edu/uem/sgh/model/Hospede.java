@@ -25,7 +25,7 @@ public class Hospede {
         this.id = id;
     }
 
-    public String getNumDzocumentoIdentidade() {
+    public String getNumDocumentoIdentidade() {
         return numDocumentoIdentidade;
     }
 
