@@ -5,19 +5,17 @@
 package edu.uem.sgh.model;
 
 import edu.uem.sgh.helper.ServicoSituacao;
-import java.sql.Blob;
 
 /**
  *
  * @author Kevin Ntumi
  */
-public class Quarto {
+public class Servico {
     private long id;
     private String descricao;
-    private int capacidade;
-    private Blob foto;
-    private double preco;
+    private long dataRegisto;
     private ServicoSituacao situacao;
+    private Gerente gerente;
 
     public long getId() {
         return id;
@@ -35,28 +33,12 @@ public class Quarto {
         this.descricao = descricao;
     }
 
-    public int getCapacidade() {
-        return capacidade;
+    public long getDataRegisto() {
+        return dataRegisto;
     }
 
-    public void setCapacidade(int capacidade) {
-        this.capacidade = capacidade;
-    }
-
-    public Blob getFoto() {
-        return foto;
-    }
-
-    public void setFoto(Blob foto) {
-        this.foto = foto;
-    }
-
-    public double getPreco() {
-        return preco;
-    }
-
-    public void setPreco(double preco) {
-        this.preco = preco;
+    public void setDataRegisto(long dataRegisto) {
+        this.dataRegisto = dataRegisto;
     }
 
     public ServicoSituacao getSituacao() {
@@ -66,4 +48,12 @@ public class Quarto {
     public void setSituacao(ServicoSituacao situacao) {
         this.situacao = situacao;
     }
+
+    public Gerente getGerente() {
+        return gerente;
+    }
+
+    public void setGerente(Gerente gerente) {
+        this.gerente = gerente;
+    }   
 }

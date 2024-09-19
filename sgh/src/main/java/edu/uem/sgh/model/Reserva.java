@@ -4,6 +4,7 @@
  */
 package edu.uem.sgh.model;
 
+import edu.uem.sgh.helper.ReservaSituacao;
 import java.util.List;
 
 /**
@@ -20,6 +21,7 @@ public class Reserva {
     private Pagamento pagamento;
     private Funcionario funcionario;
     private List<HospedeQuarto> hospedes;
+    private ReservaSituacao situacao;
 
     public long getId() {
         return id;
@@ -91,5 +93,13 @@ public class Reserva {
 
     public void setHospedes(List<HospedeQuarto> hospedes) {
         this.hospedes = hospedes;
+    }
+
+    public ReservaSituacao getSituacao() {
+        return situacao;
+    }
+
+    public void setSituacao(ReservaSituacao situacao) {
+        this.situacao = situacao;
     }
 }
