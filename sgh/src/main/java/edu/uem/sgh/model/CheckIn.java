@@ -2,12 +2,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package edu.uem.sgh.model.check_in;
+package edu.uem.sgh.model;
 
-import edu.uem.sgh.model.Funcionario;
-import edu.uem.sgh.model.Hospede;
-import edu.uem.sgh.model.HospedeQuarto;
-import edu.uem.sgh.model.Pagamento;
 import java.util.List;
 
 /**
