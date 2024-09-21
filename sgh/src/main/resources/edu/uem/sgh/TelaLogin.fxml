@@ -5,7 +5,6 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
@@ -16,110 +15,118 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane id="AnchorPane" fx:id="root" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="303.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.uem.sgh.ui.TelaLogin">
+<AnchorPane id="AnchorPane" fx:id="root" maxWidth="-Infinity" minWidth="-Infinity" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1">
     <stylesheets>
         <URL value="@/styles/tela_login.css" />
     </stylesheets>
    <children>
-      <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="303.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="10.0" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <VBox fx:id="parent" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
+            <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
                <children>
-                  <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="189.0">
+                  <ImageView fx:id="img" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+               </children>
+            </AnchorPane>
+            <VBox fx:id="form" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="303.0">
+               <children>
+                  <VBox fx:id="parent" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
                      <children>
-                        <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="189.0">
+                        <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="189.0">
                            <children>
-                              <Text boundsType="LOGICAL_VERTICAL_CENTER" strokeType="OUTSIDE" strokeWidth="0.0" text="SGH" textOrigin="CENTER" y="16.0">
-                                 <font>
-                                    <Font name="Inter Bold" size="12.0" />
-                                 </font>
-                              </Text>
+                              <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="189.0">
+                                 <children>
+                                    <Text boundsType="LOGICAL_VERTICAL_CENTER" strokeType="OUTSIDE" strokeWidth="0.0" text="SGH" textOrigin="CENTER" y="16.0">
+                                       <font>
+                                          <Font name="Inter Bold" size="12.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                              </Pane>
+                              <ImageView fx:id="minimize" fitHeight="32.0" fitWidth="46.0" pickOnBounds="true" preserveRatio="true">
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                              </ImageView>
+                              <ImageView fx:id="close" fitHeight="32.0" fitWidth="46.0" pickOnBounds="true" preserveRatio="true" />
                            </children>
-                        </Pane>
-                        <ImageView fx:id="minimize" fitHeight="32.0" fitWidth="46.0" pickOnBounds="true" preserveRatio="true">
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                        </ImageView>
-                        <ImageView fx:id="close" fitHeight="32.0" fitWidth="46.0" pickOnBounds="true" preserveRatio="true">
-                        </ImageView>
-                     </children>
-                  </HBox>
-                  <Text boundsType="LOGICAL_VERTICAL_CENTER" cache="true" strokeType="OUTSIDE" strokeWidth="0.0" text="E-mail:">
-                     <font>
-                        <Font name="Inter Regular" size="12.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets top="36.0" />
-                     </VBox.margin>
-                  </Text>
-                  <TextField fx:id="txtEmail" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefWidth="255.0">
-                     <font>
-                        <Font name="Inter Regular" size="12.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets top="16.0" />
-                     </VBox.margin>
-                  </TextField>
-                  <Text boundsType="LOGICAL_VERTICAL_CENTER" cache="true" mouseTransparent="true" strokeType="OUTSIDE" strokeWidth="0.0" text="Palavra-Passe:">
-                     <font>
-                        <Font name="Inter Regular" size="12.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets top="16.0" />
-                     </VBox.margin>
-                  </Text>
-                  <TextField fx:id="txtPalavraPasse" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefWidth="255.0">
-                     <font>
-                        <Font name="Inter Regular" size="12.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets top="16.0" />
-                     </VBox.margin>
-                  </TextField>
-                  <Button fx:id="btnIniciarSessao" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefWidth="255.0" text="Iniciar sessão">
-                     <font>
-                        <Font name="Inter Bold" size="12.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets bottom="24.0" top="24.0" />
-                     </VBox.margin>
-                  </Button>
-                  <StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="255.0">
-                     <children>
-                        <Line endX="255.0" stroke="#cccccc" />
-                        <StackPane fx:id="lblOuParent" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
+                        </HBox>
+                        <Text boundsType="LOGICAL_VERTICAL_CENTER" cache="true" strokeType="OUTSIDE" strokeWidth="0.0" text="E-mail:">
+                           <font>
+                              <Font name="Inter Regular" size="12.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets top="36.0" />
+                           </VBox.margin>
+                        </Text>
+                        <TextField fx:id="txtEmail" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefWidth="255.0">
+                           <font>
+                              <Font name="Inter Regular" size="12.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets top="16.0" />
+                           </VBox.margin>
+                        </TextField>
+                        <Text boundsType="LOGICAL_VERTICAL_CENTER" cache="true" mouseTransparent="true" strokeType="OUTSIDE" strokeWidth="0.0" text="Palavra-Passe:">
+                           <font>
+                              <Font name="Inter Regular" size="12.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets top="16.0" />
+                           </VBox.margin>
+                        </Text>
+                        <TextField fx:id="txtPalavraPasse" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefWidth="255.0">
+                           <font>
+                              <Font name="Inter Regular" size="12.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets top="16.0" />
+                           </VBox.margin>
+                        </TextField>
+                        <Button fx:id="btnIniciarSessao" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefWidth="255.0" text="Iniciar sessão">
+                           <font>
+                              <Font name="Inter Bold" size="12.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets bottom="24.0" top="24.0" />
+                           </VBox.margin>
+                        </Button>
+                        <StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="255.0">
                            <children>
-                              <Text fx:id="lblOu" boundsType="LOGICAL_VERTICAL_CENTER" strokeType="OUTSIDE" strokeWidth="0.0" text=" OU " textAlignment="CENTER">
-                                 <font>
-                                    <Font name="Inter Bold" size="12.0" />
-                                 </font>
-                                 <StackPane.margin>
-                                    <Insets left="4.0" right="4.0" />
-                                 </StackPane.margin>
-                              </Text>
+                              <Line endX="255.0" stroke="#cccccc" />
+                              <StackPane fx:id="lblOuParent" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
+                                 <children>
+                                    <Text fx:id="lblOu" boundsType="LOGICAL_VERTICAL_CENTER" strokeType="OUTSIDE" strokeWidth="0.0" text=" OU " textAlignment="CENTER">
+                                       <font>
+                                          <Font name="Inter Bold" size="12.0" />
+                                       </font>
+                                       <StackPane.margin>
+                                          <Insets left="4.0" right="4.0" />
+                                       </StackPane.margin>
+                                    </Text>
+                                 </children>
+                              </StackPane>
                            </children>
+                           <padding>
+                              <Insets bottom="36.0" />
+                           </padding>
                         </StackPane>
                      </children>
                      <padding>
-                        <Insets bottom="36.0" />
+                        <Insets left="24.0" right="24.0" />
                      </padding>
+                  </VBox>
+                  <StackPane fx:id="stackPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="48.0" prefWidth="303.0">
+                     <children>
+                        <Label fx:id="lblRecuperarPalavraPasse" text="Recuperar a palavra-passe" textFill="#00000099" underline="true">
+                           <font>
+                              <Font name="Inter Bold" size="12.0" />
+                           </font>
+                        </Label>
+                     </children>
                   </StackPane>
                </children>
-               <padding>
-                  <Insets left="24.0" right="24.0" />
-               </padding>
             </VBox>
-            <StackPane fx:id="stackPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="48.0" prefWidth="303.0">
-               <children>
-                  <Label text="Recuperar a palavra-passe" textFill="#00000099" underline="true">
-                     <font>
-                        <Font name="Inter Bold" size="12.0" />
-                     </font>
-                  </Label>
-               </children>
-            </StackPane>
          </children>
-      </VBox>
+      </HBox>
    </children>
 </AnchorPane>

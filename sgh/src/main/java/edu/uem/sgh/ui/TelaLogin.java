@@ -6,8 +6,10 @@ package edu.uem.sgh.ui;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
 
 /**
  *
@@ -24,13 +26,27 @@ public class TelaLogin{
     private Button btnIniciarSessao;
     
     @FXML
-    private TextField txtRecuperarPalavraPasse;
+    private Label lblRecuperarPalavraPasse;
     
     @FXML
     private ImageView close;
     
     @FXML
     private ImageView minimize;
+    
+    @FXML
+    private VBox form;
+    
+    @FXML
+    private ImageView img;
+
+    public VBox getForm() {
+        return form;
+    }
+
+    public ImageView getImg() {
+        return img;
+    }
 
     public TextField getTxtEmail() {
         return txtEmail;
@@ -44,8 +60,8 @@ public class TelaLogin{
         return btnIniciarSessao;
     }
 
-    public TextField getTxtRecuperarPalavraPasse() {
-        return txtRecuperarPalavraPasse;
+    public Label getLblRecuperarPalavraPasse() {
+        return lblRecuperarPalavraPasse;
     }
 
     public ImageView getClose() {

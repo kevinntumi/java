@@ -2,6 +2,7 @@ module edu.uem.sgh {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.graphics;
+    requires javafx.base;
     requires org.slf4j;
     requires org.xerial.sqlitejdbc;
     requires java.sql;
