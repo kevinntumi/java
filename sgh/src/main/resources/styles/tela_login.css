@@ -5,8 +5,16 @@
     -fx-border-radius: 0;
 }
 
+#topBar {
+   -fx-background-color: #4772A3; 
+}
+
 #parent {
-   -fx-background-color: white;
+    -fx-background-color: white;
+    -fx-border-color: #ccc;
+    -fx-border-width: 1;
+    -fx-border-style: solid inside;
+    -fx-border-radius: 0;
 }
 
 #btnIniciarSessao {
@@ -16,12 +24,19 @@
     -fx-background-radius: 0px;
 }
 
-#lblRecuperarPalavraPasse {
-    -fx-text-fill: rgba(0, 0, 0, 0.6);
+#btnIniciarSessao:hover {
+    -fx-background-color: #3B5E86;
 }
 
-#lblRecuperarPalavraPasse:hover, #lblRecuperarPalavraPasse:focused {
-    -fx-text-fill: black;
+#btnRecuperarPalavraPasse {
+    -fx-background-color: #eee;
+    -fx-text-fill: rgba(0,0,0,0.6);;
+    -fx-border-radius: 0;
+    -fx-border-color: #CCC;
+}
+
+#btnRecuperarPalavraPasse:hover{
+    -fx-background-color: #ddd;
 }
 
 #close {
@@ -62,10 +77,6 @@
     -fx-background-color: rgba(238, 238, 238, 1.0);
 }
 
-#btnIniciarSessao:hover {
-    -fx-background-color: #3B5E86;
-}
-
 #txtEmail, #txtPalavraPasse {
     -fx-background-color: rgba(0,0,0,0);
     -fx-border-color: #CCC;
@@ -75,7 +86,7 @@
     -fx-border-radius: 0;
 }
 
-#txtEmail:focused, #txtPalavraPasse:focused, #txtEmail:hover, #txtPalavraPasse:hover {
+#txtEmail:focused, #txtPalavraPasse:focused {
     -fx-border-color: #4772A3;
     -fx-transition: 0.5s;
 }

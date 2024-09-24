@@ -42,7 +42,7 @@ public class JUnitTest {
     //
     // @Test
     // public void hello() {}
-    
+
     @Test
     public void findResources() {
         File f = new File(System.getProperty("user.dir") + "\\src\\main\\resources\\images");

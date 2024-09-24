@@ -9,11 +9,14 @@ import javafx.scene.layout.VBox;
 import com.gluonhq.charm.glisten.control.*;
 import edu.uem.sgh.controller.AbstractController;
 import edu.uem.sgh.model.Usuario;
+import static edu.uem.sgh.model.Usuario.Funcao.FUNCIONARIO;
+import static edu.uem.sgh.model.Usuario.Funcao.GERENTE;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.StackPane;
@@ -84,8 +87,24 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
 
     @Override
     public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-        if (newValue instanceof Usuario) {
+        if (newValue == null) return; 
             
+        if (newValue instanceof Usuario) {
+            Usuario usuario = (Usuario) newValue;
+   
+            switch (usuario.getFuncao()) {
+                case FUNCIONARIO: 
+                    break;
+                case GERENTE:
+                    break;
+                case ADMINISTRADOR:
+                    break;
+            }
         }
+    }
+
+    @Override
+    public Parent getRoot() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }
