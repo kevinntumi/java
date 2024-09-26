@@ -5,18 +5,22 @@
 package edu.uem.sgh;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
  * @author Kevin Ntumi
  */
 public class JUnitTest {
+    private final static String baseResourcePath = System.getProperty("user.dir") + "\\src\\main\\resources\\edu\\uem\\sgh";
     
     public JUnitTest() {
     }
@@ -46,7 +50,20 @@ public class JUnitTest {
     @Test
     public void findResources() {
         File f = new File(System.getProperty("user.dir") + "\\src\\main\\resources\\images");
-        
         System.out.println(f);
+    }
+   
+    
+    @Test
+    public void testResourcePath() throws Exception {
+        Parent root;
+        
+        try {
+            root = FXMLLoader.load(new URI(baseResourcePath + "\\TelaLogin.fxml").toURL());
+        } catch (IOException e) {
+            root = null;
+        }
+
+        org.junit.jupiter.api.Assertions.assertNotNull(root);
     }
 }

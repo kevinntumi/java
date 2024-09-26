@@ -11,7 +11,20 @@ import javafx.scene.Parent;
  * @author Kevin Ntumi
  */
 public abstract class AbstractController {
+    private String uiClassID;
+    
+    protected AbstractController() {
+    }
+    
     public abstract void adicionarListeners();
     public abstract void removerListeners();
     public abstract Parent getRoot();
+
+    public String getUiClassID() {
+        return uiClassID;
+    }
+
+    public void setUiClassID(String uiClassID) {
+        this.uiClassID = uiClassID;
+    }
 }

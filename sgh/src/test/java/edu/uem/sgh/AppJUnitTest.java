@@ -7,7 +7,6 @@ package edu.uem.sgh;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -19,10 +18,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.junit.Before;
-import org.testfx.framework.junit.ApplicationTest;
 
 /**
  *
@@ -37,11 +33,6 @@ public class AppJUnitTest extends Application implements ChangeListener<Bounds> 
     
     public static void main(String[] args) throws Exception {
         Application.launch(AppJUnitTest.class, args);
-    }
-
-    @Before 
-    public void setUpClass() throws Exception {
-        ApplicationTest.launch(App.class, new String[3]);
     }
     
     @Override
@@ -85,8 +76,6 @@ public class AppJUnitTest extends Application implements ChangeListener<Bounds> 
 
     @Override
     public void changed(ObservableValue<? extends Bounds> observable, Bounds oldValue, Bounds newValue) {
-        System.out.println("Height: " + newValue.getHeight());
-        
         if (newValue.getHeight() == 0 || imageView.getImage() != null) return;
         
         double dimension = newValue.getHeight();

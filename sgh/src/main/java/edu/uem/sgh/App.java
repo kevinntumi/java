@@ -8,11 +8,7 @@ import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
 import edu.uem.sgh.util.Detector;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RunnableScheduledFuture;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -20,7 +16,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -163,10 +158,6 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
         
         if (newValue instanceof Usuario) {
             Usuario usuario = (Usuario) newValue;
-            
-            if (usuario == null) {
-                
-            }
         }
         
         System.out.println("tsoka " + newValue);

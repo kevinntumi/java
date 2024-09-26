@@ -5,22 +5,25 @@
 package edu.uem.sgh.ui;
 
 import javafx.fxml.FXML;
-import javafx.scene.layout.VBox;
 import com.gluonhq.charm.glisten.control.*;
 import edu.uem.sgh.controller.AbstractController;
 import edu.uem.sgh.model.Usuario;
+import static edu.uem.sgh.model.Usuario.Funcao.ADMINISTRADOR;
 import static edu.uem.sgh.model.Usuario.Funcao.FUNCIONARIO;
 import static edu.uem.sgh.model.Usuario.Funcao.GERENTE;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.layout.StackPane;
-import javafx.scene.text.Text;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 
 /**
  *
@@ -28,51 +31,38 @@ import javafx.scene.text.Text;
  */
 public class TelaMenuPrincipal extends AbstractController implements Initializable, ChangeListener<Object>{
     @FXML
-    private VBox topBar;
+    private Avatar fotoPerfil;
     
     @FXML
-    private Avatar userPhoto;
+    private ImageView close;
     
     @FXML
-    private Text userName;
+    private ImageView minimize;
     
     @FXML
-    private Text userRole;
+    private AnchorPane root;
     
     @FXML
-    private ListView sideBarMenu;
+    private TabPane tabPane;
     
-    @FXML
-    private StackPane stackPane;
+    private AbstractController[] tabContentControllers;
+    
+    private Usuario usuario;
 
-    public VBox getTopBar() {
-        return topBar;
+    public TelaMenuPrincipal() {
+        super();
     }
 
-    public Avatar getUserPhoto() {
-        return userPhoto;
+    public Avatar getFotoPerfil() {
+        return fotoPerfil;
     }
 
-    public Text getUserName() {
-        return userName;
+    public ImageView getClose() {
+        return close;
     }
 
-    public Text getUserRole() {
-        return userRole;
-    }
-
-    public ListView getSideBarMenu() {
-        return sideBarMenu;
-    }
-
-    public StackPane getStackPane() {
-        return stackPane;
-    }
-
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        getSideBarMenu().getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        getSideBarMenu().getItems().set(0, "Tsoka");
+    public ImageView getMinimize() {
+        return minimize;
     }
 
     @Override
@@ -90,21 +80,112 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         if (newValue == null) return; 
             
         if (newValue instanceof Usuario) {
-            Usuario usuario = (Usuario) newValue;
-   
-            switch (usuario.getFuncao()) {
-                case FUNCIONARIO: 
-                    break;
-                case GERENTE:
-                    break;
-                case ADMINISTRADOR:
-                    break;
-            }
+            usuario = (Usuario) newValue;
+            definirMenu(getTabs(usuario.getFuncao()));
         }
     }
 
     @Override
     public Parent getRoot() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return root;
+    }
+
+    public String[] getTabs(Usuario.Funcao funcao) {
+        switch (funcao) {
+            case FUNCIONARIO: 
+                return new String[] {
+                    "Serviços", "Hóspedes", "Quartos", "Reservas", "Check-In", "Check-Out", "Relatórios"
+                };
+            case GERENTE:
+                return new String[] {
+                    "Funcionários", "Serviços", "Hóspedes", "Quartos", "Reservas", "Check-In", "Check-Out", "Relatórios"
+                };
+            case ADMINISTRADOR:
+                return new String[] {
+                    "Funcionários", "Gerentes", "Serviços", "Hóspedes", "Quartos", "Reservas", "Check-In", "Check-Out", "Relatórios"
+                };
+            default:
+                return null;
+        }
+    }
+    
+    public void definirMenu(String[] tabs) {
+        inicializarTabContentsControllers(tabs.length);
+        
+        for (int i = 0 ; i < tabs.length ; i++) {
+            String tab = tabs[i];
+            tabPane.getTabs().add(new Tab(tab, getTabContentByName(tab, i)));
+        }
+    }
+    
+    public FXMLLoader getFXMLoader(String name) {
+        URL resourcePath;
+        
+        switch (name) {
+            case "Funcionários": resourcePath = getClass().getResource("TelaLogin.fxml");
+                break;
+            case "Gerentes": resourcePath = getClass().getResource("TelaLogin.fxml");
+                break;
+            case "Serviços": resourcePath = getClass().getResource("TelaLogin.fxml");
+                break;
+            case "Hóspedes": resourcePath = getClass().getResource("TelaLogin.fxml");
+                break;
+            case "Quartos": resourcePath = getClass().getResource("TelaLogin.fxml");
+                break;
+            case "Reservas": resourcePath = getClass().getResource("TelaLogin.fxml");
+                break;
+            case "Check-In": resourcePath = getClass().getResource("TelaLogin.fxml");
+                break;
+            case "Check-Out": resourcePath = getClass().getResource("TelaLogin.fxml");
+                break;
+            case "Relatórios": resourcePath = getClass().getResource("TelaLogin.fxml");
+                break;
+            default: 
+                return null;
+        }
+        
+        return new FXMLLoader(resourcePath);
+    }
+    
+    public Node getTabContentByName(String name, int i) {
+        if (name == null || name.isBlank()) return null;
+        
+        Node node;
+        FXMLLoader loader = getFXMLoader(name);
+        
+        try {
+            node = loader.load();
+        } catch (IOException e) {
+            node = null;
+        }
+        
+        tabContentControllers[i] = loader.getController();
+        return node;
+    }
+    
+    public Node getTabContentAt(int index) {
+        if (index < 0 || index >= tabContentControllers.length) return null;
+        Node node = tabContentControllers[index].getRoot();
+        return node;
+    }
+    
+    @Override
+    public void setUiClassID(String uiClassID) {
+        super.setUiClassID(uiClassID); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+    }
+
+    @Override
+    public String getUiClassID() {
+        return super.getUiClassID(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        setUiClassID(getClass().getSimpleName());
+    }
+
+    private void inicializarTabContentsControllers(int size) {
+        if (tabContentControllers != null) return;
+        tabContentControllers = new AbstractController[size];
     }
 }

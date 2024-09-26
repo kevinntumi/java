@@ -12,6 +12,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
@@ -63,5 +64,10 @@ public class TelaLoginController extends AbstractController {
     public void removerListeners() {
         minimize.setOnMouseClicked(null);
         close.setOnMouseClicked(null);
+    }
+
+    @Override
+    public Parent getRoot() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

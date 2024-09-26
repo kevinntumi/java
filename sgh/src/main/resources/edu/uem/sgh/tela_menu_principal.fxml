@@ -2,6 +2,7 @@
 
 <?import com.gluonhq.charm.glisten.control.Avatar?>
 <?import java.net.URL?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.image.Image?>
@@ -12,7 +13,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane id="AnchorPane" maxHeight="1080.0" maxWidth="1920.0" minHeight="720.0" minWidth="1280.0" styleClass="mainFxmlClass" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/22">
+<AnchorPane id="AnchorPane" fx:id="root" maxHeight="1080.0" maxWidth="1920.0" minHeight="720.0" minWidth="1280.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1">
     <stylesheets>
         <URL value="@/styles/tela_menu_principal.css" />
     </stylesheets>
@@ -24,10 +25,13 @@
             <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="48.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="96.0" AnchorPane.topAnchor="0.0">
                <children>
                   <Avatar fx:id="fotoPerfil" />
-                  <ImageView fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="expandirPerfil" fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../../../images/down.png" />
                      </image>
+                     <HBox.margin>
+                        <Insets left="8.0" />
+                     </HBox.margin>
                   </ImageView>
                </children>
             </HBox>
@@ -44,17 +48,15 @@
       </AnchorPane>
       <TabPane fx:id="tabPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="48.0">
         <tabs>
-          <Tab text="Untitled Tab 1">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-            </content>
-          </Tab>
-          <Tab text="Untitled Tab 2">
+          <Tab text="Início">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
             </content>
           </Tab>
         </tabs>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
       </TabPane>
    </children>
 </AnchorPane>
