@@ -4,14 +4,11 @@
  */
 package edu.uem.sgh;
 
-import edu.uem.sgh.model.Usuario;
-
+import edu.uem.sgh.connection.DatabaseConnection;
+import edu.uem.sgh.util.DatabaseUtil;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.EnumMap;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import org.junit.jupiter.api.AfterEach;
@@ -59,31 +56,21 @@ public class JUnitTest {
     }
     
     @Test
-    public void findEnumValuesByClass() {
+    public void testLocalSQLiteDatabaseConnection() throws Exception {
+        DatabaseConnection databaseConnection = new DatabaseConnection();
+        
+    }
+    
+    @Test 
+    public void findResourcesPathByUserRole() {
         
     }
     
     @Test
-    public void findResourcesPathByUserRole() throws MalformedURLException {
-        Usuario.Funcao[] funcoes = Usuario.Funcao.values();
+    public void testJavaClassesFieldSQLiteColumnConvertion() {
+        DatabaseUtil databaseUtil;
         
-        for (Usuario.Funcao funcao : funcoes) {
-            File f;
-            
-            try {
-                f = new File(baseResourcePath + "\\" + funcao.toString().toLowerCase());
-            } catch (Exception e) {
-                f = null;
-            }
-            
-            if (f == null || (f.exists() && !f.isDirectory()) || !f.exists()) continue;
-            
-            for (File file : f.listFiles()) {
-                System.out.println(file);
-            }
-        }
     }
-   
     
     @Test
     public void testResourcePath() throws Exception {

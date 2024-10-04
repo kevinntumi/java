@@ -39,13 +39,8 @@ public class DatabaseConnection {
     }
     
     public void initLocalConnection() throws Exception {
-        if (localConnection != null) return;
-        
-        File f = new File(LOCAL_DATABASE_PATH);
-        boolean doesntExist = (f.exists() && !f.isFile()) || !f.exists();
-        if (doesntExist) throw new Exception();
         localConnection = DriverManager.getConnection(LOCAL_DATABASE_PATH);
-        if (!doesntExist && DatabaseUtil.fileSizeInMegaBytes(f) == 0) DatabaseUtil.initializeLocalDatabase(localConnection);
+        DatabaseUtil.initializeLocalDatabase(localConnection);
     }
     
     public Connection getRemoteConnection() {

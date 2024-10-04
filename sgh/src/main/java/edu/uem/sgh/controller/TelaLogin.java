@@ -8,24 +8,27 @@ import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
 import edu.uem.sgh.util.LoginValidator;
+import java.net.URL;
+import java.util.ResourceBundle;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.AnchorPane;
 
 /**
  *
  * @author Kevin Ntumi
  */
-public class TelaLogin extends AbstractController implements EventHandler<MouseEvent>, ChangeListener<Object>{
+public class TelaLogin extends AbstractController implements Initializable, EventHandler<MouseEvent>, ChangeListener<Object>{
     @FXML
     private TextField txtEmail;
     
@@ -45,47 +48,13 @@ public class TelaLogin extends AbstractController implements EventHandler<MouseE
     private ImageView minimize;
     
     @FXML
-    private VBox form;
-    
-    @FXML
-    private ImageView img;
+    private AnchorPane root;
     
     private AutenticacaoRepository autenticacaoRepository;
     private Task<Result<Usuario>> tarefaFazerLogin, tarefaBuscarUsuario;
     private ReadOnlyDoubleProperty progressoTarefaLogin, progressoTarefaRecuperarPalavraPasse;
     private String email, palavraPasse;
-
-    public VBox getForm() {
-        return form;
-    }
-
-    public ImageView getImg() {
-        return img;
-    }
-
-    public TextField getTxtEmail() {
-        return txtEmail;
-    }
-
-    public TextField getTxtPalavraPasse() {
-        return txtPalavraPasse;
-    }
-
-    public Button getBtnIniciarSessao() {
-        return btnIniciarSessao;
-    }
-
-    public Button getBtnRecuperarPalavraPasse() {
-        return btnRecuperarPalavraPasse;
-    }
-
-    public ImageView getClose() {
-        return close;
-    }
-
-    public ImageView getMinimize() {
-        return minimize;
-    }
+    private EventHandler<MouseEvent> parentMouseEventHandler;
 
     @Override
     public void adicionarListeners() {
@@ -93,6 +62,8 @@ public class TelaLogin extends AbstractController implements EventHandler<MouseE
         txtEmail.textProperty().addListener(this);
         btnIniciarSessao.setOnMouseClicked(this);
         btnRecuperarPalavraPasse.setOnMouseClicked(this);
+        getCloseButton().setOnMouseClicked(parentMouseEventHandler);
+        getMinimizeButton().setOnMouseClicked(parentMouseEventHandler);
     }
 
     @Override
@@ -101,20 +72,18 @@ public class TelaLogin extends AbstractController implements EventHandler<MouseE
         txtEmail.textProperty().removeListener(this);
         btnIniciarSessao.setOnMouseClicked(null);
         btnRecuperarPalavraPasse.setOnMouseClicked(null);
+        getCloseButton().setOnMouseClicked(null);
+        getMinimizeButton().setOnMouseClicked(null);
         
         if (progressoTarefaLogin != null) progressoTarefaLogin.removeListener(this);
         if (progressoTarefaRecuperarPalavraPasse != null) progressoTarefaRecuperarPalavraPasse.removeListener(this);
         if (tarefaFazerLogin != null) tarefaFazerLogin = null;
         if (tarefaBuscarUsuario != null) tarefaBuscarUsuario = null;
     }
-
-    public void setAutenticacaoRepository(AutenticacaoRepository autenticacaoRepository) {
-        this.autenticacaoRepository = autenticacaoRepository;
-    }
     
     @Override
     public Parent getRoot() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return root;
     }
 
     @Override
@@ -129,15 +98,47 @@ public class TelaLogin extends AbstractController implements EventHandler<MouseE
             recuperarPalavraPasse();
         }
     }
+
+    @Override
+    public void setUiClassID(String uiClassID) {
+        super.setUiClassID(uiClassID); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+    }
+
+    @Override
+    public String getUiClassID() {
+        return super.getUiClassID(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+    }
+    
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        setUiClassID(getClass().getSimpleName());
+    }
+    
+    public ImageView getCloseButton() {
+        return close;
+    }
+
+    public ImageView getMinimizeButton() {
+        return minimize;
+    }
+    
+    public void setAutenticacaoRepository(AutenticacaoRepository autenticacaoRepository) {
+        this.autenticacaoRepository = autenticacaoRepository;
+    }
+
+    public void setParentMouseEventHandler(EventHandler<MouseEvent> parentMouseEventHandler) {
+        this.parentMouseEventHandler = parentMouseEventHandler;
+    }
     
     private void observarMudancasTxtEmail(String newValue) {
         email = newValue;
         btnIniciarSessao.setDisable(!LoginValidator.isEmailValid(newValue) || !LoginValidator.isPasswordValid(txtPalavraPasse.getText()));
+        btnRecuperarPalavraPasse.setDisable(!LoginValidator.isEmailValid(email));
     }
 
     private void observarMudancasTxtPalavraPasse(String newValue) {
         palavraPasse = newValue;
-        btnRecuperarPalavraPasse.setDisable(!LoginValidator.isPasswordValid(newValue) || !LoginValidator.isEmailValid(txtEmail.getText()));
+        btnIniciarSessao.setDisable(!LoginValidator.isPasswordValid(newValue) || !LoginValidator.isEmailValid(txtEmail.getText()));
     }
 
     private void iniciarSessao() {

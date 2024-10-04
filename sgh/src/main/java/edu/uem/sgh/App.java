@@ -53,6 +53,7 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
         try {
             getDatabaseConnection().initLocalConnection();
         } catch (Exception e) {
+            System.err.println(e);
             Platform.runLater(() -> {
                 new Alert(AlertType.ERROR, "",ButtonType.APPLY).show();
             });
@@ -61,18 +62,12 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        getUsuarioProperty().addListener(this);
-        verificarUsuarioAutenticado();
-        
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("TelaLogin.fxml"));
         stage = primaryStage;
         stage.setResizable(false);
         stage.initStyle(StageStyle.UNDECORATED);
-        stage.setScene(new Scene(fxmlLoader.load()));
-        addOrRemoveNodesMouseClickedListener(findCloseAndMinimizeButtons(stage.getScene().getRoot()), true);        
-        addMousePressedAndDraggedListener(stage.getScene().getRoot());
-        stage.getScene().rootProperty().addListener(this);
         stage.show();
+        getUsuarioProperty().addListener(this);
+        verificarUsuarioAutenticado();
     }
     
     @Override
@@ -177,18 +172,6 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
         }
     }
     
-    private void addOrRemoveNodesMouseClickedListener(Node[] nodes, boolean add) {
-        for (Node node : nodes){
-            if (node == null) continue;
-            
-            if (add) {
-                addMouseClickedListener(node);
-            } else {
-                removeMouseClickedListener(node);
-            }
-        }
-    }
-    
     private void addMouseClickedListener(Node node) {
         if (getMouseEventHandler().equals(node.getOnMouseClicked())) return;
         node.setOnMouseClicked(this);
@@ -252,76 +235,5 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
     
     EventHandler<MouseEvent> getMouseEventHandler() {
         return this;
-    }
-    
-    private Node findCloseButton(Parent root, String closeButtonId) {
-        ObservableList<Node> rootChildren = root.getChildrenUnmodifiable();
-        Node closeButton = null;
-        
-        for (Node node : rootChildren) {
-            if (node instanceof Parent) node = findCloseButton((Parent) node, closeButtonId);
-            if (closeButton != null) return closeButton;
-            if (node != null && closeButtonId.equals(node.getId())) return node;
-        }
-        
-        return null;
-    }
-    
-    private Node findMinimizeButton(Parent root, String minimizeButtonId) {
-        ObservableList<Node> rootChildren = root.getChildrenUnmodifiable();
-        Node minimizeButton = null;
-        
-        for (Node node : rootChildren) {
-            if (node instanceof Parent) node = findMinimizeButton((Parent) node, minimizeButtonId);
-            if (minimizeButton != null) return minimizeButton;
-            if (node != null && minimizeButtonId.equals(node.getId())) return node;
-        }
-        
-        return null;
-    }
-
-    private Node[] findCloseAndMinimizeButtons(Parent root) {
-        Node[] nodes = new Node[2];
-        ObservableList<Node> rootChildren = root.getChildrenUnmodifiable();
-        int i = 0;
-        
-        String closeButtonId = "close", minimizeButtonId = "minimize";
-        
-        for (Node node : rootChildren) {
-            if (i >= nodes.length) break;
-            if (node == null) continue;
-            
-            if (node instanceof Parent) {
-                Parent parent = (Parent) node;
-                Node mButton = findMinimizeButton(parent, minimizeButtonId), cButton = findCloseButton(parent, closeButtonId);
-                
-                if (mButton == null && cButton == null) continue;
-                
-                if (mButton != null) {
-                    nodes[i] = mButton;
-                    i += 1;
-                }
-                
-                if (cButton != null) {
-                    nodes[i] = cButton;
-                    i += 1;
-                }
-                
-            } else {
-                if (!(closeButtonId.equals(node.getId()) || minimizeButtonId.equals(node.getId()))) continue;
-                
-                if (closeButtonId.equals(node.getId())) {
-                    nodes[i] = node;
-                    i += 1;
-                }
-                
-                if (minimizeButtonId.equals(node.getId())) {
-                    nodes[i] = node;
-                    i += 1;
-                }
-            } 
-        }
-        
-        return nodes;
     }
 }
