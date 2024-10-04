@@ -30,7 +30,7 @@ public class DatabaseConnection {
     private final String REMOTE_DATABASE_BASE_ENDPOINT = "localhost:" + REMOTE_DATABASE_PORT;
     private final String REMOTE_DATABASE_URL = "jdbc:mysql://" + REMOTE_DATABASE_BASE_ENDPOINT + "/" + REMOTE_DATABASE_NAME;
     private final String REMOTE_DATABASE_USERNAME = "root";
-    private final String REMOTE_DATABASE_PASSWORD = "";
+    private final String REMOTE_DATABASE_PASSWORD = "kevinntumi";
     private final String LOCAL_DATABASE_NAME = "local.db";
     private final String LOCAL_DATABASE_PATH = "jdbc:sqlite:" + System.getProperty("user.dir") + "\\" + LOCAL_DATABASE_NAME;
     private Connection remoteConnection, localConnection;
@@ -56,6 +56,14 @@ public class DatabaseConnection {
     }
 
     public Connection getLocalConnection() {
+        if (localConnection == null) {
+            try {
+                localConnection = DriverManager.getConnection(LOCAL_DATABASE_PATH);
+            } catch(SQLException e) {
+                return null;
+            }
+        }
+        
         return localConnection;
     }
     

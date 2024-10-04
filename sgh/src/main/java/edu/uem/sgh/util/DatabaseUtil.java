@@ -5,6 +5,7 @@
 package edu.uem.sgh.util;
 
 import java.io.File;
+import java.lang.reflect.AccessFlag;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.Connection;
@@ -22,40 +23,34 @@ public class DatabaseUtil {
     private static final String LOCAL_DRIVER_NAME = "SQLite JDBC";
     private static final int MAXIMUM_BATCH_ATTEMPTS = 5;
     
-    public static double fileSizeInMegaBytes(File file) {
-        return (double) file.length() / (1024 * 1024);
-    }
-    
     public static void initializeLocalDatabase(Connection localConnection) throws Exception {
         DatabaseMetaData metaData = localConnection.getMetaData();
         
         if (!LOCAL_DRIVER_NAME.equals(metaData.getDriverName())) return;
         
-        ResultSet schemas = metaData.getSchemas();
+        ResultSet tablesResultSet = metaData.getTables(null, null, null, new String[]{"TABLE"});
         int i = 0;
         
-        while (schemas.next()) {
-            i += 1;
+        while (tablesResultSet.next()) {
+            i++;
         }
         
         if (i != 0) return;
         
-        String url = metaData.getURL();
-        List<String> tableSchemas = getTableSchemas(getJavaClassesInFolder(url.substring(12, url.length())));
+        List<String> tableSchemas = getTableSchemas(getJavaClassesInFolder(Path.SQLITE_SCHEMA_FOLDER_PATH));
         
         try (Statement statement = localConnection.createStatement()) {
             for (String tableSchema : tableSchemas) {
-                System.out.println(tableSchema);
-                //statement.executeUpdate(tableSchema);
+                statement.addBatch(tableSchema);
             }
             
             int[] statementsResult = statement.executeBatch();
             
             if (wasBatchSucessful(statementsResult)) return;
             
-            int attempts = 0;
+            statement.clearBatch();
             
-            if (wereRemainingStatementsExecuted(attempts, statementsResult, tableSchemas, statement)) {
+            if (wereRemainingStatementsExecuted(0, statementsResult, tableSchemas, statement)) {
                 System.out.println("Sim");
             } else {
                 System.out.println("Nao");
@@ -87,20 +82,124 @@ public class DatabaseUtil {
         return true;
     }
     
-    static List<String> getTableSchemas(List<Class> classes) {
+    static List<String> getTableSchemas(List<Class<?>> classes) {
         if (classes == null || classes.isEmpty()) return null;
         
         List<String> tableSchemas = new ArrayList<>();
-        String tableQuery;
         
         for (Class<?> clazz : classes) {
-            
+            if (isAbstractClass(clazz)) {
+                for (Class<?> clazzz : getSubClassesBySuperClass(clazz)) {
+                    String tableSchema;
+                    
+                    try {
+                        tableSchema = getTableSchemaCreationQueryByClass(clazzz, clazz);
+                    } catch (RuntimeException e) {
+                        continue;
+                    }
+                    
+                    tableSchemas.add(tableSchema);
+                }
+            } else {
+                String tableSchema;
+                    
+                try {
+                    tableSchema = getTableSchemaCreationQueryByClass(clazz, null);
+                } catch (RuntimeException e) {
+                    continue;
+                }
+
+                tableSchemas.add(tableSchema);
+            }
         }
         
         return tableSchemas;
     }
     
-    public static String getSQLiteTableName(String className) {
+    private static String getTableSchemaCreationQueryByClass(Class<?> clazz, Class<?> superClass) throws RuntimeException {
+        String tableSchemaCreationQuery;
+        
+        if (superClass == null) {
+            tableSchemaCreationQuery = "CREATE TABLE IF NOT EXISTS " + getSQLiteTableName(clazz.getSimpleName()) + " (";
+        } else {
+            tableSchemaCreationQuery = "CREATE TABLE IF NOT EXISTS " + getSQLiteTableName(superClass.getSimpleName()) + "_" + getSQLiteTableName(clazz.getSimpleName()) + " ("; 
+        }
+                    
+        List<Field> fields = getFieldsByClass(clazz);
+        int size = fields.size();
+        
+        if (size == 0) throw new RuntimeException();
+
+        int sizeMinusOne = (size - 1), i;
+
+        for (i = 0 ; i < size ; i++) {
+            Field field = fields.get(i);
+            String sqliteColumnType = getSQLiteColumnTypeName(field.getType().getSimpleName()), sqliteColumnName;
+
+            if (sqliteColumnType == null) continue;
+            
+            sqliteColumnName = getSQLiteColumnName(field.getName());
+            
+            if (i == 0) {
+                tableSchemaCreationQuery += (sqliteColumnName + " " + sqliteColumnType);
+            } else {
+                tableSchemaCreationQuery += (" " + sqliteColumnName + " " + sqliteColumnType);
+            }
+            
+            if (sqliteColumnName.equals("id")) tableSchemaCreationQuery += " PRIMARY KEY";
+            if (sqliteColumnType.equals("TEXT")) tableSchemaCreationQuery += " NOT NULL";
+            if (i != sizeMinusOne) tableSchemaCreationQuery += ",";
+        }
+        
+        return tableSchemaCreationQuery + ")";
+    }
+    
+    private static List<Class<?>> getSubClassesBySuperClass(Class<?> superClass) {
+        List<Class<?>> subClasses = new ArrayList<>();
+        
+        for (Class<?> clazz : superClass.getNestMembers()) {
+            if (clazz.getSuperclass().equals(superClass)) subClasses.add(clazz);
+        }
+        
+        return subClasses;
+    }
+    
+    public static List<Field> getFieldsByClass(Class<?> clazz) {
+        List<Field> fields = new ArrayList<>();
+        Field[] declaredFields = clazz.getDeclaredFields();
+        
+        for (Field declaredField : declaredFields) {
+            if (Modifier.isPrivate(declaredField.getModifiers())) fields.add(declaredField);
+        }
+        
+        Class<?> superClass = clazz.getSuperclass();
+        
+        if (!superClass.equals(Object.class)) {
+            List<Field> declaredSuperClassFields = getFieldsByClass(superClass);
+            
+            for (Field declaredField : declaredSuperClassFields) {
+                if(Modifier.isPrivate(declaredField.getModifiers())) fields.add(declaredField);
+            }
+        }
+        
+        return fields;
+    }
+    
+    public static String getRelativeFolderPath(String absoluteFolderPath) {
+        return absoluteFolderPath.replace(Path.BASE_JAVA_SRC_FOLDER_PATH, "").replace("\\", ".");
+    }
+    
+    private static boolean isAbstractClass(Class<?> clazz) {
+        if (clazz == null) throw new NullPointerException();
+        
+        for (AccessFlag accessFlag : clazz.accessFlags()) {
+            if (accessFlag.equals(AccessFlag.ABSTRACT)) return true;
+        }
+        
+        return false;
+    }
+    
+    private static String getSQLiteTableName(String className) {
         char classNameFirstCharacter = className.charAt(0); 
         String sqLiteTableName = (Character.isUpperCase(classNameFirstCharacter) ? Character.toLowerCase(classNameFirstCharacter) : classNameFirstCharacter) + "";
         char[] characters = className.toCharArray();
@@ -166,22 +265,22 @@ public class DatabaseUtil {
         return fields;
     }
     
-    public static List<Class> getJavaClassesInFolder(String folderPath) {
+    public static List<Class<?>> getJavaClassesInFolder(String folderPath) {
         File folder = new File(folderPath);
-        
+
         if (folder.exists() && folder.isFile() || !folder.exists()) return null;
         
         String suffix = ".java";
         String[] folderList = folder.list();        
-        List<Class> classes = new ArrayList<>();
-        
+        List<Class<?>> classes = new ArrayList<>();
+       
         for (String path : folderList) {
             if (!path.endsWith(suffix)) continue;
 
             Class<?> clazz;
-            
+
             try {
-                clazz = Class.forName(folder.getName() + "." + path.replace(suffix, ""));
+                clazz = Class.forName(getRelativeFolderPath(folder.getAbsolutePath()) + "." + path.replace(suffix, ""));
             } catch (ClassNotFoundException ex) {
                 clazz = null;
             }

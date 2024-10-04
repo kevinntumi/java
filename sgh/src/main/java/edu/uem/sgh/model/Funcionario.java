@@ -30,7 +30,7 @@ public class Funcionario {
     public void setNome(String nome) {
         this.nome = nome;
     }
-
+    
     public long getDataNascimento() {
         return dataNascimento;
     }

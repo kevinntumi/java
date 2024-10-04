@@ -13,6 +13,40 @@ public abstract class CheckIn {
     private long idFuncionario;
     private long dataCheckIn;
     private long dataCheckOut;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public long getIdFuncionario() {
+        return idFuncionario;
+    }
+
+    public void setIdFuncionario(long idFuncionario) {
+        this.idFuncionario = idFuncionario;
+    }
+
+    public long getDataCheckIn() {
+        return dataCheckIn;
+    }
+
+    public void setDataCheckIn(long dataCheckIn) {
+        this.dataCheckIn = dataCheckIn;
+    }
+
+    public long getDataCheckOut() {
+        return dataCheckOut;
+    }
+
+    public void setDataCheckOut(long dataCheckOut) {
+        this.dataCheckOut = dataCheckOut;
+    }
+    
+    
    
     private class Imediato extends CheckIn{
         private long idCliente;
