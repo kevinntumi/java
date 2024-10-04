@@ -26,7 +26,7 @@ public class LocalAutenticacaoDataSource extends AbstractDataSource {
         Result<Usuario> result = null;
         
         try {
-            
+            throw new RuntimeException();
         } catch(Exception e) {
             result = new Result.Error<>(e);
         }
@@ -34,10 +34,10 @@ public class LocalAutenticacaoDataSource extends AbstractDataSource {
         return result;
     }
     
-    public Result<Boolean> logIn(Usuario usuario) {
+    public Result<Usuario> logIn(Usuario usuario) {
         if (usuario == null) return new Result.Error<>(new Exception());
                 
-        Result<Boolean> result = null;
+        Result<Usuario> result = null;
         
         try {
             

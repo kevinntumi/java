@@ -2,17 +2,20 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package edu.uem.sgh.ui;
+package edu.uem.sgh.controller;
 
 import javafx.fxml.FXML;
 import com.gluonhq.charm.glisten.control.*;
-import edu.uem.sgh.controller.AbstractController;
 import edu.uem.sgh.model.Usuario;
 import static edu.uem.sgh.model.Usuario.Funcao.ADMINISTRADOR;
 import static edu.uem.sgh.model.Usuario.Funcao.FUNCIONARIO;
 import static edu.uem.sgh.model.Usuario.Funcao.GERENTE;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -48,6 +51,8 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     private AbstractController[] tabContentControllers;
     
     private Usuario usuario;
+    
+    private EnumMap<Usuario.Funcao, Map<String, URI>> resourcePaths;
 
     public TelaMenuPrincipal() {
         super();
@@ -108,46 +113,47 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
                 return null;
         }
     }
+
+    public EnumMap<Usuario.Funcao, Map<String, URI>> getResourcePaths() {
+        if (resourcePaths == null) {
+            resourcePaths = new EnumMap(Usuario.Funcao.class);
+            
+            
+            
+        }
+        
+        return resourcePaths;
+    }
+    
+    
     
     public void definirMenu(String[] tabs) {
         inicializarTabContentsControllers(tabs.length);
         
         for (int i = 0 ; i < tabs.length ; i++) {
             String tab = tabs[i];
-            tabPane.getTabs().add(new Tab(tab, getTabContentByName(tab, i)));
+            tabPane.getTabs().add(new Tab(tab, createTabContentByName(tab, i)));
         }
     }
     
+    public URI getResourcePath(String name) {
+        if (!getResourcePaths().containsKey(usuario.getFuncao()) || !getResourcePaths().get(usuario.getFuncao()).containsKey(name)) throw new RuntimeException();
+        return getResourcePaths().get(usuario.getFuncao()).get(name);
+    }
+    
     public FXMLLoader getFXMLoader(String name) {
-        URL resourcePath;
+        URL resourcePath = null;
         
-        switch (name) {
-            case "Funcionários": resourcePath = getClass().getResource("TelaLogin.fxml");
-                break;
-            case "Gerentes": resourcePath = getClass().getResource("TelaLogin.fxml");
-                break;
-            case "Serviços": resourcePath = getClass().getResource("TelaLogin.fxml");
-                break;
-            case "Hóspedes": resourcePath = getClass().getResource("TelaLogin.fxml");
-                break;
-            case "Quartos": resourcePath = getClass().getResource("TelaLogin.fxml");
-                break;
-            case "Reservas": resourcePath = getClass().getResource("TelaLogin.fxml");
-                break;
-            case "Check-In": resourcePath = getClass().getResource("TelaLogin.fxml");
-                break;
-            case "Check-Out": resourcePath = getClass().getResource("TelaLogin.fxml");
-                break;
-            case "Relatórios": resourcePath = getClass().getResource("TelaLogin.fxml");
-                break;
-            default: 
-                return null;
+        try {
+            
+        } catch (RuntimeException runtimeException) {
+            throw runtimeException;
         }
         
         return new FXMLLoader(resourcePath);
     }
     
-    public Node getTabContentByName(String name, int i) {
+    public Node createTabContentByName(String name, int i) {
         if (name == null || name.isBlank()) return null;
         
         Node node;

@@ -23,8 +23,12 @@ public class AutenticacaoRepository {
         this.remoteConnection = remoteConnection;
         this.localConnection = localConnection;
     }
+    
+    public Result<Usuario> getUserByEmail(String email) {
+        return null;
+    }
 
-    public Result<Boolean> logIn(String email, String password) {
+    public Result<Usuario> logIn(String email, String password) {
         Result<Usuario> result = getRemoteAutenticacaoDataSource().logIn(email, password);
         if (result instanceof Result.Error) return new Result.Error<>(((Result.Error<Usuario>) result).getException());        
         Result.Success<Usuario> success = ((Result.Success<Usuario>) result);
@@ -39,12 +43,12 @@ public class AutenticacaoRepository {
         return getLocalAutenticacaoDataSource().logOut();
     }
     
-    public RemoteAutenticacaoDataSource getRemoteAutenticacaoDataSource() {
+    private RemoteAutenticacaoDataSource getRemoteAutenticacaoDataSource() {
         if (remoteAutenticacaoDataSource == null) remoteAutenticacaoDataSource = new RemoteAutenticacaoDataSource(remoteConnection);
         return remoteAutenticacaoDataSource;
     }
 
-    public LocalAutenticacaoDataSource getLocalAutenticacaoDataSource() {
+    private LocalAutenticacaoDataSource getLocalAutenticacaoDataSource() {
         if (localAutenticacaoDataSource == null) localAutenticacaoDataSource = new LocalAutenticacaoDataSource(localConnection);
         return localAutenticacaoDataSource;
     }   

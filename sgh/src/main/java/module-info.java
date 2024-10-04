@@ -11,6 +11,5 @@ module edu.uem.sgh {
     requires com.gluonhq.charm.glisten;
     
     opens edu.uem.sgh to javafx.fxml;
-    opens edu.uem.sgh.ui to javafx.fxml;
     exports edu.uem.sgh;
 }

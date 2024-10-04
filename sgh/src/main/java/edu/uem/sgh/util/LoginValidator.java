@@ -38,4 +38,12 @@ public class LoginValidator {
     public static void increment(int variableToIncrement, int valueToIncrement) {
         variableToIncrement += valueToIncrement;
     }
+
+    public static int getLeastLetterCount() {
+        return LEAST_LETTER_COUNT;
+    }
+
+    public static int getLeastNumberCount() {
+        return LEAST_NUMBER_COUNT;
+    }
 }
