@@ -1,0 +1,92 @@
+#root {
+    -fx-border-color: black;
+    -fx-border-width: 1;
+    -fx-border-style: solid inside;
+    -fx-border-radius: 0;
+}
+
+#topBar {
+   -fx-background-color: #4772A3; 
+}
+
+#parent {
+    -fx-background-color: white;
+    -fx-border-color: #ccc;
+    -fx-border-width: 1;
+    -fx-border-style: solid inside;
+    -fx-border-radius: 0;
+}
+
+#btnIniciarSessao {
+    -fx-background-color: #4772A3;
+    -fx-text-fill: white;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0px;
+}
+
+#btnIniciarSessao:hover {
+    -fx-background-color: #3B5E86;
+}
+
+#btnRecuperarPalavraPasse {
+    -fx-background-color: #eee;
+    -fx-text-fill: rgba(0,0,0,0.6);;
+    -fx-border-radius: 0;
+    -fx-border-color: #CCC;
+}
+
+#btnRecuperarPalavraPasse:hover{
+    -fx-background-color: #ddd;
+}
+
+#close {
+    -fx-image: url("/images/close.png");
+    -fx-transition: 0.5s;
+}
+
+#close:hover {
+    -fx-image: url("/images/close_hovered.png");
+    -fx-transition: 0.5s;
+}
+
+#close:pressed {
+    -fx-image: url("/images/close_pressed.png");
+    -fx-transition: 0.5s;
+}
+
+#minimize {
+    -fx-image: url("/images/minimize.png");
+    -fx-transition: 0.5s;
+}
+
+#minimize:hover {
+    -fx-image: url("/images/minimize_hovered.png");
+    -fx-transition: 0.5s;
+}
+
+#minimize:pressed{
+    -fx-image: url("/images/minimize_pressed.png");
+    -fx-transition: 0.5s;
+}
+
+#lblOuParent {
+   -fx-background-color: white; 
+}
+
+#stackPane {
+    -fx-background-color: rgba(238, 238, 238, 1.0);
+}
+
+#txtEmail, #txtPalavraPasse {
+    -fx-background-color: rgba(0,0,0,0);
+    -fx-border-color: #CCC;
+    -fx-border-width: 1;
+    -fx-border-style: solid inside;
+    -fx-text-fill: #000;
+    -fx-border-radius: 0;
+}
+
+#txtEmail:focused, #txtPalavraPasse:focused {
+    -fx-border-color: #4772A3;
+    -fx-transition: 0.5s;
+}
