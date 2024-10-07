@@ -3,23 +3,27 @@ package edu.uem.sgh;
 import atlantafx.base.theme.*;
 import edu.uem.sgh.connection.DatabaseConnection;
 import edu.uem.sgh.controller.AbstractController;
+import edu.uem.sgh.controller.TelaLogin;
+import edu.uem.sgh.controller.TelaMenuPrincipal;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
 import edu.uem.sgh.util.Detector;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -36,12 +40,12 @@ import javafx.stage.StageStyle;
 public class App extends Application implements EventHandler<MouseEvent>, ChangeListener<Object> {
     private String[] appThemeStyleSheet;
     private double xOffset = 0, yOffset = 0;
-    private List<? extends AbstractController> controllers;
+    private List<AbstractController> controllers;
     private DatabaseConnection databaseConnection;
     private AutenticacaoRepository autenticacaoRepository;
     private SimpleObjectProperty<Usuario> usuarioProperty;
     private Task<Result<Usuario>> tarefaBuscarUsuario;
-    private ReadOnlyDoubleProperty progressoTarefaBuscarUsuario;
+    private Result<Usuario> r;
     private Thread backgroundThread;
     private Stage stage;
 
@@ -65,7 +69,6 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
         stage = primaryStage;
         stage.setResizable(false);
         stage.initStyle(StageStyle.UNDECORATED);
-        stage.show();
         getUsuarioProperty().addListener(this);
         verificarUsuarioAutenticado();
     }
@@ -135,52 +138,128 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
 
     @Override
     public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-        if (oldValue != null && oldValue instanceof Parent) {
-            Parent parent = (Parent) oldValue;
-            removeMousePressedAndDraggedListener(parent);
-        }
-        
-        if (newValue == null) return;
-        
-        System.out.println("tsoka " + observable);
+        System.out.println(observable);
         
         if (observable.equals(getUsuarioProperty())) {
+            FXMLLoader fxmlLoader = new FXMLLoader((newValue == null) ? getClass().getResource("TelaLogin.fxml") : getClass().getResource("tela_menu_principal.fxml"));
+            AbstractController newController = (newValue == null) ? new TelaLogin() : new TelaMenuPrincipal();
+            Scene scene = stage.getScene();
 
-        } else if (observable.equals(progressoTarefaBuscarUsuario)) {
-            
-        }
-        
-        if (newValue instanceof Parent) {
-            Parent parent = (Parent) newValue;          
-            addMousePressedAndDraggedListener(parent);
-            
-            switch (parent.getId()) {
-                case "":
-                    break;  
+            if (scene == null) {
+                fxmlLoader.setController(newController);
+                getControllers().add(newController);
+                
+                try {
+                    scene = new Scene(fxmlLoader.load());
+                } catch (IOException e) {
+                    return;
+                }
+                
+                addMousePressedAndDraggedListener(scene.getRoot());
             }
             
-            return;
-        }
-        
-        if (newValue instanceof Usuario) {
-            Usuario usuario = (Usuario) newValue;
-        }
-        
-        if (observable.equals(progressoTarefaBuscarUsuario)) {
-            System.out.println("tsokax " + newValue);        
+            if (stage.getScene() == null) {
+                stage.sceneProperty().addListener(this);
+                stage.setScene(scene);
+            } else {
+                removeMousePressedAndDraggedListener(scene.getRoot());
+                
+                AbstractController current = getController(scene.getRoot());
+                
+                if (current != null) getControllers().remove(current);
+                
+                if (containsController(newController)) getControllers().add(newController);
+                
+                stage.getScene().rootProperty().removeListener(this);
+                stage.getScene().rootProperty().addListener(this);
+                
+                try {
+                    stage.getScene().setRoot(fxmlLoader.load());
+                } catch (IOException ex) {
+                    return;
+                }
+            }
+            
+            if (!stage.isShowing()) stage.show();  
+            
+        } else if (observable.equals(stage.sceneProperty())) {
+            Scene pastScene = null, currentScene = (Scene) newValue;
+            AbstractController pastController, currentController = getController(currentScene.getRoot());
+            
+            if (oldValue != null) pastScene = null;
+            
+            if (pastScene != null) {
+                pastController = getController(pastScene.getRoot());
+                
+                if (pastController != null) {
+                    pastController.removerListeners();
+                }
+            }
+            
+            if (currentController != null) {
+                System.out.println("UIClassID: " + currentController.getUiClassID());
+
+                switch (currentController.getUiClassID()) {
+                    case "TelaMenuPrincipal":
+                        break;
+                    case "TelaLogin":
+                        break;
+                }
+            }
+            
+            stage.getScene().rootProperty().addListener(this);
             observable.removeListener(this);
+            
+        } else if (observable.equals(stage.getScene().rootProperty())) {
+            
         }
     }
     
-    private void addMouseClickedListener(Node node) {
-        if (getMouseEventHandler().equals(node.getOnMouseClicked())) return;
-        node.setOnMouseClicked(this);
+    private void resolverDependencias(AbstractController abstractController, boolean add) {
+        if (abstractController.getUiClassID() == null) return;
+        
+        if (add) {
+            abstractController.adicionarListeners();
+            
+            if (abstractController.getUiClassID().equals("TelaLogin")) {
+                TelaLogin telaLogin = (TelaLogin) abstractController;
+                telaLogin.setParentMouseEventHandler(getMouseEventHandler());
+            } else if (abstractController.getUiClassID().equals("TelaMenuPrincipal")) {
+                TelaMenuPrincipal telaMenuPrincipal = (TelaMenuPrincipal) abstractController;
+                telaMenuPrincipal.setParentMouseEventHandler(getMouseEventHandler());
+            }
+        } else {
+            abstractController.removerListeners();
+            
+            if (abstractController.getUiClassID().equals("TelaLogin")) {
+                TelaLogin telaLogin = (TelaLogin) abstractController;
+            } else if (abstractController.getUiClassID().equals("TelaMenuPrincipal")) {
+                TelaMenuPrincipal telaMenuPrincipal = (TelaMenuPrincipal) abstractController;
+            }   
+        }
+    }
+
+    public List<AbstractController> getControllers() {
+        if (controllers == null) controllers = new ArrayList<>();
+        return controllers;
     }
     
-    private void removeMouseClickedListener(Node node) {
-        node.setOnMouseClicked(null);
+    private AbstractController getController(Parent root) {
+        for (AbstractController abstractController : getControllers()) {
+            if (root.equals(abstractController.getRoot())) return abstractController;
+        }
+        
+        return null;
     }
     
+    private boolean containsController(AbstractController controllerToLookFor) {
+        for (AbstractController abstractController : getControllers()) {
+            if (abstractController.equals(controllerToLookFor)) return true;
+        }
+        
+        return false;
+    }
+ 
     private void removeMousePressedAndDraggedListener(Parent parent) {
         if (parent.getOnMousePressed() != null) parent.setOnMousePressed(null);
         if (parent.getOnMouseDragged() != null) parent.setOnMouseDragged(null);
@@ -204,9 +283,9 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
     }
     
     private void cancelarTarefaBuscarUsuario() {
+        if (r != null) r = null;
         if (tarefaBuscarUsuario != null && tarefaBuscarUsuario.isRunning()) tarefaBuscarUsuario.cancel(true);
         if (backgroundThread != null) backgroundThread.interrupt();
-        if (progressoTarefaBuscarUsuario != null) progressoTarefaBuscarUsuario.removeListener(this); 
     }
 
     public SimpleObjectProperty<Usuario> getUsuarioProperty() {
@@ -222,10 +301,33 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
             };
         };
         
-        progressoTarefaBuscarUsuario = tarefaBuscarUsuario.progressProperty();
-        progressoTarefaBuscarUsuario.addListener(this);
         backgroundThread = new Thread(tarefaBuscarUsuario);
         backgroundThread.start();
+        
+        try {
+            r = tarefaBuscarUsuario.get(1500, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | CancellationException | TimeoutException | ExecutionException e) {
+            switch (e.getClass().getSimpleName()) {
+                case "InterruptedException": 
+                    break;
+                case "CancellationException":
+                    break;
+                case "TimeoutException":
+                    break;
+                case "ExecutionException":
+                    break;
+            }
+        }
+        
+        if (!backgroundThread.isInterrupted()) {
+            try {
+                backgroundThread.interrupt();
+            } catch (Exception e) {
+                System.err.println(e);
+            }
+        }
+        
+        getUsuarioProperty().set((r instanceof Result.Error) ? null : ((Result.Success<Usuario>) r).getData());
     }
     
     private AutenticacaoRepository getAutenticacaoRepository() {

@@ -11,6 +11,8 @@ package edu.uem.sgh.model;
 public abstract class Result<T> {
     private Result() {
     }
+    
+    public abstract Object getValue();
 
     public static final class Success<T> extends Result<T> {
         private final T data;
@@ -20,6 +22,11 @@ public abstract class Result<T> {
         }
 
         public T getData() {
+            return data;
+        }
+
+        @Override
+        public Object getValue() {
             return data;
         }
     }
@@ -32,6 +39,11 @@ public abstract class Result<T> {
         }
 
         public Exception getException() {
+            return exception;
+        }
+
+        @Override
+        public Object getValue() {
             return exception;
         }
     }

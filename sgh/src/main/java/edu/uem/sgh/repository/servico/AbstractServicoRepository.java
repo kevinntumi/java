@@ -19,10 +19,11 @@ import java.util.List;
  * @author Kevin Ntumi
  */
 public abstract class AbstractServicoRepository extends AbstractRepository {
-    public AbstractServicoRepository(Connection connection) {
+    AbstractServicoRepository(Connection connection) {
         super(connection);
     }
 
+    @Override
     public Connection getConnection() {
         return super.getConnection();
     }

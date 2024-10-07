@@ -11,7 +11,7 @@ import javafx.scene.Parent;
  * @author Kevin Ntumi
  */
 public abstract class AbstractController {
-    private String uiClassID;
+    private String uiClassID = null;
     
     protected AbstractController() {
     }
@@ -24,7 +24,7 @@ public abstract class AbstractController {
         return uiClassID;
     }
 
-    public void setUiClassID(String uiClassID) {
+    protected void setUiClassID(String uiClassID) {
         this.uiClassID = uiClassID;
     }
 }

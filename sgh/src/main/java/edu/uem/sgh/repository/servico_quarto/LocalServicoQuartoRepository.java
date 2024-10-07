@@ -13,7 +13,7 @@ import java.util.List;
  * @author Kevin Ntumi
  */
 public class LocalServicoQuartoRepository extends AbstractServicoQuartoRepository {
-    public LocalServicoQuartoRepository(Connection connection) {
+    LocalServicoQuartoRepository(Connection connection) {
         super(connection);
     }
 

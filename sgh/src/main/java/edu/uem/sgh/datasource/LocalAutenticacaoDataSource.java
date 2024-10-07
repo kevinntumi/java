@@ -6,13 +6,20 @@ package edu.uem.sgh.datasource;
 
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
+import edu.uem.sgh.model.Usuario.Tipo;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 
 /**
  *
  * @author Kevin Ntumi
  */
 public class LocalAutenticacaoDataSource extends AbstractDataSource {
+    private final static String tblName = "usuario";
+    
     public LocalAutenticacaoDataSource(Connection connection) {
         super(connection);
     }
@@ -23,11 +30,40 @@ public class LocalAutenticacaoDataSource extends AbstractDataSource {
     }
     
     public Result<Usuario> getCurrentUser() {
-        Result<Usuario> result = null;
+        Result<Usuario> result;
         
         try {
-            throw new RuntimeException();
-        } catch(Exception e) {
+            PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM " + tblName);
+            ResultSet rs = statement.executeQuery();
+            ResultSetMetaData resultSetMetaData = rs.getMetaData();
+            Usuario usuario = null;
+            
+            while (usuario == null && rs.next()) {
+                usuario = new Usuario(System.currentTimeMillis());
+                
+                for (int i = 1 ; i <= resultSetMetaData.getColumnCount() ; i++) {
+                    String columnName = resultSetMetaData.getColumnName(i);
+                    
+                    switch (columnName) {
+                        case "id": usuario.setId(rs.getInt(columnName));
+                            break;
+                        case "id_tipo": usuario.setIdTipo(rs.getInt(columnName));
+                            break;
+                        case "nome": usuario.setNome(rs.getString(columnName));
+                            break;
+                        case "tipo": usuario.setTipo(obterTipoUsuario(rs.getString(columnName)));
+                            break;
+                        case "data_registo": usuario.setDataRegisto(rs.getDate(columnName).getTime());
+                            break;
+                        case "data_alterado": usuario.setDataAlterado(rs.getDate(columnName).getTime());
+                            break;
+                    }
+                }
+            }
+            
+            result = new Result.Success<>(usuario);
+            rs.close();
+        } catch(SQLException e) {
             result = new Result.Error<>(e);
         }
         
@@ -58,5 +94,18 @@ public class LocalAutenticacaoDataSource extends AbstractDataSource {
         }
         
         return result;
+    }
+    
+    private Tipo obterTipoUsuario(String tipo) {
+        switch (tipo) {
+            case "CLIENTE":
+                return Tipo.CLIENTE;
+            case "FUNCIONARIO":
+                return Tipo.FUNCIONARIO;
+            case "GERENTE":
+                return Tipo.GERENTE;
+            default:
+                return Tipo.ADMINISTRADOR;
+        }
     }
 }

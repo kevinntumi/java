@@ -9,15 +9,21 @@ package edu.uem.sgh.model;
  * @author Kevin Ntumi
  */
 public class Usuario {
-    private long id;
-    private long idTipo;
+    private Long id;
+    private Long idTipo;
     private String nome;
     private Tipo tipo;
-    private long dataInicio;
-    private long dataRegisto;
-    private long dataAlterado;
-
+    private Long dataInicio;
+    private Long dataRegisto;
+    private Long dataAlterado;
+    
+    public static Usuario VAZIO = new Usuario();
+    
     public Usuario() {
+    }
+
+    public Usuario(Long dataInicio) {
+        this.dataInicio = dataInicio;
     }
 
     public long getIdTipo() {

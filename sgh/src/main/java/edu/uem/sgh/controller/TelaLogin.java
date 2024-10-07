@@ -4,6 +4,7 @@
  */
 package edu.uem.sgh.controller;
 
+import edu.uem.sgh.annotation.Dependency;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
@@ -50,12 +51,16 @@ public class TelaLogin extends AbstractController implements Initializable, Even
     @FXML
     private AnchorPane root;
     
+    @Dependency
     private AutenticacaoRepository autenticacaoRepository;
+    
+    @Dependency
+    private EventHandler<MouseEvent> parentMouseEventHandler;
+    
     private Task<Result<Usuario>> tarefaFazerLogin, tarefaBuscarUsuario;
     private ReadOnlyDoubleProperty progressoTarefaLogin, progressoTarefaRecuperarPalavraPasse;
     private String email, palavraPasse;
-    private EventHandler<MouseEvent> parentMouseEventHandler;
-
+    
     @Override
     public void adicionarListeners() {
         txtPalavraPasse.textProperty().addListener(this);
@@ -92,11 +97,10 @@ public class TelaLogin extends AbstractController implements Initializable, Even
         
         Object source = event.getSource();
         
-        if (source.equals(btnIniciarSessao)) {
+        if (source.equals(btnIniciarSessao)) 
             iniciarSessao();
-        } else if (source.equals(btnRecuperarPalavraPasse)) {
+        else if (source.equals(btnRecuperarPalavraPasse)) 
             recuperarPalavraPasse();
-        }
     }
 
     @Override

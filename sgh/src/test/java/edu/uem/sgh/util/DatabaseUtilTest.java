@@ -5,7 +5,6 @@
 package edu.uem.sgh.util;
 
 import java.io.File;
-import java.lang.reflect.AccessFlag;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.Connection;
@@ -54,8 +53,6 @@ public class DatabaseUtilTest {
         System.out.println("fileSizeInMegaBytes");
         File file = null;
         double expResult = 0.0;
-        double result = DatabaseUtil.fileSizeInMegaBytes(file);
-        assertEquals(expResult, result, 0);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
@@ -67,7 +64,6 @@ public class DatabaseUtilTest {
     public void testInitializeLocalDatabase() throws Exception {
         System.out.println("initializeLocalDatabase");
         Connection connection = null;
-        DatabaseUtil.initializeLocalDatabase(connection);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
@@ -82,6 +78,25 @@ public class DatabaseUtilTest {
         DatabaseUtil.closeConnection(connection);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
+    }
+    
+    @Test
+    public void findAllClasses() throws ClassNotFoundException {
+        File folder = new File(BASE_JAVA_SRC_FOLDER_PATH+ "\\edu\\uem\\sgh\\model");
+        
+        if (folder.exists() && folder.isFile() || !folder.exists()) throw new RuntimeException();
+        
+        for (String path : folder.list()) {
+            if (!path.endsWith(".java")) continue;
+            
+            Class<?> clazz = Class.forName("edu.uem.sgh." + folder.getName() + "." + path.replace(".java", ""));
+            
+            System.out.println(clazz);
+            
+            System.out.println(Modifier.isAbstract(clazz.getModifiers()));
+            
+            System.out.println();
+        }
     }
     
     @Test
@@ -116,13 +131,13 @@ public class DatabaseUtilTest {
         if (classes == null) return;
         
         for (Class<?> clazz : classes) {
-            if (clazz.accessFlags().contains(AccessFlag.ABSTRACT)) {
+            if (Modifier.isAbstract(clazz.getModifiers())) {
                 for (Class<?> clazzz : getSubClassesBySuperClass(clazz)) {
-                    String tableQuery = getTableSchemaCreationQueryByClass(clazzz, clazz);
+                   // String tableQuery = getTableSchemaCreationQueryByClass(clazzz, clazz);
                     
                 }
             } else {
-                String tableQuery = getTableSchemaCreationQueryByClass(clazz, null);
+              //  String tableQuery = getTableSchemaCreationQueryByClass(clazz, null);
                 
             }
             

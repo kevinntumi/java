@@ -5,7 +5,11 @@
 package edu.uem.sgh.controller;
 
 import com.gluonhq.charm.glisten.control.*;
+import edu.uem.sgh.annotation.Dependency;
 import edu.uem.sgh.model.Usuario;
+import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
+import edu.uem.sgh.repository.quarto.QuartoRepository;
+import edu.uem.sgh.repository.servico.ServicoRepository;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -49,7 +53,18 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     private AbstractController[] tabContentControllers;
     private Usuario usuario;
     private EnumMap<Usuario.Tipo, Map<String, URI>> resourcePaths;
-    private EventHandler<MouseEvent> parentMouseEventHandler; 
+    
+    @Dependency
+    private ServicoRepository servicoRepository;
+    
+    @Dependency
+    private AutenticacaoRepository autenticacaoRepository;
+    
+    @Dependency
+    private QuartoRepository quartoRepository;
+    
+    @Dependency
+    private EventHandler<MouseEvent> parentMouseEventHandler;
 
     public TelaMenuPrincipal() {
         super();
@@ -82,15 +97,15 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         return root;
     }
     
-    public ImageView getCloseButton() {
+    private ImageView getCloseButton() {
         return close;
     }
 
-    public ImageView getMinimizeButton() {
+    private ImageView getMinimizeButton() {
         return minimize;
     }
 
-    public String[] getTabs(Usuario.Tipo tipo) {
+    private String[] getTabs(Usuario.Tipo tipo) {
         switch (tipo) {
             case CLIENTE:
                 return new String[] {
@@ -113,7 +128,7 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         }
     }
 
-    public EnumMap<Usuario.Tipo, Map<String, URI>> getResourcePaths() {
+    private EnumMap<Usuario.Tipo, Map<String, URI>> getResourcePaths() {
         if (resourcePaths == null) {
             resourcePaths = new EnumMap(Usuario.Tipo.class);
             
@@ -128,7 +143,7 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         this.parentMouseEventHandler = parentMouseEventHandler;
     }
     
-    public void definirMenu(String[] tabs) {
+    private void definirMenu(String[] tabs) {
         inicializarTabContentsControllers(tabs.length);
         
         for (int i = 0 ; i < tabs.length ; i++) {
@@ -145,12 +160,12 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         }
     }
     
-    public URI getResourcePath(String name) {
+    private URI getResourcePath(String name) {
         if (!getResourcePaths().containsKey(usuario.getTipo()) || !getResourcePaths().get(usuario.getTipo()).containsKey(name)) throw new RuntimeException();
         return getResourcePaths().get(usuario.getTipo()).get(name);
     }
     
-    public FXMLLoader getFXMLoader(String name) {
+    private FXMLLoader getFXMLoader(String name) {
         URL resourcePath;
         
         try {
@@ -162,7 +177,7 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         return new FXMLLoader(resourcePath);
     }
     
-    public Node createTabContentByName(String name, int i) throws Exception {
+    private Node createTabContentByName(String name, int i) throws Exception {
         if (name == null || name.isBlank()) throw new RuntimeException();
         
         FXMLLoader loader = getFXMLoader(name);
@@ -174,14 +189,14 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         return node;
     }
     
-    public Node getTabContentAt(int index) {
+    private Node getTabContentAt(int index) {
         if (index < 0 || index >= tabContentControllers.length) return null;
         Node node = tabContentControllers[index].getRoot();
         return node;
     }
     
     @Override
-    public void setUiClassID(String uiClassID) {
+    protected void setUiClassID(String uiClassID) {
         super.setUiClassID(uiClassID); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
     }
 

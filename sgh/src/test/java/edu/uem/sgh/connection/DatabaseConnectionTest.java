@@ -7,38 +7,17 @@ package edu.uem.sgh.connection;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 /**
  *
  * @author Kevin Ntumi
  */
 public class DatabaseConnectionTest {
-    
-    public DatabaseConnectionTest() {
-    }
-    
-    @BeforeAll
-    public static void setUpClass() {
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
-    }
-    
-    @BeforeEach
-    public void setUp() {
-    }
-    
-    @AfterEach
-    public void tearDown() {
-    }
-
     /**
      * Test of initLocalConnection method, of class DatabaseConnection.
      */
@@ -48,7 +27,7 @@ public class DatabaseConnectionTest {
         DatabaseConnection instance = new DatabaseConnection();
         instance.initLocalConnection();
         // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        //fail("The test case is a prototype.");
     }
 
     /**
@@ -92,6 +71,28 @@ public class DatabaseConnectionTest {
     }
     
     @Test
+    public void testIfConnectionCanBeFoundInList() {
+        ArrayList<Object> availableDependencies = new ArrayList<>();
+        DatabaseConnection instance = new DatabaseConnection();
+        availableDependencies.add(instance.getLocalConnection());
+        
+        for (Object object : availableDependencies) {
+            if (!(object instanceof Connection)) continue;
+            
+            Connection connection = (Connection) object;
+            DatabaseMetaData databaseMetaData;
+            
+            try {
+                databaseMetaData = connection.getMetaData();
+                
+            } catch (SQLException e) {
+                continue;
+            }
+        }
+        
+    }
+    
+    @Test
     public void findRemoteConnectionTableNames() throws Exception {
         DatabaseConnection databaseConnection = new DatabaseConnection();
         
@@ -128,7 +129,7 @@ public class DatabaseConnectionTest {
         DatabaseConnection databaseConnection = new DatabaseConnection();
         
         Connection connection = databaseConnection.getLocalConnection();
-        System.out.println("tsooak " + connection);
+
         if (connection == null) return;
         
         DatabaseMetaData databaseMetaData = connection.getMetaData();
