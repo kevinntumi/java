@@ -1,57 +1,39 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package edu.uem.sgh.model;
+
+import java.util.Date;
 
 /**
  *
  * @author Kevin Ntumi
  */
-public class Funcionario {
-    private long id;
-    private String nome;
-    private long dataNascimento;
-    private long dataRegisto;
-    private Gerente gerente;
+public class Funcionario extends Pessoa {
 
-    public long getId() {
-        return id;
+    private int id;
+    private Date dataRegisto;
+    private String cargo;
+
+    public String getCargo() {
+        return cargo;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setCargo(String cargo) {
+        this.cargo = cargo;
     }
 
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-    
-    public long getDataNascimento() {
-        return dataNascimento;
-    }
-
-    public void setDataNascimento(long dataNascimento) {
-        this.dataNascimento = dataNascimento;
-    }
-
-    public long getDataRegisto() {
-        return dataRegisto;
-    }
-
-    public void setDataRegisto(long dataRegisto) {
+    public void setDataRegisto(Date dataRegisto) {
         this.dataRegisto = dataRegisto;
     }
 
-    public Gerente getGerente() {
-        return gerente;
+    public int getId() {
+        return id;
     }
 
-    public void setGerente(Gerente gerente) {
-        this.gerente = gerente;
+    public void setId(int id) {
+        this.id = id;
     }
+
+    public Date getDataRegisto() {
+        return dataRegisto;
+    }
+
 }

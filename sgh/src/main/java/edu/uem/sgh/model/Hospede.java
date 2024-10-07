@@ -1,37 +1,17 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package edu.uem.sgh.model;
 
+import java.util.Date;
+
 /**
- *
  * @author Kevin Ntumi
  */
-public class Hospede {
-    private long id;
-    private String numDocumentoIdentidade;
+public class Hospede extends Pessoa {
+
+    private Date dataRegisto;
     private String nacionalidade;
-    private String nome;
-    private String morada;
-    private long dataNascimento;
-    private long dataRegistrado;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getNumDocumentoIdentidade() {
-        return numDocumentoIdentidade;
-    }
-
-    public void setNumDocumentoIdentidade(String numDocumentoIdentidade) {
-        this.numDocumentoIdentidade = numDocumentoIdentidade;
-    }
+    private String statusHospedagem;
+    private int numQuarto;
+    private int id;
 
     public String getNacionalidade() {
         return nacionalidade;
@@ -41,35 +21,35 @@ public class Hospede {
         this.nacionalidade = nacionalidade;
     }
 
-    public String getNome() {
-        return nome;
+    public int getId() {
+        return id;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public String getMorada() {
-        return morada;
+    public int getNumQuarto() {
+        return numQuarto;
     }
 
-    public void setMorada(String morada) {
-        this.morada = morada;
+    public void setNumQuarto(int numQuarto) {
+        this.numQuarto = numQuarto;
     }
 
-    public long getDataNascimento() {
-        return dataNascimento;
+    public String getStatusHospedagem() {
+        return statusHospedagem;
     }
 
-    public void setDataNascimento(long dataNascimento) {
-        this.dataNascimento = dataNascimento;
+    public void setStatusHospedagem(String statusHospedagem) {
+        this.statusHospedagem = statusHospedagem;
     }
 
-    public long getDataRegistrado() {
-        return dataRegistrado;
+    public Date getDataRegisto() {
+        return dataRegisto;
     }
 
-    public void setDataRegistrado(long dataRegistrado) {
-        this.dataRegistrado = dataRegistrado;
+    public void setDataRegisto(Date dataRegisto) {
+        this.dataRegisto = dataRegisto;
     }
 }
