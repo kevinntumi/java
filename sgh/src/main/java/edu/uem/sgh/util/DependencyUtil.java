@@ -6,6 +6,7 @@ package edu.uem.sgh.util;
 
 import edu.uem.sgh.annotation.Dependency;
 import edu.uem.sgh.connection.ConnectionType;
+import edu.uem.sgh.connection.Type;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
@@ -38,6 +39,25 @@ public class DependencyUtil {
         }
         
         return requiredDependencies;
+    }
+    
+    public static Type getUnnavailableConnection(List<Object> availableDependencies) {
+        for (Object object : availableDependencies) {
+            if (!(object instanceof Connection)) continue;
+            
+            Connection connection = (Connection) object;
+            Type type;
+            
+            try {
+                type = (connection.getMetaData().getURL().startsWith(Path.REMOTE_DATABASE_INITIAL_URL)) ? Type.LOCAL : Type.REMOTE;
+            } catch (SQLException e) {
+                type = null;
+            }
+            
+            return type;
+        }
+        
+        return null;
     }
     
     private static Object getDependency(Class<?> clazz, List<Object> availableDependencies) {

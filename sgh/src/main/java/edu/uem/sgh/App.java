@@ -2,6 +2,7 @@ package edu.uem.sgh;
 
 import atlantafx.base.theme.*;
 import edu.uem.sgh.connection.DatabaseConnection;
+import edu.uem.sgh.connection.Type;
 import edu.uem.sgh.controller.AbstractController;
 import edu.uem.sgh.controller.TelaLogin;
 import edu.uem.sgh.controller.TelaMenuPrincipal;
@@ -60,10 +61,19 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
         try {
             getDatabaseConnection().initLocalConnection();
         } catch (Exception e) {
-            System.err.println(e);
             Platform.runLater(() -> {
                 new Alert(AlertType.ERROR, "",ButtonType.APPLY).show();
             });
+        } finally {
+            addDependency(getDatabaseConnection().getLocalConnection());
+        }
+        
+        try {
+            getDatabaseConnection().initRemoteConnection();
+        } catch (Exception e) {
+            System.err.println(e);
+        } finally {
+            addDependency(getDatabaseConnection().getRemoteConnection());
         }
     }
 
@@ -202,17 +212,37 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
                 pastController = getController(pastScene.getRoot());
                 
                 if (pastController != null) {
-                    pastController.removerListeners();
+                    resolverDependencias(pastController, false);
                 }
             }
             
             if (currentController != null) {
+                resolverDependencias(currentController, true);
                 System.out.println("UIClassID: " + currentController.getUiClassID());
                 ArrayList<Object> dependencies = DependencyUtil.getDependenciesByClass(currentController.getClass(), getAvailableDependencies());
                 
                 for (Object object : dependencies) {
                     System.out.println(object);
                 }
+                
+                Type unnavailableConnectionType = DependencyUtil.getUnnavailableConnection(dependencies);
+                
+                if (unnavailableConnectionType != null) {
+                    try {
+                        switch (unnavailableConnectionType) {
+                            case LOCAL:
+                                getDatabaseConnection().initLocalConnection();
+                                    break;
+                            case REMOTE:
+                                getDatabaseConnection().initRemoteConnection();
+                                    break;
+                        }
+                    } catch (Exception e) {
+                        System.err.println(e);
+                    }
+                }
+                
+                
             }
             
             stage.getScene().rootProperty().addListener(this);
@@ -231,6 +261,17 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
             
             if (abstractController.getUiClassID().equals("TelaLogin")) {
                 TelaLogin telaLogin = (TelaLogin) abstractController;
+                
+                for (Object object : getAvailableDependencies()) {
+                    if (object.equals(getMouseEventHandler())) {
+                        telaLogin.setParentMouseEventHandler(getMouseEventHandler());
+                    } else if (object.equals(getUsuarioProperty())) {
+                        telaLogin.setUsuarioProperty(getUsuarioProperty());
+                    } else if (object.equals(getAutenticacaoRepository())) {
+                        telaLogin.setAutenticacaoRepository(getAutenticacaoRepository());
+                    }
+                }
+                
                 telaLogin.setParentMouseEventHandler(getMouseEventHandler());
             } else if (abstractController.getUiClassID().equals("TelaMenuPrincipal")) {
                 TelaMenuPrincipal telaMenuPrincipal = (TelaMenuPrincipal) abstractController;
@@ -241,10 +282,18 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
             
             if (abstractController.getUiClassID().equals("TelaLogin")) {
                 TelaLogin telaLogin = (TelaLogin) abstractController;
+                telaLogin.setParentMouseEventHandler(null);
+                telaLogin.setUsuarioProperty(null);
+                telaLogin.setAutenticacaoRepository(null);
             } else if (abstractController.getUiClassID().equals("TelaMenuPrincipal")) {
                 TelaMenuPrincipal telaMenuPrincipal = (TelaMenuPrincipal) abstractController;
+                telaMenuPrincipal.setParentMouseEventHandler(null);
             }   
         }
+    }
+    
+    private void addDependency(Object object) {
+        if (object != null) getAvailableDependencies().add(object);
     }
 
     public List<AbstractController> getControllers() {

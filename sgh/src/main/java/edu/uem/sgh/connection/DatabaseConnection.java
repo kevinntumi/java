@@ -35,6 +35,10 @@ public class DatabaseConnection {
         DatabaseUtil.initLocalDatabase(localConnection);
     }
     
+    public void initRemoteConnection() throws Exception {
+        remoteConnection = DriverManager.getConnection(Path.REMOTE_DATABASE_URL, Path.REMOTE_DATABASE_USERNAME, Path.REMOTE_DATABASE_PASSWORD);
+    }
+    
     public Connection getRemoteConnection() {
         if (remoteConnection == null) {
             try {
