@@ -82,6 +82,10 @@ public class Usuario {
         this.tipo = tipo;
     }
     
+    public static boolean isVazio(Usuario usuario) {
+        return usuario.dataAlterado == null && usuario.dataInicio == null && usuario.dataRegisto == null && usuario.id == null && usuario.idTipo == null && usuario.nome == null && usuario.tipo == null;
+    }
+    
     public enum Tipo {
         CLIENTE,
         FUNCIONARIO,

@@ -61,6 +61,8 @@ public class LocalAutenticacaoDataSource extends AbstractDataSource {
                 }
             }
             
+            if (usuario == null) usuario = Usuario.VAZIO;
+            
             result = new Result.Success<>(usuario);
             rs.close();
         } catch(SQLException e) {

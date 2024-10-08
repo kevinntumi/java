@@ -4,6 +4,9 @@
  */
 package edu.uem.sgh.repository.quarto;
 
+import edu.uem.sgh.annotation.Constructor;
+import edu.uem.sgh.connection.ConnectionType;
+import edu.uem.sgh.connection.Type;
 import edu.uem.sgh.model.Quarto;
 import edu.uem.sgh.model.Result;
 import java.io.FileInputStream;
@@ -19,7 +22,8 @@ public class QuartoRepository {
     private RemoteQuartoRepository remoteQuartoRepository;
     private LocalQuartoRepository localQuartoRepository;
 
-    public QuartoRepository(Connection remoteConnection, Connection localConnection) {
+    @Constructor
+    public QuartoRepository(@ConnectionType(type = Type.REMOTE) Connection remoteConnection, @ConnectionType Connection localConnection) {
         this.remoteConnection = remoteConnection;
         this.localConnection = localConnection;
     }

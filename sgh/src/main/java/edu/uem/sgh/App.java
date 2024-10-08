@@ -8,6 +8,7 @@ import edu.uem.sgh.controller.TelaMenuPrincipal;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
+import edu.uem.sgh.util.DependencyUtil;
 import edu.uem.sgh.util.Detector;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,13 +48,15 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
     private Task<Result<Usuario>> tarefaBuscarUsuario;
     private Result<Usuario> r;
     private Thread backgroundThread;
+    private List<Object> availableDependencies;
+    private String closeButtonId = "close", minimizeButtonId = "minimize";
     private Stage stage;
 
     @Override
     public void init() throws Exception {
         super.init(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
         Application.setUserAgentStylesheet(getTheme(Detector.isDarkMode()));
-        
+
         try {
             getDatabaseConnection().initLocalConnection();
         } catch (Exception e) {
@@ -118,12 +121,12 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
             
             ImageView imageView = (ImageView) event.getSource();
             
-            switch (imageView.getId()) {
-                case "close": Platform.exit();
-                    break;
-                case "minimize": stage.setIconified(true);
-                    break;
-            }
+            if (!(closeButtonId.equals(imageView.getId()) || minimizeButtonId.equals(imageView.getId()))) return;
+            
+            if (closeButtonId.equals(imageView.getId()))
+                Platform.exit();
+            else
+                stage.setIconified(true);
         }
     }
 
@@ -138,13 +141,20 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
 
     @Override
     public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-        System.out.println(observable);
-        
         if (observable.equals(getUsuarioProperty())) {
-            FXMLLoader fxmlLoader = new FXMLLoader((newValue == null) ? getClass().getResource("TelaLogin.fxml") : getClass().getResource("tela_menu_principal.fxml"));
-            AbstractController newController = (newValue == null) ? new TelaLogin() : new TelaMenuPrincipal();
+            FXMLLoader fxmlLoader;
             Scene scene = stage.getScene();
-
+            AbstractController newController;
+            Usuario usuario = (Usuario) newValue;
+            
+            if (Usuario.isVazio(usuario)) {
+                fxmlLoader = new FXMLLoader(getClass().getResource("TelaLogin.fxml"));
+                newController = new TelaLogin();
+            } else {
+                fxmlLoader = new FXMLLoader(getClass().getResource("tela_menu_principal.fxml"));
+                newController = new TelaMenuPrincipal();
+            }
+            
             if (scene == null) {
                 fxmlLoader.setController(newController);
                 getControllers().add(newController);
@@ -198,12 +208,10 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
             
             if (currentController != null) {
                 System.out.println("UIClassID: " + currentController.getUiClassID());
-
-                switch (currentController.getUiClassID()) {
-                    case "TelaMenuPrincipal":
-                        break;
-                    case "TelaLogin":
-                        break;
+                ArrayList<Object> dependencies = DependencyUtil.getDependenciesByClass(currentController.getClass(), getAvailableDependencies());
+                
+                for (Object object : dependencies) {
+                    System.out.println(object);
                 }
             }
             
@@ -275,11 +283,18 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
         return databaseConnection;
     }
 
+    public List<Object> getAvailableDependencies() {
+        if (availableDependencies == null) availableDependencies = new ArrayList<>();
+        return availableDependencies;
+    }
+
     private void shutDown() {
         removerListeners();
         getDatabaseConnection().closeAllConnections();
         getUsuarioProperty().removeListener(this);
         cancelarTarefaBuscarUsuario();
+        
+        if (availableDependencies != null) availableDependencies.clear();
     }
     
     private void cancelarTarefaBuscarUsuario() {

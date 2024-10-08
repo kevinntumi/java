@@ -11,7 +11,11 @@ import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
 import edu.uem.sgh.util.LoginValidator;
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.beans.property.ReadOnlyDoubleProperty;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -57,9 +61,14 @@ public class TelaLogin extends AbstractController implements Initializable, Even
     @Dependency
     private EventHandler<MouseEvent> parentMouseEventHandler;
     
+    @Dependency
+    private SimpleObjectProperty<Usuario> usuarioProperty;
+    
     private Task<Result<Usuario>> tarefaFazerLogin, tarefaBuscarUsuario;
-    private ReadOnlyDoubleProperty progressoTarefaLogin, progressoTarefaRecuperarPalavraPasse;
+    private Thread bgThreadOne, bgThreadTwo;
+    private Result<Usuario> rsltThreadOne, rsltThreadTwo;
     private String email, palavraPasse;
+    private final int TENTATIVAS_MAXIMAS_INTERRUPCAO_THREADS = 5, TENTATIVAS_MAXIMAS_INTERRUPCAO_TAREFAS = 5;
     
     @Override
     public void adicionarListeners() {
@@ -80,10 +89,8 @@ public class TelaLogin extends AbstractController implements Initializable, Even
         getCloseButton().setOnMouseClicked(null);
         getMinimizeButton().setOnMouseClicked(null);
         
-        if (progressoTarefaLogin != null) progressoTarefaLogin.removeListener(this);
-        if (progressoTarefaRecuperarPalavraPasse != null) progressoTarefaRecuperarPalavraPasse.removeListener(this);
-        if (tarefaFazerLogin != null) tarefaFazerLogin = null;
-        if (tarefaBuscarUsuario != null) tarefaBuscarUsuario = null;
+        interromperTodasThreads();
+        interromperTodasTarefas();
     }
     
     @Override
@@ -102,6 +109,14 @@ public class TelaLogin extends AbstractController implements Initializable, Even
         else if (source.equals(btnRecuperarPalavraPasse)) 
             recuperarPalavraPasse();
     }
+    
+    @Override
+    public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
+        if (observable.equals(txtEmail.textProperty()))
+            observarMudancasTxtEmail((String) newValue);
+        else if (observable.equals(txtPalavraPasse.textProperty()))
+            observarMudancasTxtPalavraPasse((String) newValue);
+    }
 
     @Override
     public void setUiClassID(String uiClassID) {
@@ -118,11 +133,11 @@ public class TelaLogin extends AbstractController implements Initializable, Even
         setUiClassID(getClass().getSimpleName());
     }
     
-    public ImageView getCloseButton() {
+    private ImageView getCloseButton() {
         return close;
     }
 
-    public ImageView getMinimizeButton() {
+    private ImageView getMinimizeButton() {
         return minimize;
     }
     
@@ -132,6 +147,10 @@ public class TelaLogin extends AbstractController implements Initializable, Even
 
     public void setParentMouseEventHandler(EventHandler<MouseEvent> parentMouseEventHandler) {
         this.parentMouseEventHandler = parentMouseEventHandler;
+    }
+
+    public void setUsuarioProperty(SimpleObjectProperty<Usuario> usuarioProperty) {
+        this.usuarioProperty = usuarioProperty;
     }
     
     private void observarMudancasTxtEmail(String newValue) {
@@ -153,40 +172,131 @@ public class TelaLogin extends AbstractController implements Initializable, Even
             }
         };
         
-        progressoTarefaLogin = tarefaFazerLogin.progressProperty();
-        progressoTarefaLogin.addListener(this);
-    }
-
-    private void recuperarPalavraPasse() {
-        tarefaBuscarUsuario = new Task<Result<Usuario>>() {
-            @Override
-            protected Result<Usuario> call() throws Exception {
-                return autenticacaoRepository.getUserByEmail(email);
-            }
-        };
+        Thread.State state = null;
         
-        progressoTarefaRecuperarPalavraPasse = tarefaBuscarUsuario.progressProperty();
-        progressoTarefaRecuperarPalavraPasse.addListener(this);
-    }
-
-    @Override
-    public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-        if (observable.equals(txtEmail.textProperty())) {
-            observarMudancasTxtEmail((String) newValue);
-        } else if (observable.equals(txtPalavraPasse.textProperty())) {
-            observarMudancasTxtPalavraPasse((String) newValue);
-        } else if (observable.equals(progressoTarefaLogin)) {
-            observarProgressoTarefaLogin((Double) newValue);
-        } else if (observable.equals(progressoTarefaRecuperarPalavraPasse)) {
-            observarProgressoTarefaRecuperarPalavraPasse((Double) newValue);
+        if (bgThreadOne != null) {
+            state = bgThreadOne.getState();
+            
+            if (state != Thread.State.TERMINATED) 
+                interromperThreadRecursivamente(0, bgThreadOne);
+        }
+        
+        if (bgThreadOne == null || state == Thread.State.TERMINATED) bgThreadOne = new Thread(tarefaFazerLogin);
+        
+        try {
+            bgThreadOne.start();
+        } catch (Exception e) {
+            return;
+        }
+        
+        obterResultadoThread(bgThreadOne, tarefaFazerLogin, rsltThreadOne);
+        
+        if (rsltThreadOne instanceof Result.Error) {
+            
+        } else {
+            Result.Success<Usuario> success = (Result.Success<Usuario>) rsltThreadOne;
+            usuarioProperty.set(success.getData());
         }
     }
-
-    private void observarProgressoTarefaLogin(Double progresso) {
-        System.out.println("sksk " + progresso);
+    
+    private void recuperarPalavraPasse() {
+        inicializarThread(bgThreadTwo, tarefaBuscarUsuario);
+        
+        try {
+            bgThreadTwo.start();
+        } catch (Exception e) {
+            return;
+        }
+        
+        obterResultadoThread(bgThreadTwo, tarefaBuscarUsuario, rsltThreadTwo);
+        
+        if (rsltThreadTwo instanceof Result.Error) {
+            
+        } else {
+            Result.Success<Usuario> success = (Result.Success<Usuario>) rsltThreadTwo;
+        }
     }
-
-    private void observarProgressoTarefaRecuperarPalavraPasse(Double progresso) {
-        System.out.println("sksk " + progresso);
+    
+    @SuppressWarnings("All")
+    private void inicializarThread(Thread thread, Task<Result<Usuario>> tarefaRelacionada) {
+        Thread bgThread = thread;
+        
+        if (tarefaRelacionada == null) {
+            tarefaRelacionada = new Task<Result<Usuario>>() {
+                @Override
+                protected Result<Usuario> call() throws Exception {
+                    return (bgThread.equals(bgThreadOne)) ? autenticacaoRepository.logIn(email, palavraPasse) : autenticacaoRepository.getUserByEmail(email);
+                }
+            };
+        }
+        
+        Thread.State state = null;
+        
+        if (thread != null) {
+            state = thread.getState();
+            
+            if (state != Thread.State.TERMINATED) 
+                interromperThreadRecursivamente(0, thread);
+        }
+        
+        if (thread == null || state == Thread.State.TERMINATED) thread = new Thread(tarefaRelacionada);
+    }
+    
+    private void obterResultadoThread(Thread thread, Task<Result<Usuario>> tarefaRelacionada, Result<Usuario> result){
+        try {
+            result = tarefaRelacionada.get(1500, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | CancellationException | TimeoutException | ExecutionException e) {
+            switch (e.getClass().getSimpleName()) {
+                case "InterruptedException": 
+                    break;
+                case "CancellationException":
+                    break;
+                case "TimeoutException":
+                    break;
+                case "ExecutionException":
+                    break;
+            }
+        }
+        
+        interromperThreadRecursivamente(0, thread);
+    }
+    
+    private void interromperTodasTarefas() {
+        if (tarefaFazerLogin != null) 
+            interromperTarefaRecursivamente(0, tarefaFazerLogin);
+        
+        if (tarefaBuscarUsuario != null) 
+            interromperTarefaRecursivamente(0, tarefaBuscarUsuario);
+    }
+    
+    private void interrromperTarefa(Task<? extends Object> tarefa) {
+        if (tarefa.isRunning()) tarefa.cancel(true);
+    }
+    
+    private void interromperTarefaRecursivamente(int tentativa, Task<?> tarefa) {
+        if (tentativa < 0 || tentativa > TENTATIVAS_MAXIMAS_INTERRUPCAO_TAREFAS || !tarefa.isRunning()) return;
+        interrromperTarefa(tarefa);
+        interromperTarefaRecursivamente(tentativa + 1, tarefa);
+    }
+    
+    private void interromperTodasThreads() {
+        interromperThreadRecursivamente(0, bgThreadOne);
+        interromperThreadRecursivamente(0, bgThreadTwo);
+    }
+    
+    private void interromperThread(Thread thread) {
+        if (!thread.isInterrupted()) {
+            try {
+                thread.interrupt();
+            } catch (Exception e) {
+                System.err.println(e);
+            }
+        }
+    }
+    
+    private void interromperThreadRecursivamente(int tentativa, Thread thread) {
+        if (tentativa < 0 || tentativa > TENTATIVAS_MAXIMAS_INTERRUPCAO_THREADS || thread.getState() == Thread.State.TERMINATED) return;
+        interromperThread(thread);
+        interromperThreadRecursivamente(tentativa + 1, thread);
     }
 }

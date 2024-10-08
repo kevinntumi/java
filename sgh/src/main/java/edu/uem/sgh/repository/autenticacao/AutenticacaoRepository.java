@@ -4,8 +4,11 @@
  */
 package edu.uem.sgh.repository.autenticacao;
 
+import edu.uem.sgh.annotation.Constructor;
+import edu.uem.sgh.connection.ConnectionType;
 import edu.uem.sgh.datasource.LocalAutenticacaoDataSource;
 import edu.uem.sgh.datasource.RemoteAutenticacaoDataSource;
+import edu.uem.sgh.connection.Type;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
 import java.sql.Connection;
@@ -19,7 +22,8 @@ public class AutenticacaoRepository {
     private RemoteAutenticacaoDataSource remoteAutenticacaoDataSource;
     private LocalAutenticacaoDataSource localAutenticacaoDataSource;
 
-    public AutenticacaoRepository(Connection remoteConnection, Connection localConnection) {
+    @Constructor
+    public AutenticacaoRepository(@ConnectionType(type = Type.REMOTE) Connection remoteConnection, @ConnectionType Connection localConnection) {
         this.remoteConnection = remoteConnection;
         this.localConnection = localConnection;
     }

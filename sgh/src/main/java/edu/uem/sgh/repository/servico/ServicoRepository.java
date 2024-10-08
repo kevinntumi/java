@@ -4,6 +4,9 @@
  */
 package edu.uem.sgh.repository.servico;
 
+import edu.uem.sgh.annotation.Constructor;
+import edu.uem.sgh.connection.ConnectionType;
+import edu.uem.sgh.connection.Type;
 import edu.uem.sgh.dao.ServicoDao;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Servico;
@@ -19,7 +22,8 @@ public class ServicoRepository implements ServicoDao{
     private LocalServicoRepository localServicoRepository;
     private RemoteServicoRepository remoteServicoRepository;
 
-    public ServicoRepository(Connection remoteConnection, Connection localConnection) {
+    @Constructor
+    public ServicoRepository(@ConnectionType(type = Type.REMOTE) Connection remoteConnection, @ConnectionType Connection localConnection) {
         this.remoteConnection = remoteConnection;
         this.localConnection = localConnection;
     }
