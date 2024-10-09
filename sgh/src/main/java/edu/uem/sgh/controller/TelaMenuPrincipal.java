@@ -8,16 +8,20 @@ import com.gluonhq.charm.glisten.control.*;
 import edu.uem.sgh.annotation.Dependency;
 import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.model.Usuario.Tipo;
+import static edu.uem.sgh.model.Usuario.Tipo.ADMINISTRADOR;
+import static edu.uem.sgh.model.Usuario.Tipo.CLIENTE;
+import static edu.uem.sgh.model.Usuario.Tipo.FUNCIONARIO;
+import static edu.uem.sgh.model.Usuario.Tipo.GERENTE;
 import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
 import edu.uem.sgh.repository.quarto.QuartoRepository;
 import edu.uem.sgh.repository.servico.ServicoRepository;
-import java.net.MalformedURLException;
-import java.net.URI;
+import edu.uem.sgh.util.Path;
 import java.net.URL;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -54,7 +58,8 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     
     private AbstractController[] tabContentControllers;
     private Usuario usuario;
-    private EnumMap<Usuario.Tipo, Map<String, URI>> resourcePaths;
+    private EnumMap<Usuario.Tipo, Map<Class<?>, URL>> resourcePaths;
+    private EnumMap<Usuario.Tipo, Map<String, Class<?>>> resourcePathMap;
     
     @Dependency
     private ServicoRepository servicoRepository;
@@ -105,38 +110,182 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         return minimize;
     }
 
-    private String[] getTabs(Usuario.Tipo tipo) {
-        switch (tipo) {
-            case CLIENTE:
-                return new String[] {
-                    "Reservas", "Check-In", "Check-Out", "Relatórios"
-                };
-            case FUNCIONARIO: 
-                return new String[] {
-                    "Serviços", "Hóspedes", "Quartos", "Reservas", "Check-In", "Check-Out", "Relatórios"
-                };
-            case GERENTE:
-                return new String[] {
-                    "Funcionários", "Serviços", "Hóspedes", "Quartos", "Reservas", "Check-In", "Check-Out", "Relatórios"
-                };
-            case ADMINISTRADOR:
-                return new String[] {
-                    "Funcionários", "Gerentes", "Serviços", "Hóspedes", "Quartos", "Reservas", "Check-In", "Check-Out", "Relatórios"
-                };
-            default:
-                return null;
-        }
+    private Set<String> getTabs(Usuario.Tipo tipo) {
+        if (tipo == null || !getResourcePathMap().containsKey(tipo)) return null;
+        return getResourcePathMap().get(tipo).keySet();
     }
 
-    private EnumMap<Usuario.Tipo, Map<String, URI>> getResourcePaths() {
+    @SuppressWarnings("unchecked")
+    public EnumMap<Usuario.Tipo, Map<String, Class<?>>> getResourcePathMap() {
+        if (resourcePathMap == null) {
+            resourcePathMap = new EnumMap(Usuario.Tipo.class);
+            Tipo[] tipos = Tipo.values();
+            
+            if (tipos.length == 0) throw new RuntimeException();
+            
+            for (Tipo tipo : tipos) {
+                if (!resourcePathMap.containsKey(tipo)) 
+                    resourcePathMap.put(tipo, new HashMap<>());
+
+                Map<String, Class<?>> map = resourcePathMap.get(tipo);
+                
+                String[] resources = new String[] {
+                    "Funcionários", "Gerentes", "Serviços", "Hóspedes", "Quartos", "Reservas", "Check-In", "Check-Out", "Relatórios"
+                };
+                
+                for (String resource : resources) {
+                    if (tipo == ADMINISTRADOR) {
+                        Class<?> clazz = null;
+                        
+                        switch (resource) {
+                            case "Funcionários":
+                                clazz = edu.uem.sgh.controller.administrador.TelaFuncionarios.class;
+                                    break;
+                            case "Quartos":
+                                clazz = edu.uem.sgh.controller.administrador.TelaQuartos.class;
+                                    break;
+                            case "Gerentes":
+                                clazz = edu.uem.sgh.controller.administrador.TelaGerentes.class;
+                                    break;
+                            case "Serviços":
+                                clazz = edu.uem.sgh.controller.administrador.TelaServicos.class;
+                                    break;
+                            case "Hóspedes":
+                                clazz = edu.uem.sgh.controller.administrador.TelaHospedes.class;
+                                    break;
+                            case "Check-In":
+                                clazz = edu.uem.sgh.controller.administrador.TelaCheckIns.class;
+                                    break;
+                            case "Check-Out":
+                                clazz = edu.uem.sgh.controller.administrador.TelaCheckOuts.class;
+                                    break;
+                            case "Relatórios": 
+                                clazz = edu.uem.sgh.controller.administrador.TelaRelatorios.class;
+                                    break;
+                            case "Reservas": 
+                                clazz = edu.uem.sgh.controller.administrador.TelaReservas.class;
+                                    break;
+                        }
+                        
+                        if (clazz != null) 
+                            map.put(resource, clazz);
+                        
+                    } else if (tipo == CLIENTE) {
+                        Class<?> clazz = null;
+                        
+                        switch (resource) {
+                            case "Reservas":
+                                clazz = edu.uem.sgh.controller.cliente.TelaReservas.class;
+                                    break;
+                            case "Check-In":
+                                clazz = edu.uem.sgh.controller.cliente.TelaCheckIns.class;
+                                    break;
+                            case "Check-Out":
+                                clazz = edu.uem.sgh.controller.cliente.TelaCheckOuts.class;
+                                    break;
+                            case "Relatórios": 
+                                clazz = edu.uem.sgh.controller.cliente.TelaRelatorios.class;
+                                    break;
+                        }
+                        
+                        if (clazz != null) 
+                            map.put(resource, clazz);
+                        
+                    } else if (tipo == FUNCIONARIO) {
+                        Class<?> clazz = null;
+                        
+                        switch (resource) {
+                            case "Serviços":
+                                clazz = edu.uem.sgh.controller.funcionario.TelaServicos.class;
+                                    break;
+                            case "Hóspedes":
+                                clazz = edu.uem.sgh.controller.funcionario.TelaHospedes.class;
+                                    break;
+                            case "Quartos":
+                                clazz = edu.uem.sgh.controller.funcionario.TelaQuartos.class;
+                                    break;
+                            case "Reservas":
+                                clazz = edu.uem.sgh.controller.funcionario.TelaReservas.class;
+                                    break;
+                            case "Check-In":
+                                clazz = edu.uem.sgh.controller.funcionario.TelaCheckIns.class;
+                                    break;
+                            case "Check-Out":
+                                clazz = edu.uem.sgh.controller.funcionario.TelaCheckOuts.class;
+                                    break;
+                            case "Relatórios": 
+                                clazz = edu.uem.sgh.controller.funcionario.TelaRelatorios.class;
+                                    break;
+                        }
+                        
+                        if (clazz != null) 
+                            map.put(resource, clazz);
+                        
+                    } else if (tipo == GERENTE) {
+                        Class<?> clazz = null;
+                        
+                        switch (resource) {
+                            case "Funcionários":
+                                clazz = edu.uem.sgh.controller.gerente.TelaFuncionarios.class;
+                                    break;
+                            case "Serviços":
+                                clazz = edu.uem.sgh.controller.gerente.TelaServicos.class;
+                                    break;
+                            case "Hóspedes":
+                                clazz = edu.uem.sgh.controller.gerente.TelaHospedes.class;;
+                                    break;
+                            case "Quartos":
+                                clazz = edu.uem.sgh.controller.gerente.TelaQuartos.class;;
+                                    break;
+                            case "Reservas":
+                                clazz = edu.uem.sgh.controller.gerente.TelaReservas.class;;
+                                    break;
+                            case "Check-In":
+                                clazz = edu.uem.sgh.controller.gerente.TelaCheckIns.class;;
+                                    break;
+                            case "Check-Out":
+                                clazz = edu.uem.sgh.controller.gerente.TelaCheckOuts.class;;
+                                    break;
+                            case "Relatórios": 
+                                clazz = edu.uem.sgh.controller.gerente.TelaRelatorios.class;;
+                                    break;
+                        }
+                        
+                        if (clazz != null) 
+                            map.put(resource, clazz);
+                        
+                    }
+                }
+                    
+                resourcePathMap.put(tipo, map);
+            }
+        }
+        
+        return resourcePathMap;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private EnumMap<Usuario.Tipo, Map<Class<?>, URL>> getResourcePaths() {
         if (resourcePaths == null) {
             resourcePaths = new EnumMap(Usuario.Tipo.class);
             Tipo[] tipos = Tipo.values();
             
-            for (Tipo tipo : tipos) {
-                resourcePaths.put(tipo, new HashMap<String, URI>());
-            }
+            if (tipos.length == 0) throw new RuntimeException();
             
+            for (Tipo tipo : tipos) {
+                String tipoStr = tipo.toString().toLowerCase(), resourcePathStr = Path.getResourcePathByUserType(tipo, tipoStr);
+                
+                if (resourcePathStr == null) 
+                    continue;
+                
+                Map<Class<?>, URL> resourcePath = Path.getResourcesPathURL(resourcePathStr, tipoStr);
+                
+                for (Class<?> key : resourcePath.keySet()) {
+                    System.out.println("key: " + key + ", value: " + resourcePath.get(key));
+                }
+                
+                resourcePaths.put(tipo, resourcePath);
+            }
         }
         
         return resourcePaths;
@@ -146,16 +295,19 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         this.parentMouseEventHandler = parentMouseEventHandler;
     }
     
-    private void definirMenu(String[] tabs) {
-        inicializarTabContentsControllers(tabs.length);
+    private void definirMenu(Set<String> tabs) {
+        int size = tabs.size(), i = 0;
+        inicializarTabContentsControllers(size);
         
-        for (int i = 0 ; i < tabs.length ; i++) {
-            String tabName = tabs[i];
+        for (String tabName : tabs) {
             Node tabContent;
+            i++;
             
             try {
                 tabContent = createTabContentByName(tabName, i);
             } catch (Exception e) {
+                System.err.println(e);
+                System.err.println(e.getCause());
                 continue;
             }
             
@@ -163,21 +315,18 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         }
     }
     
-    private URI getResourcePath(String name) {
-        if (!getResourcePaths().containsKey(usuario.getTipo()) || !getResourcePaths().get(usuario.getTipo()).containsKey(name)) throw new RuntimeException();
-        return getResourcePaths().get(usuario.getTipo()).get(name);
+    private URL getResourcePath(String name) {
+        if (!getResourcePaths().containsKey(usuario.getTipo()) || !getResourcePathMap().get(usuario.getTipo()).containsKey(name)) throw new RuntimeException();
+        return getResourcePaths().get(usuario.getTipo()).get(getResourcePathMap().get(usuario.getTipo()).get(name));
     }
     
     private FXMLLoader getFXMLoader(String name) {
-        URL resourcePath;
+        URL resourcePath = getResourcePath(name);
         
-        try {
-            resourcePath = getResourcePath(name).toURL();
-        } catch (MalformedURLException | RuntimeException exception) {
+        if (resourcePath == null)
             return null;
-        }
-        
-        return new FXMLLoader(resourcePath);
+        else
+            return new FXMLLoader(resourcePath);
     }
     
     private Node createTabContentByName(String name, int i) throws Exception {

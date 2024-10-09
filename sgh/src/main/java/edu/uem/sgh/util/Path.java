@@ -4,9 +4,12 @@
  */
 package edu.uem.sgh.util;
 
+import edu.uem.sgh.model.Usuario.Tipo;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -44,5 +47,116 @@ public class Path {
         }
         
         return url;
+    }
+    
+    public static String getResourcePathByUserType(Tipo tipo, String tipoStr) {
+        if (tipo == null) return null;
+        return BASE_RESOURCE_PATH + "\\edu\\uem\\sgh\\" + tipoStr;
+    }
+    
+    public static String getResourceName(String str) {
+        if (str == null || str.isBlank()) return null;
+        
+        String resourceName = "";
+        char onlySpecialCharAllowed = '_';
+        int n = (str.length() - 1);
+        
+        for (int i = 0 ; i <= n ; i++) {
+            char ch = str.charAt(i);
+            
+            if (i == 0 && Character.isLetter(ch))
+                resourceName += Character.toUpperCase(ch);
+            
+            if (i != 0) {
+                if (!(Character.isLetter(ch) || ch == onlySpecialCharAllowed)){
+                    return null;
+                }
+                
+                if (!Character.isLetter(ch))
+                    continue;
+                
+                char previousChar = str.charAt(i - 1);
+            
+                if (previousChar == onlySpecialCharAllowed)
+                    resourceName += Character.toUpperCase(ch);
+                else
+                    resourceName += ch;
+            }
+        }
+        
+        return resourceName;
+    }
+    
+    public static Map<Class<?>,URL> getResourcesPathURL(String path, String tipoUsuarioStr) {
+        Map<Class<?>, URL> resourcesPath = new HashMap<>();
+        File f;
+        
+        try {
+            f = new File(path);
+        } catch (Exception e) {
+            return resourcesPath;
+        }
+        
+        if (!f.exists() || (f.exists() && !f.isDirectory()))
+            return resourcesPath;
+        
+        File[] files = f.listFiles();
+        
+        if (files.length == 0)
+            return resourcesPath;
+        
+        String extension = ".fxml";
+        
+        for (File file : files) {
+            if (!file.isFile())
+                continue;
+            
+            String fileName = file.getAbsolutePath().replace(path + "\\", "");
+            
+            if (!fileName.endsWith(extension))
+                continue;
+            
+            URL url;
+            
+            try {
+                url = file.toURI().toURL();
+            } catch (MalformedURLException e) {
+                continue;
+            }
+            
+            Class<?> controllerClass;
+            
+            String 
+                extensionStrippedFileName = fileName.replace(extension, ""),
+                    controllerName = getResourceName(extensionStrippedFileName),
+                        typeFileName = "edu.uem.sgh.controller." + tipoUsuarioStr + "." + controllerName;
+            
+            switch (extensionStrippedFileName) {
+                case "tela_funcionario":
+                case "tela_servico":
+                case "tela_quarto":
+                case "tela_gerente":
+                case "tela_check_in":
+                case "tela_check_out":
+                case "tela_reserva":
+                case "tela_servicos":
+                case "tela_funcionarios":
+                case "tela_quartos":
+                case "tela_gerentes":
+                case "tela_check_ins":
+                case "tela_check_outs":
+                case "tela_reservas": 
+                    controllerClass = ClassUtil.getClassByTypeName(typeFileName);
+                        break;
+                default:
+                    controllerClass = null;
+                        break;
+            }
+            
+            if (controllerClass != null)
+                resourcesPath.put(controllerClass, url);
+        }
+        
+        return resourcesPath;
     }
 }

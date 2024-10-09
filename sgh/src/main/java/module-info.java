@@ -13,5 +13,9 @@ module edu.uem.sgh {
     
     opens edu.uem.sgh to javafx.fxml;
     opens edu.uem.sgh.controller to javafx.fxml;
+    opens edu.uem.sgh.controller.administrador to javafx.fxml;
+    opens edu.uem.sgh.controller.cliente to javafx.fxml;
+    opens edu.uem.sgh.controller.funcionario to javafx.fxml;
+    opens edu.uem.sgh.controller.gerente to javafx.fxml;
     exports edu.uem.sgh;
 }
