@@ -18,10 +18,11 @@ import java.sql.SQLException;
  * @author Kevin Ntumi
  */
 public class LocalAutenticacaoDataSource extends AbstractDataSource {
-    private final static String tblName = "usuario";
+    private final String tblName;
     
-    public LocalAutenticacaoDataSource(Connection connection) {
+    public LocalAutenticacaoDataSource(Connection connection, String tblName) {
         super(connection);
+        this.tblName = tblName;
     }
 
     @Override
@@ -39,7 +40,7 @@ public class LocalAutenticacaoDataSource extends AbstractDataSource {
             Usuario usuario = null;
             
             while (usuario == null && rs.next()) {
-                usuario = new Usuario(System.currentTimeMillis());
+                usuario = new Usuario();
                 
                 for (int i = 1 ; i <= resultSetMetaData.getColumnCount() ; i++) {
                     String columnName = resultSetMetaData.getColumnName(i);
@@ -59,6 +60,8 @@ public class LocalAutenticacaoDataSource extends AbstractDataSource {
                             break;
                     }
                 }
+                
+                usuario.setDataInicio(System.currentTimeMillis());
             }
             
             if (usuario == null) usuario = Usuario.VAZIO;

@@ -9,6 +9,7 @@ module edu.uem.sgh {
     requires mysql.connector.j;
     requires atlantafx.base;
     requires com.gluonhq.charm.glisten;
+    requires java.base;
     
     opens edu.uem.sgh to javafx.fxml;
     opens edu.uem.sgh.controller to javafx.fxml;

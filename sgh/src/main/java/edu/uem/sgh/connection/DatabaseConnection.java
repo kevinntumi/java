@@ -26,6 +26,7 @@ import java.sql.SQLException;
  */
 public class DatabaseConnection {
     private Connection remoteConnection, localConnection;
+    private static final int MAX_CONNECTION_ATTEMPTS = 5;
 
     public DatabaseConnection() {
     }
@@ -40,26 +41,10 @@ public class DatabaseConnection {
     }
     
     public Connection getRemoteConnection() {
-        if (remoteConnection == null) {
-            try {
-                remoteConnection = DriverManager.getConnection(Path.REMOTE_DATABASE_URL, Path.REMOTE_DATABASE_USERNAME, Path.REMOTE_DATABASE_PASSWORD);
-            } catch (SQLException ex) {
-                return null;
-            }
-        }
-        
         return remoteConnection;
     }
 
     public Connection getLocalConnection() {
-        if (localConnection == null) {
-            try {
-                localConnection = DriverManager.getConnection(Path.LOCAL_DATABASE_PATH);
-            } catch(SQLException e) {
-                return null;
-            }
-        }
-        
         return localConnection;
     }
     
@@ -79,5 +64,40 @@ public class DatabaseConnection {
         } catch (Exception e) {
             System.err.println(e);
         }
+    }
+    
+    public boolean areAllConnectionsUnnavailable() {
+        return isConnectionUnnavailable(getRemoteConnection()) && isConnectionUnnavailable(getLocalConnection());
+    }
+    
+    public boolean isConnectionUnnavailable(Connection connection) {
+        if (connection == null) return true;
+        
+        try {
+            if (connection.isClosed()) return true;
+        } catch (SQLException e) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public void attemptInitConnection (int attempt, Connection connection, Type type) {
+        if (attempt < 0 || attempt > MAX_CONNECTION_ATTEMPTS) return;
+        if (type == null) return; 
+        
+        try {
+            if (type == Type.LOCAL)
+                initLocalConnection();
+            else
+                initRemoteConnection();
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+    }
+    
+    public void attemptInitConnections() {
+        attemptInitConnection(0, localConnection, Type.LOCAL);
+        attemptInitConnection(0, remoteConnection, Type.REMOTE);
     }
 }

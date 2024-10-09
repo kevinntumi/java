@@ -2,15 +2,12 @@ package edu.uem.sgh;
 
 import atlantafx.base.theme.*;
 import edu.uem.sgh.connection.DatabaseConnection;
-import edu.uem.sgh.connection.Type;
 import edu.uem.sgh.controller.AbstractController;
 import edu.uem.sgh.controller.TelaLogin;
 import edu.uem.sgh.controller.TelaMenuPrincipal;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
-import edu.uem.sgh.util.DependencyUtil;
-import edu.uem.sgh.util.Detector;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +37,6 @@ import javafx.stage.StageStyle;
  * JavaFX App
  */
 public class App extends Application implements EventHandler<MouseEvent>, ChangeListener<Object> {
-    private String[] appThemeStyleSheet;
     private double xOffset = 0, yOffset = 0;
     private List<AbstractController> controllers;
     private DatabaseConnection databaseConnection;
@@ -49,31 +45,30 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
     private Task<Result<Usuario>> tarefaBuscarUsuario;
     private Result<Usuario> r;
     private Thread backgroundThread;
-    private List<Object> availableDependencies;
-    private String closeButtonId = "close", minimizeButtonId = "minimize";
+    private final String closeButtonId = "close", minimizeButtonId = "minimize";
     private Stage stage;
 
     @Override
     public void init() throws Exception {
         super.init(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-        Application.setUserAgentStylesheet(getTheme(Detector.isDarkMode()));
+        Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
 
         try {
             getDatabaseConnection().initLocalConnection();
         } catch (Exception e) {
-            Platform.runLater(() -> {
-                new Alert(AlertType.ERROR, "",ButtonType.APPLY).show();
-            });
-        } finally {
-            addDependency(getDatabaseConnection().getLocalConnection());
+            System.err.println(e);
         }
         
         try {
             getDatabaseConnection().initRemoteConnection();
         } catch (Exception e) {
             System.err.println(e);
-        } finally {
-            addDependency(getDatabaseConnection().getRemoteConnection());
+        }
+        
+        if (getDatabaseConnection().areAllConnectionsUnnavailable()) {
+            Platform.runLater(() -> {
+                new Alert(AlertType.ERROR, "",ButtonType.APPLY).show();
+            });
         }
     }
 
@@ -83,7 +78,14 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
         stage.setResizable(false);
         stage.initStyle(StageStyle.UNDECORATED);
         getUsuarioProperty().addListener(this);
-        verificarUsuarioAutenticado();
+        Usuario usuario = new Usuario();
+        usuario.setId(1);
+        usuario.setIdTipo(1);
+        usuario.setDataInicio(System.currentTimeMillis());
+        usuario.setDataRegisto(System.currentTimeMillis());
+        usuario.setTipo(Usuario.Tipo.CLIENTE);
+        getUsuarioProperty().set(usuario);
+        //verificarUsuarioAutenticado();
     }
     
     @Override
@@ -94,28 +96,6 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
 
     public static void main(String[] args) {
         Application.launch(args);
-    }
-
-    private String[] getAppThemeStyleSheet() {
-        if (appThemeStyleSheet == null) 
-            appThemeStyleSheet = new String[]{
-                new PrimerLight().getUserAgentStylesheet(),
-                new PrimerDark().getUserAgentStylesheet()
-            };
-            
-        return appThemeStyleSheet;
-    }
-    
-    private String getLightAppTheme() {
-        return getAppThemeStyleSheet()[0];
-    }
-    
-    private String getDarkAppTheme() {
-        return getAppThemeStyleSheet()[1];
-    }
-    
-    private String getTheme(boolean isDarkMode) {
-        return (isDarkMode) ? getDarkAppTheme() : getLightAppTheme();
     }
 
     @Override
@@ -206,77 +186,51 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
             Scene pastScene = null, currentScene = (Scene) newValue;
             AbstractController pastController, currentController = getController(currentScene.getRoot());
             
-            if (oldValue != null) pastScene = null;
+            if (oldValue != null) pastScene = (Scene) oldValue;
             
             if (pastScene != null) {
                 pastController = getController(pastScene.getRoot());
                 
-                if (pastController != null) {
+                if (pastController != null)
                     resolverDependencias(pastController, false);
-                }
             }
             
-            if (currentController != null) {
+            if (currentController != null)
                 resolverDependencias(currentController, true);
-                System.out.println("UIClassID: " + currentController.getUiClassID());
-                ArrayList<Object> dependencies = DependencyUtil.getDependenciesByClass(currentController.getClass(), getAvailableDependencies());
-                
-                for (Object object : dependencies) {
-                    System.out.println(object);
-                }
-                
-                Type unnavailableConnectionType = DependencyUtil.getUnnavailableConnection(dependencies);
-                
-                if (unnavailableConnectionType != null) {
-                    try {
-                        switch (unnavailableConnectionType) {
-                            case LOCAL:
-                                getDatabaseConnection().initLocalConnection();
-                                    break;
-                            case REMOTE:
-                                getDatabaseConnection().initRemoteConnection();
-                                    break;
-                        }
-                    } catch (Exception e) {
-                        System.err.println(e);
-                    }
-                }
-                
-                
-            }
             
             stage.getScene().rootProperty().addListener(this);
             observable.removeListener(this);
             
         } else if (observable.equals(stage.getScene().rootProperty())) {
+            AbstractController pastController, currentController = getController((Parent) newValue);
+            System.out.println("fuck");
             
+            if (oldValue != null) {
+                pastController = getController((Parent) oldValue);
+                
+                if (pastController != null) 
+                    resolverDependencias(pastController, false);
+            }
+            
+            if (currentController != null)
+                resolverDependencias(currentController, true);
         }
     }
     
     private void resolverDependencias(AbstractController abstractController, boolean add) {
-        if (abstractController.getUiClassID() == null) return;
-        
         if (add) {
-            abstractController.adicionarListeners();
-            
             if (abstractController.getUiClassID().equals("TelaLogin")) {
                 TelaLogin telaLogin = (TelaLogin) abstractController;
-                
-                for (Object object : getAvailableDependencies()) {
-                    if (object.equals(getMouseEventHandler())) {
-                        telaLogin.setParentMouseEventHandler(getMouseEventHandler());
-                    } else if (object.equals(getUsuarioProperty())) {
-                        telaLogin.setUsuarioProperty(getUsuarioProperty());
-                    } else if (object.equals(getAutenticacaoRepository())) {
-                        telaLogin.setAutenticacaoRepository(getAutenticacaoRepository());
-                    }
-                }
-                
                 telaLogin.setParentMouseEventHandler(getMouseEventHandler());
+                telaLogin.setUsuarioProperty(getUsuarioProperty());
+                telaLogin.setAutenticacaoRepository(getAutenticacaoRepository());
             } else if (abstractController.getUiClassID().equals("TelaMenuPrincipal")) {
                 TelaMenuPrincipal telaMenuPrincipal = (TelaMenuPrincipal) abstractController;
                 telaMenuPrincipal.setParentMouseEventHandler(getMouseEventHandler());
+                telaMenuPrincipal.changed(getUsuarioProperty(), getUsuarioProperty().get(), getUsuarioProperty().get());
             }
+            
+            abstractController.adicionarListeners();
         } else {
             abstractController.removerListeners();
             
@@ -288,12 +242,9 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
             } else if (abstractController.getUiClassID().equals("TelaMenuPrincipal")) {
                 TelaMenuPrincipal telaMenuPrincipal = (TelaMenuPrincipal) abstractController;
                 telaMenuPrincipal.setParentMouseEventHandler(null);
+                getUsuarioProperty().removeListener(telaMenuPrincipal);
             }   
         }
-    }
-    
-    private void addDependency(Object object) {
-        if (object != null) getAvailableDependencies().add(object);
     }
 
     public List<AbstractController> getControllers() {
@@ -332,18 +283,11 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
         return databaseConnection;
     }
 
-    public List<Object> getAvailableDependencies() {
-        if (availableDependencies == null) availableDependencies = new ArrayList<>();
-        return availableDependencies;
-    }
-
     private void shutDown() {
         removerListeners();
         getDatabaseConnection().closeAllConnections();
         getUsuarioProperty().removeListener(this);
         cancelarTarefaBuscarUsuario();
-        
-        if (availableDependencies != null) availableDependencies.clear();
     }
     
     private void cancelarTarefaBuscarUsuario() {

@@ -4,12 +4,17 @@
  */
 package edu.uem.sgh.controller;
 
+import com.gluonhq.charm.glisten.control.LifecycleEvent;
 import edu.uem.sgh.annotation.Dependency;
+import edu.uem.sgh.model.DialogDetails;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
 import edu.uem.sgh.util.LoginValidator;
+import edu.uem.sgh.util.Path;
+import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -19,8 +24,11 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
+import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -33,7 +41,7 @@ import javafx.scene.layout.AnchorPane;
  *
  * @author Kevin Ntumi
  */
-public class TelaLogin extends AbstractController implements Initializable, EventHandler<MouseEvent>, ChangeListener<Object>{
+public class TelaLogin extends AbstractController implements Initializable, EventHandler<Event>, ChangeListener<Object>{
     @FXML
     private TextField txtEmail;
     
@@ -64,11 +72,13 @@ public class TelaLogin extends AbstractController implements Initializable, Even
     @Dependency
     private SimpleObjectProperty<Usuario> usuarioProperty;
     
+    private SimpleObjectProperty<DialogDetails> dialogDetailsProperty;
     private Task<Result<Usuario>> tarefaFazerLogin, tarefaBuscarUsuario;
     private Thread bgThreadOne, bgThreadTwo;
     private Result<Usuario> rsltThreadOne, rsltThreadTwo;
     private String email, palavraPasse;
     private final int TENTATIVAS_MAXIMAS_INTERRUPCAO_THREADS = 5, TENTATIVAS_MAXIMAS_INTERRUPCAO_TAREFAS = 5;
+    private AbstractController abstractController = null;
     
     @Override
     public void adicionarListeners() {
@@ -76,6 +86,7 @@ public class TelaLogin extends AbstractController implements Initializable, Even
         txtEmail.textProperty().addListener(this);
         btnIniciarSessao.setOnMouseClicked(this);
         btnRecuperarPalavraPasse.setOnMouseClicked(this);
+        
         getCloseButton().setOnMouseClicked(parentMouseEventHandler);
         getMinimizeButton().setOnMouseClicked(parentMouseEventHandler);
     }
@@ -91,6 +102,7 @@ public class TelaLogin extends AbstractController implements Initializable, Even
         
         interromperTodasThreads();
         interromperTodasTarefas();
+        removerTodasReferencias();
     }
     
     @Override
@@ -99,15 +111,19 @@ public class TelaLogin extends AbstractController implements Initializable, Even
     }
 
     @Override
-    public void handle(MouseEvent event) {
-        if (!event.getEventType().equals(MouseEvent.MOUSE_CLICKED)) return;
-        
+    public void handle(Event event) {
+        EventType<? extends Event> eventType = event.getEventType();
         Object source = event.getSource();
         
-        if (source.equals(btnIniciarSessao)) 
-            iniciarSessao();
-        else if (source.equals(btnRecuperarPalavraPasse)) 
-            recuperarPalavraPasse();
+        if (eventType.equals(LifecycleEvent.CLOSE_REQUEST)) {
+            if (abstractController == null || !source.equals(abstractController.getRoot()) || !(abstractController instanceof DialogController)) return;
+            removerTodasReferencias();            
+        } else if (eventType.equals(MouseEvent.MOUSE_CLICKED)) {
+            if (source.equals(btnIniciarSessao)) 
+                iniciarSessao();
+            else if (source.equals(btnRecuperarPalavraPasse)) 
+                recuperarPalavraPasse();
+        }
     }
     
     @Override
@@ -140,6 +156,11 @@ public class TelaLogin extends AbstractController implements Initializable, Even
     private ImageView getMinimizeButton() {
         return minimize;
     }
+
+    public SimpleObjectProperty<DialogDetails> getDialogDetailsProperty() {
+        if (dialogDetailsProperty == null) dialogDetailsProperty = new SimpleObjectProperty<>();
+        return dialogDetailsProperty;
+    }
     
     public void setAutenticacaoRepository(AutenticacaoRepository autenticacaoRepository) {
         this.autenticacaoRepository = autenticacaoRepository;
@@ -153,32 +174,45 @@ public class TelaLogin extends AbstractController implements Initializable, Even
         this.usuarioProperty = usuarioProperty;
     }
     
+    public void removerTodasReferencias() {
+        if (abstractController == null || !(abstractController instanceof DialogController)) return;
+            
+        DialogController dialogController = (DialogController) abstractController;
+        dialogController.removerListeners();
+        dialogController.setLifecycleEventHandler(null);
+        
+        if (dialogDetailsProperty != null) getDialogDetailsProperty().removeListener(dialogController);
+    }
+    
     private void observarMudancasTxtEmail(String newValue) {
         email = newValue;
-        btnIniciarSessao.setDisable(!LoginValidator.isEmailValid(newValue) || !LoginValidator.isPasswordValid(txtPalavraPasse.getText()));
+        btnIniciarSessao.setDisable(!(LoginValidator.isPasswordValid(txtPalavraPasse.getText()) && LoginValidator.isEmailValid(email)));
         btnRecuperarPalavraPasse.setDisable(!LoginValidator.isEmailValid(email));
     }
 
     private void observarMudancasTxtPalavraPasse(String newValue) {
         palavraPasse = newValue;
-        btnIniciarSessao.setDisable(!LoginValidator.isPasswordValid(newValue) || !LoginValidator.isEmailValid(txtEmail.getText()));
+        btnIniciarSessao.setDisable(!(LoginValidator.isPasswordValid(palavraPasse) && LoginValidator.isEmailValid(txtEmail.getText())));
     }
 
     private void iniciarSessao() {
-        tarefaFazerLogin = new Task<Result<Usuario>>() {
-            @Override
-            protected Result<Usuario> call() throws Exception {
-                return autenticacaoRepository.logIn(email, palavraPasse);
-            }
-        };
+        if (tarefaFazerLogin == null) {
+            tarefaFazerLogin = new Task<Result<Usuario>>() {
+                @Override
+                protected Result<Usuario> call() throws Exception {
+                    return autenticacaoRepository.logIn(1, palavraPasse);
+                }
+            };
+        }
         
         Thread.State state = null;
         
         if (bgThreadOne != null) {
             state = bgThreadOne.getState();
             
-            if (state != Thread.State.TERMINATED) 
+            if (state != Thread.State.TERMINATED){
                 interromperThreadRecursivamente(0, bgThreadOne);
+            }
         }
         
         if (bgThreadOne == null || state == Thread.State.TERMINATED) bgThreadOne = new Thread(tarefaFazerLogin);
@@ -188,19 +222,55 @@ public class TelaLogin extends AbstractController implements Initializable, Even
         } catch (Exception e) {
             return;
         }
+     
+        //mostrarProgressBar
+        try {
+            rsltThreadOne = tarefaFazerLogin.get(1500, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | CancellationException | TimeoutException | ExecutionException e) {
+            rsltThreadOne = new Result.Error<>(e);
+        }
         
-        obterResultadoThread(bgThreadOne, tarefaFazerLogin, rsltThreadOne);
-        
+        interromperThreadRecursivamente(0, bgThreadOne);
+        //naoMostrarProgressBar
+        System.out.println(rsltThreadOne.getValue());
         if (rsltThreadOne instanceof Result.Error) {
-            
+            Result.Error<Usuario> error = (Result.Error<Usuario>) rsltThreadOne;
+            String descricao = (error.getException().getClass().equals(SQLException.class)) ? "Não foi possivel estabelecer uma conexão a base de dados remota." : "Não foi possivel realizar o pedido. Tente novamente em uma outra altura.";
+            mostrarMsgErro("Ocorreu algo inesperado", descricao);
+            System.err.println(error.getException());
         } else {
             Result.Success<Usuario> success = (Result.Success<Usuario>) rsltThreadOne;
-            usuarioProperty.set(success.getData());
+            Usuario usuario = success.getData();
+            
+            if (usuario == null) {
+                mostrarMsgErro("Ocorreu algo inesperado", "Usuário ou palavra-passe inválido(a).");
+            } else {
+                usuarioProperty.set(usuario);
+                System.out.println("yup");
+            }
         }
     }
     
     private void recuperarPalavraPasse() {
-        inicializarThread(bgThreadTwo, tarefaBuscarUsuario);
+        if (tarefaBuscarUsuario == null) {
+            tarefaBuscarUsuario = new Task<Result<Usuario>>() {
+                @Override
+                protected Result<Usuario> call() throws Exception {
+                    return autenticacaoRepository.getUserById(90);
+                }
+            };
+        }
+        
+        Thread.State state = null;
+        
+        if (bgThreadTwo != null) {
+            state = bgThreadTwo.getState();
+            
+            if (state != Thread.State.TERMINATED) 
+                interromperThreadRecursivamente(0, bgThreadTwo);
+        }
+        
+        if (bgThreadTwo == null || state == Thread.State.TERMINATED) bgThreadTwo = new Thread(tarefaBuscarUsuario);
         
         try {
             bgThreadTwo.start();
@@ -208,57 +278,19 @@ public class TelaLogin extends AbstractController implements Initializable, Even
             return;
         }
         
-        obterResultadoThread(bgThreadTwo, tarefaBuscarUsuario, rsltThreadTwo);
+        try {
+            rsltThreadTwo = tarefaBuscarUsuario.get(1500, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | CancellationException | TimeoutException | ExecutionException e) {
+            rsltThreadTwo = new Result.Error<>(e);
+        }
+        
+        interromperThreadRecursivamente(0, bgThreadTwo);
         
         if (rsltThreadTwo instanceof Result.Error) {
             
         } else {
             Result.Success<Usuario> success = (Result.Success<Usuario>) rsltThreadTwo;
         }
-    }
-    
-    @SuppressWarnings("All")
-    private void inicializarThread(Thread thread, Task<Result<Usuario>> tarefaRelacionada) {
-        Thread bgThread = thread;
-        
-        if (tarefaRelacionada == null) {
-            tarefaRelacionada = new Task<Result<Usuario>>() {
-                @Override
-                protected Result<Usuario> call() throws Exception {
-                    return (bgThread.equals(bgThreadOne)) ? autenticacaoRepository.logIn(email, palavraPasse) : autenticacaoRepository.getUserByEmail(email);
-                }
-            };
-        }
-        
-        Thread.State state = null;
-        
-        if (thread != null) {
-            state = thread.getState();
-            
-            if (state != Thread.State.TERMINATED) 
-                interromperThreadRecursivamente(0, thread);
-        }
-        
-        if (thread == null || state == Thread.State.TERMINATED) thread = new Thread(tarefaRelacionada);
-    }
-    
-    private void obterResultadoThread(Thread thread, Task<Result<Usuario>> tarefaRelacionada, Result<Usuario> result){
-        try {
-            result = tarefaRelacionada.get(1500, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | CancellationException | TimeoutException | ExecutionException e) {
-            switch (e.getClass().getSimpleName()) {
-                case "InterruptedException": 
-                    break;
-                case "CancellationException":
-                    break;
-                case "TimeoutException":
-                    break;
-                case "ExecutionException":
-                    break;
-            }
-        }
-        
-        interromperThreadRecursivamente(0, thread);
     }
     
     private void interromperTodasTarefas() {
@@ -295,8 +327,51 @@ public class TelaLogin extends AbstractController implements Initializable, Even
     }
     
     private void interromperThreadRecursivamente(int tentativa, Thread thread) {
-        if (tentativa < 0 || tentativa > TENTATIVAS_MAXIMAS_INTERRUPCAO_THREADS || thread.getState() == Thread.State.TERMINATED) return;
+        if (tentativa < 0 || tentativa > TENTATIVAS_MAXIMAS_INTERRUPCAO_THREADS || thread == null || thread.getState() == Thread.State.TERMINATED) return;
         interromperThread(thread);
         interromperThreadRecursivamente(tentativa + 1, thread);
+    }
+
+    private void mostrarMsgErro(String title, String description) {
+        if (abstractController == null) {
+            FXMLLoader fXMLLoader = new FXMLLoader(Path.getFXMLURL("error_dialog"));
+            Parent content;
+
+            try {
+                content = fXMLLoader.load();
+            }catch(IOException e) {
+                content = null;
+            }
+            
+            if (content == null) return;
+            
+            abstractController = fXMLLoader.getController();
+            //adicionar content a root
+        }
+        
+        //mostrar content
+        
+        if (!(abstractController instanceof DialogController)) return;
+        
+        DialogController dialogController = (DialogController) abstractController;
+        getDialogDetailsProperty().removeListener(dialogController);
+        
+        DialogDetails dialogDetails = getDialogDetailsProperty().get();
+        
+        if (dialogDetails == null) {
+            dialogDetails = new DialogDetails(title, description);
+        } else {
+            dialogDetails.setTitle(title);
+            dialogDetails.setDescription(description);
+        }
+        
+        getDialogDetailsProperty().addListener(dialogController);
+        getDialogDetailsProperty().set(dialogDetails);
+        dialogController.setLifecycleEventHandler(getEventHandler());
+        dialogController.adicionarListeners();
+    }
+    
+    EventHandler<Event> getEventHandler() {
+        return this;
     }
 }

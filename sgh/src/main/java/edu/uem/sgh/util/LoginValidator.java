@@ -28,15 +28,15 @@ public class LoginValidator {
         char[] passwordCharacters = password.toCharArray();
         
         for (char ch : passwordCharacters) {
-            if (Character.isLetterOrDigit(ch)) increment(Character.isLetter(ch) ? letterCount : numberCount, 1);
-            return false;
+            if (!Character.isLetterOrDigit(ch)) return false;
+            
+            if (Character.isLetter(ch)) 
+                letterCount += 1;
+            else
+                numberCount += 1;
         }
         
         return (letterCount >= LEAST_LETTER_COUNT && numberCount >= LEAST_NUMBER_COUNT);
-    }
-    
-    public static void increment(int variableToIncrement, int valueToIncrement) {
-        variableToIncrement += valueToIncrement;
     }
 
     public static int getLeastLetterCount() {

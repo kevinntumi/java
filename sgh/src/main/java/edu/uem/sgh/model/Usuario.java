@@ -22,8 +22,9 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Usuario(Long dataInicio) {
+    public Usuario(Long dataInicio, Long id) {
         this.dataInicio = dataInicio;
+        this.id = id;
     }
 
     public long getIdTipo() {
@@ -83,7 +84,24 @@ public class Usuario {
     }
     
     public static boolean isVazio(Usuario usuario) {
+        if (usuario == null) return true;
         return usuario.dataAlterado == null && usuario.dataInicio == null && usuario.dataRegisto == null && usuario.id == null && usuario.idTipo == null && usuario.nome == null && usuario.tipo == null;
+    }
+    
+    public static Tipo obterTipoViaString (String tipo) {
+        if (tipo == null || tipo.isBlank()) return null;
+        
+        if (tipo.equals(Tipo.CLIENTE.toString())) {
+            return Tipo.CLIENTE;
+        } else if (tipo.equals(Tipo.FUNCIONARIO.toString())) {
+            return Tipo.FUNCIONARIO;
+        } else if (tipo.equals(Tipo.GERENTE.toString())) {
+            return Tipo.GERENTE;
+        } else if (tipo.equals(Tipo.ADMINISTRADOR.toString())) {
+            return Tipo.ADMINISTRADOR;
+        }
+        
+        return null;
     }
     
     public enum Tipo {

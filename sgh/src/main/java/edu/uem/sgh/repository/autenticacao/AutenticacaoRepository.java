@@ -18,6 +18,7 @@ import java.sql.Connection;
  * @author Kevin Ntumi
  */
 public class AutenticacaoRepository {
+    private String tblName = "usuario";
     private final Connection remoteConnection, localConnection;
     private RemoteAutenticacaoDataSource remoteAutenticacaoDataSource;
     private LocalAutenticacaoDataSource localAutenticacaoDataSource;
@@ -28,12 +29,12 @@ public class AutenticacaoRepository {
         this.localConnection = localConnection;
     }
     
-    public Result<Usuario> getUserByEmail(String email) {
-        return null;
+    public Result<Usuario> getUserById(long id) {
+        return remoteAutenticacaoDataSource.getUserById(id);
     }
 
-    public Result<Usuario> logIn(String email, String password) {
-        Result<Usuario> result = getRemoteAutenticacaoDataSource().logIn(email, password);
+    public Result<Usuario> logIn(long id, String password) {
+        Result<Usuario> result = getRemoteAutenticacaoDataSource().logIn(id, password);
         if (result instanceof Result.Error) return new Result.Error<>(((Result.Error<Usuario>) result).getException());        
         Result.Success<Usuario> success = ((Result.Success<Usuario>) result);
         return getLocalAutenticacaoDataSource().logIn(success.getData());
@@ -48,12 +49,12 @@ public class AutenticacaoRepository {
     }
     
     private RemoteAutenticacaoDataSource getRemoteAutenticacaoDataSource() {
-        if (remoteAutenticacaoDataSource == null) remoteAutenticacaoDataSource = new RemoteAutenticacaoDataSource(remoteConnection);
+        if (remoteAutenticacaoDataSource == null) remoteAutenticacaoDataSource = new RemoteAutenticacaoDataSource(remoteConnection, tblName);
         return remoteAutenticacaoDataSource;
     }
 
     private LocalAutenticacaoDataSource getLocalAutenticacaoDataSource() {
-        if (localAutenticacaoDataSource == null) localAutenticacaoDataSource = new LocalAutenticacaoDataSource(localConnection);
+        if (localAutenticacaoDataSource == null) localAutenticacaoDataSource = new LocalAutenticacaoDataSource(localConnection, tblName);
         return localAutenticacaoDataSource;
     }   
 }

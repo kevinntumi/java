@@ -4,6 +4,10 @@
  */
 package edu.uem.sgh.util;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  *
  * @author Kevin Ntumi
@@ -12,6 +16,7 @@ public class Path {
     public static final String BASE_FOLDER_PATH = System.getProperty("user.dir");
     public static final String BASE_SRC_FOLDER_PATH = BASE_FOLDER_PATH + "\\src";
     public static final String BASE_JAVA_SRC_FOLDER_PATH = BASE_SRC_FOLDER_PATH + "\\main\\java\\";
+    public static final String BASE_RESOURCE_PATH = System.getProperty("user.dir") + "\\src\\main\\resources";
     public static final String SQLITE_SCHEMA_FOLDER_PATH = BASE_JAVA_SRC_FOLDER_PATH + "\\edu\\uem\\sgh\\schema";
     public static final String REMOTE_DATABASE_NAME = "hotel";
     public static final String REMOTE_DATABASE_PORT = "3306";
@@ -26,5 +31,18 @@ public class Path {
     
     public static String getRelativeFolderPath(String absoluteFolderPath) {
         return absoluteFolderPath.replace(BASE_JAVA_SRC_FOLDER_PATH, "").replace("\\", ".");
+    }
+    
+    public static URL getFXMLURL(String fxmlLayout) {
+        File f = new File(BASE_RESOURCE_PATH + "\\edu\\uem\\sgh\\" + fxmlLayout + ".fxml");
+        URL url = null;
+        
+        try {
+            if (f.exists() && f.isFile()) url = f.toURI().toURL();
+        } catch (MalformedURLException e) {
+            return null;
+        }
+        
+        return url;
     }
 }

@@ -7,6 +7,7 @@ package edu.uem.sgh.controller;
 import com.gluonhq.charm.glisten.control.*;
 import edu.uem.sgh.annotation.Dependency;
 import edu.uem.sgh.model.Usuario;
+import edu.uem.sgh.model.Usuario.Tipo;
 import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
 import edu.uem.sgh.repository.quarto.QuartoRepository;
 import edu.uem.sgh.repository.servico.ServicoRepository;
@@ -14,6 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import javafx.beans.value.ChangeListener;
@@ -84,8 +86,6 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
 
     @Override
     public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-        if (newValue == null) return; 
-            
         if (newValue instanceof Usuario) {
             usuario = (Usuario) newValue;
             definirMenu(getTabs(usuario.getTipo()));
@@ -131,8 +131,11 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     private EnumMap<Usuario.Tipo, Map<String, URI>> getResourcePaths() {
         if (resourcePaths == null) {
             resourcePaths = new EnumMap(Usuario.Tipo.class);
+            Tipo[] tipos = Tipo.values();
             
-            
+            for (Tipo tipo : tipos) {
+                resourcePaths.put(tipo, new HashMap<String, URI>());
+            }
             
         }
         
