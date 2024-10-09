@@ -279,11 +279,6 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
                     continue;
                 
                 Map<Class<?>, URL> resourcePath = Path.getResourcesPathURL(resourcePathStr, tipoStr);
-                
-                for (Class<?> key : resourcePath.keySet()) {
-                    System.out.println("key: " + key + ", value: " + resourcePath.get(key));
-                }
-                
                 resourcePaths.put(tipo, resourcePath);
             }
         }
@@ -301,16 +296,14 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         
         for (String tabName : tabs) {
             Node tabContent;
-            i++;
             
             try {
                 tabContent = createTabContentByName(tabName, i);
             } catch (Exception e) {
-                System.err.println(e);
-                System.err.println(e.getCause());
                 continue;
             }
             
+            i++;
             tabPane.getTabs().add(new Tab(tabName, tabContent));
         }
     }

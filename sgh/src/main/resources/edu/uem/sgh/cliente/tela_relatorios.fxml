@@ -9,6 +9,6 @@
 
 <AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" styleClass="mainFxmlClass" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.uem.sgh.controller.cliente.TelaRelatorios">
     <stylesheets>
-        <URL value="@/edu/uem/sgh/cliente/tela_relatorios.css"/>
+        <URL value="@/styles/edu/uem/sgh/cliente/tela_relatorios.css"/>
     </stylesheets>
 </AnchorPane>

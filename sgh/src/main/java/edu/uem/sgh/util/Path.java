@@ -141,6 +141,7 @@ public class Path {
                 case "tela_reserva":
                 case "tela_servicos":
                 case "tela_funcionarios":
+                case "tela_relatorios":
                 case "tela_quartos":
                 case "tela_gerentes":
                 case "tela_check_ins":

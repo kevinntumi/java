@@ -4,12 +4,28 @@
  */
 package edu.uem.sgh.controller.administrador;
 
+import edu.uem.sgh.controller.AbstractController;
 import edu.uem.sgh.controller.gerente.*;
+import javafx.scene.Parent;
 
 /**
  *
  * @author Kevin Ntumi
  */
-public class TelaCheckIns {
-    
+public class TelaCheckIns extends AbstractController {
+
+    @Override
+    public void adicionarListeners() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void removerListeners() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public Parent getRoot() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }
