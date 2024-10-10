@@ -35,7 +35,5 @@ public class FuncionariosController {
 
         // Mensagem de sucesso
         JOptionPane.showMessageDialog(null, "Hóspede cadastrado com sucesso!");
-
     }
-    
 }

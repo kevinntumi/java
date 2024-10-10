@@ -7,6 +7,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.AnchorPane;
+import javax.swing.JOptionPane;
 
 public class TelaFuncionarioController {
 
@@ -91,6 +92,7 @@ public class TelaFuncionarioController {
 
     @FXML
     void onEditServico(ActionEvent event) {
+        JOptionPane.showMessageDialog(null, "You Clicked" );
 
     }
 

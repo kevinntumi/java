@@ -8,11 +8,13 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fxml.TelasRecepcionistaController">
    <children>
       <TabPane fx:id="tabPaneMaster" layoutY="48.0" prefHeight="402.0" prefWidth="699.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="48.0">
         <tabs>
@@ -72,11 +74,16 @@
                               <URL value="@../styles/tela_login.css" />
                            </stylesheets></Button>
                         <Button fx:id="btnApagarHospede" layoutX="389.0" layoutY="590.0" mnemonicParsing="false" prefWidth="110.0" stylesheets="@../styles/tela_login.css" text="Apagar" AnchorPane.bottomAnchor="20.0" />
-                        <Label layoutX="46.0" layoutY="29.0" text="Para obter informações sobre um hóspede, clique duas vezes sobre ele." AnchorPane.leftAnchor="48.0" AnchorPane.topAnchor="29.0">
+                        <Label layoutX="84.0" layoutY="25.0" text="Para obter informações sobre um hóspede, clique duas vezes sobre ele." AnchorPane.leftAnchor="84.0" AnchorPane.topAnchor="25.0">
                            <font>
                               <Font name="Raleway Medium" size="20.0" />
                            </font>
                         </Label>
+                        <ImageView fitHeight="30.0" fitWidth="30.0" layoutX="48.0" layoutY="22.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="48.0" AnchorPane.rightAnchor="1202.0" AnchorPane.topAnchor="22.0">
+                           <image>
+                              <Image url="@../../../../../../../../../Desktop/i.png" />
+                           </image>
+                        </ImageView>
                      </children>
                      <opaqueInsets>
                         <Insets />
@@ -99,7 +106,7 @@
                               <TableColumn minWidth="0.0" prefWidth="162.00006103515625" style="-fx-font-size: 1.5em;" text="Situação" />
                            </columns>
                         </TableView>
-                        <Label layoutX="56.0" layoutY="39.0" text="Para obter informações sobre um hóspede, clique duas vezes sobre ele." AnchorPane.leftAnchor="48.0" AnchorPane.topAnchor="29.0">
+                        <Label layoutX="87.0" layoutY="30.0" text="Para obter informações sobre um hóspede, clique duas vezes sobre ele." AnchorPane.leftAnchor="87.0" AnchorPane.topAnchor="30.0">
                            <font>
                               <Font name="Raleway Medium" size="20.0" />
                            </font>
@@ -112,6 +119,11 @@
                         </Button>
                         <Button fx:id="btnEditarQuarto" layoutX="206.0" layoutY="595.0" mnemonicParsing="false" prefWidth="110.0" stylesheets="@../styles/tela_login.css" text="Editar" AnchorPane.bottomAnchor="20.0" />
                         <Button fx:id="btnApagarQuarto" layoutX="381.0" layoutY="597.0" mnemonicParsing="false" prefWidth="110.0" stylesheets="@../styles/tela_login.css" text="Apagar" />
+                        <ImageView fitHeight="30.0" fitWidth="30.0" layoutX="48.0" layoutY="27.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../../../../../../../Desktop/i.png" />
+                           </image>
+                        </ImageView>
                      </children>
                   </AnchorPane>
               </content>
@@ -180,5 +192,20 @@
             <Font name="Montserrat Medium" size="20.0" />
          </font>
       </Label>
+      <ImageView fx:id="fechar" fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="0.0">
+         <image>
+            <Image url="@../../../../../../../../../Desktop/x.png" />
+         </image>
+      </ImageView>
+      <ImageView fx:id="minimizar" fitHeight="48.0" fitWidth="48.0" layoutX="1242.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="48.0" AnchorPane.topAnchor="0.0">
+         <image>
+            <Image url="@../../../../../../../../../Desktop/-.png" />
+         </image>
+      </ImageView>
+      <ImageView fitHeight="48.0" fitWidth="48.0" layoutX="1194.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="114.0" AnchorPane.topAnchor="0.0">
+         <image>
+            <Image url="@../../../../../../../../../Desktop/v.png" />
+         </image>
+      </ImageView>
    </children>
 </AnchorPane>
