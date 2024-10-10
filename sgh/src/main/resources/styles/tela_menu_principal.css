@@ -31,7 +31,48 @@
     -fx-transition: 0.5s;
 }
 
+#hBox:hover {
+    -fx-background-color: rgba(0,0,0,0.16);
+}
+
 #minimize:pressed{
     -fx-image: url("/images/minimize_pressed.png");
     -fx-transition: 0.5s;
+}
+
+.tab {
+    -fx-font-family: "Inter";
+    -fx-font-size: 12;
+    -fx-border-width: 4 0 4 0;
+    -fx-padding: 0 24px 0 24px;
+    -fx-min-height: 36px;
+    -fx-max-height: 36px;
+    -fx-pref-height: 36px;
+    -fx-border-color: transparent;
+}
+
+.tab:selected {
+    -fx-border-width: 4 0 4 0;
+    -fx-border-color: transparent transparent #000 transparent;
+    -fx-min-height: 36px;
+    -fx-max-height: 36px;
+    -fx-pref-height: 36px;
+    -fx-padding: 0 24px 0 24px;
+    -fx-font-size: 12;
+    -fx-font-family: "Inter Bold";
+}
+
+.tab-label {
+    -fx-padding: 0;
+}
+
+.tab-label:focused{
+    -fx-border-width: 0;
+    -fx-background-color: none;
+}
+
+.tab-header-background {
+    -fx-background-color: none;
+    -fx-border-width: 0 0 0.5px 0;
+    -fx-border-color: transparent transparent #ccc transparent;
 }

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import java.net.*?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1">
+    <stylesheets>
+        <URL value="@/styles/edu/uem/sgh/gerente/tela_check_ins.css"/>
+    </stylesheets>
+   <children>
+      <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="24.0">
+         <children>
+            <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../../../images/info.png" />
+               </image>
+            </ImageView>
+            <Label maxWidth="1.7976931348623157E308" text="Para mais informações sobre um check-in, clique duas vezes sobre ele.">
+               <font>
+                  <Font name="Inter Regular" size="12.0" />
+               </font>
+               <HBox.margin>
+                  <Insets left="12.0" />
+               </HBox.margin>
+            </Label>
+         </children>
+         <VBox.margin>
+            <Insets left="24.0" right="24.0" top="24.0" />
+         </VBox.margin>
+      </HBox>
+      <TableView fx:id="table" maxWidth="1.7976931348623157E308" prefHeight="400.0">
+         <columns>
+            <TableColumn maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="-1.0" text="Código" />
+            <TableColumn maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="-1.0" text="Cliente" />
+            <TableColumn maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="-1.0" text="Data de Reserva" />
+            <TableColumn maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="-1.0" text="Data de Check-In" />
+            <TableColumn maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="-1.0" text="Data de Check-Out" />
+            <TableColumn maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="-1.0" text="Situação" />
+            <TableColumn maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="-1.0" text="Valor Total" />
+            <TableColumn maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="-1.0" text="Valor Pago" />
+            <TableColumn maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="-1.0" text="Responsável" />
+         </columns>
+         <VBox.margin>
+            <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+         </VBox.margin>
+      </TableView>
+   </children>
+</VBox>

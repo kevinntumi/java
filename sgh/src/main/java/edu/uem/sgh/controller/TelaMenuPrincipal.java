@@ -35,6 +35,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 
 /**
  *
@@ -42,7 +43,10 @@ import javafx.scene.layout.AnchorPane;
  */
 public class TelaMenuPrincipal extends AbstractController implements Initializable, ChangeListener<Object>, EventHandler<MouseEvent>{
     @FXML
-    private Avatar fotoPerfil;
+    private ImageView fotoPerfil;
+    
+    @FXML
+    private HBox hBox;
     
     @FXML
     private ImageView close;

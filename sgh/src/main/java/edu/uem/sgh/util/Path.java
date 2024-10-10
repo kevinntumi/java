@@ -135,6 +135,7 @@ public class Path {
                 case "tela_funcionario":
                 case "tela_servico":
                 case "tela_quarto":
+                case "tela_hospede":
                 case "tela_gerente":
                 case "tela_check_in":
                 case "tela_check_out":
@@ -143,6 +144,7 @@ public class Path {
                 case "tela_funcionarios":
                 case "tela_relatorios":
                 case "tela_quartos":
+                case "tela_hospedes":
                 case "tela_gerentes":
                 case "tela_check_ins":
                 case "tela_check_outs":

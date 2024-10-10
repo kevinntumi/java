@@ -83,7 +83,7 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
         usuario.setIdTipo(1);
         usuario.setDataInicio(System.currentTimeMillis());
         usuario.setDataRegisto(System.currentTimeMillis());
-        usuario.setTipo(Usuario.Tipo.CLIENTE);
+        usuario.setTipo(Usuario.Tipo.GERENTE);
         getUsuarioProperty().set(usuario);
         //verificarUsuarioAutenticado();
     }
@@ -192,11 +192,11 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
                 pastController = getController(pastScene.getRoot());
                 
                 if (pastController != null)
-                    resolverDependencias(pastController, false);
+                        resolverDependencias(pastController, false);
             }
             
             if (currentController != null)
-                resolverDependencias(currentController, true);
+                    resolverDependencias(currentController, true);
             
             stage.getScene().rootProperty().addListener(this);
             observable.removeListener(this);
@@ -209,11 +209,11 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
                 pastController = getController((Parent) oldValue);
                 
                 if (pastController != null) 
-                    resolverDependencias(pastController, false);
+                        resolverDependencias(pastController, false);
             }
             
             if (currentController != null)
-                resolverDependencias(currentController, true);
+                    resolverDependencias(currentController, true);
         }
     }
     
