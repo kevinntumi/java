@@ -14,6 +14,56 @@ public class Funcionario {
     private long dataNascimento;
     private long dataRegisto;
     private Gerente gerente;
+    private String email;
+    private String morada;
+    private String numBI;
+    private String telefone;
+    private boolean estado;
+
+    
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
+
+    
+    
+    public String getNumBI() {
+        return numBI;
+    }
+
+    public void setNumBI(String numBI) {
+        this.numBI = numBI;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getMorada() {
+        return morada;
+    }
+
+    public void setMorada(String morada) {
+        this.morada = morada;
+    }
+
+    public boolean isEstado() {
+        return estado;
+    }
+
+    public void setEstado(boolean estado) {
+        this.estado = estado;
+    }
+    
+    
 
     public long getId() {
         return id;

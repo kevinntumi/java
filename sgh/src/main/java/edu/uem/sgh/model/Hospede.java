@@ -9,13 +9,42 @@ package edu.uem.sgh.model;
  * @author Kevin Ntumi
  */
 public class Hospede {
+
     private long id;
-    private String numDocumentoIdentidade;
+    private String numBi;
     private String nacionalidade;
     private String nome;
     private String morada;
     private long dataNascimento;
-    private long dataRegistrado;
+    private long dataRegistro;
+    private String email;
+    private String telefone;
+    private boolean estado;
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
+    
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public boolean isEstado() {
+        return estado;
+    }
+
+    public void setEstado(boolean estado) {
+        this.estado = estado;
+    }
 
     public long getId() {
         return id;
@@ -25,12 +54,12 @@ public class Hospede {
         this.id = id;
     }
 
-    public String getNumDocumentoIdentidade() {
-        return numDocumentoIdentidade;
+    public String getNumBi() {
+        return numBi;
     }
 
-    public void setNumDocumentoIdentidade(String numDocumentoIdentidade) {
-        this.numDocumentoIdentidade = numDocumentoIdentidade;
+    public void setNumBi(String numDocumentoIdentidade) {
+        this.numBi = numDocumentoIdentidade;
     }
 
     public String getNacionalidade() {
@@ -65,11 +94,11 @@ public class Hospede {
         this.dataNascimento = dataNascimento;
     }
 
-    public long getDataRegistrado() {
-        return dataRegistrado;
+    public long getDataRegistro() {
+        return dataRegistro;
     }
 
-    public void setDataRegistrado(long dataRegistrado) {
-        this.dataRegistrado = dataRegistrado;
+    public void setDataRegistro(long dataRegistrado) {
+        this.dataRegistro = dataRegistrado;
     }
 }
