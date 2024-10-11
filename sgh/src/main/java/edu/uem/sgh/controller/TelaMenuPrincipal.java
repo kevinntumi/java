@@ -4,8 +4,6 @@
  */
 package edu.uem.sgh.controller;
 
-import com.gluonhq.charm.glisten.control.*;
-import edu.uem.sgh.annotation.Dependency;
 import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.model.Usuario.Tipo;
 import static edu.uem.sgh.model.Usuario.Tipo.ADMINISTRADOR;
@@ -64,17 +62,9 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     private Usuario usuario;
     private EnumMap<Usuario.Tipo, Map<Class<?>, URL>> resourcePaths;
     private EnumMap<Usuario.Tipo, Map<String, Class<?>>> resourcePathMap;
-    
-    @Dependency
     private ServicoRepository servicoRepository;
-    
-    @Dependency
-    private AutenticacaoRepository autenticacaoRepository;
-    
-    @Dependency
+private AutenticacaoRepository autenticacaoRepository;
     private QuartoRepository quartoRepository;
-    
-    @Dependency
     private EventHandler<MouseEvent> parentMouseEventHandler;
 
     public TelaMenuPrincipal() {

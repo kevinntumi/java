@@ -4,6 +4,8 @@
  */
 package edu.uem.sgh.model;
 
+import java.sql.Blob;
+
 /**
  *
  * @author Kevin Ntumi
@@ -15,6 +17,7 @@ public class Usuario {
     private Tipo tipo;
     private Long dataInicio;
     private Long dataRegisto;
+    private Blob fotoPerfil;
     private Long dataAlterado;
     
     public static Usuario VAZIO = new Usuario();
@@ -27,6 +30,14 @@ public class Usuario {
         this.id = id;
     }
 
+    public Blob getFotoPerfil() {
+        return fotoPerfil;
+    }
+
+    public void setFotoPerfil(Blob fotoPerfil) {
+        this.fotoPerfil = fotoPerfil;
+    }
+   
     public long getIdTipo() {
         return idTipo;
     }

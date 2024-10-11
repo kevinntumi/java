@@ -48,10 +48,16 @@ public class JUnitTest {
         File f = new File(System.getProperty("user.dir") + "\\src\\main\\resources\\images");
         System.out.println(f);
     }
+    
+    @Test
+    public void testRemoteDatabaseConnection() throws Exception {
+        DatabaseConnection databaseConnection = new DatabaseConnection();
+    }
      
     @Test
     public void testLocalSQLiteDatabaseConnection() throws Exception {
         DatabaseConnection databaseConnection = new DatabaseConnection(); 
+        
     }
     
     @Test

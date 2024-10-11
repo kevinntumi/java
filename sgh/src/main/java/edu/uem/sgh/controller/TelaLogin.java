@@ -175,13 +175,15 @@ public class TelaLogin extends AbstractController implements Initializable, Even
     }
     
     public void removerTodasReferencias() {
-        if (abstractController == null || !(abstractController instanceof DialogController)) return;
+        if (abstractController == null || !(abstractController instanceof DialogController)) 
+            return;
             
         DialogController dialogController = (DialogController) abstractController;
         dialogController.removerListeners();
         dialogController.setLifecycleEventHandler(null);
         
-        if (dialogDetailsProperty != null) getDialogDetailsProperty().removeListener(dialogController);
+        if (dialogDetailsProperty != null) 
+            getDialogDetailsProperty().removeListener(dialogController);
     }
     
     private void observarMudancasTxtEmail(String newValue) {
