@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TextField?>
@@ -13,12 +12,9 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane id="AnchorPane" fx:id="root" maxWidth="-Infinity" minWidth="-Infinity" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1">
-    <stylesheets>
-        <URL value="@/styles/tela_login.css" />
-    </stylesheets>
+<StackPane fx:id="root" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" stylesheets="@../../../styles/tela_login.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.uem.sgh.controller.TelaLogin">
    <children>
-      <VBox fx:id="parent" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="303.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <VBox fx:id="parent" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="303.0">
          <children>
             <HBox fx:id="topBar" alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="48.0" prefWidth="303.0">
                <children>
@@ -46,7 +42,7 @@
                </VBox.margin>
             </HBox>
             <Line endX="303.0" stroke="#cccccc" />
-            <Text boundsType="LOGICAL_VERTICAL_CENTER" cache="true" cacheHint="QUALITY" mouseTransparent="true" strokeType="OUTSIDE" strokeWidth="0.0" text="E-mail:">
+            <Text boundsType="LOGICAL_VERTICAL_CENTER" cache="true" cacheHint="QUALITY" mouseTransparent="true" strokeType="OUTSIDE" strokeWidth="0.0" text="Código de Usuário:">
                <font>
                   <Font name="Inter Regular" size="12.0" />
                </font>
@@ -54,7 +50,7 @@
                   <Insets left="24.0" top="36.0" />
                </VBox.margin>
             </Text>
-            <TextField fx:id="txtEmail" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefWidth="255.0">
+            <TextField fx:id="txtId" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefWidth="255.0">
                <font>
                   <Font name="Inter Regular" size="12.0" />
                </font>
@@ -119,5 +115,10 @@
             </Button>
          </children>
       </VBox>
+      <AnchorPane fx:id="dialog" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" visible="false">
+         <StackPane.margin>
+            <Insets top="48.0" />
+         </StackPane.margin>
+      </AnchorPane>
    </children>
-</AnchorPane>
+</StackPane>

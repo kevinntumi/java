@@ -77,7 +77,11 @@
     -fx-background-color: rgba(238, 238, 238, 1.0);
 }
 
-#txtEmail, #txtPalavraPasse {
+#dialog {
+    -fx-background-color: rgba(0, 0, 0, 0.16);
+}
+
+#txtId, #txtPalavraPasse {
     -fx-background-color: rgba(0,0,0,0);
     -fx-border-color: #CCC;
     -fx-border-width: 1;
@@ -86,7 +90,7 @@
     -fx-border-radius: 0;
 }
 
-#txtEmail:focused, #txtPalavraPasse:focused {
+#txtId:focused, #txtPalavraPasse:focused {
     -fx-border-color: #4772A3;
     -fx-transition: 0.5s;
 }

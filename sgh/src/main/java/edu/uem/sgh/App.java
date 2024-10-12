@@ -11,16 +11,11 @@ import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -42,9 +37,7 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
     private DatabaseConnection databaseConnection;
     private AutenticacaoRepository autenticacaoRepository;
     private SimpleObjectProperty<Usuario> usuarioProperty;
-    private Task<Result<Usuario>> tarefaBuscarUsuario;
     private Result<Usuario> r;
-    private Thread backgroundThread;
     private final String closeButtonId = "close", minimizeButtonId = "minimize";
     private Stage stage;
 
@@ -78,14 +71,7 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
         stage.setResizable(false);
         stage.initStyle(StageStyle.UNDECORATED);
         getUsuarioProperty().addListener(this);
-        Usuario usuario = new Usuario();
-        usuario.setId(1);
-        usuario.setIdTipo(1);
-        usuario.setDataInicio(System.currentTimeMillis());
-        usuario.setDataRegisto(System.currentTimeMillis());
-        usuario.setTipo(Usuario.Tipo.GERENTE);
-        getUsuarioProperty().set(usuario);
-        //verificarUsuarioAutenticado();
+        verificarUsuarioAutenticado();
     }
     
     @Override
@@ -134,27 +120,25 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
         if (observable.equals(getUsuarioProperty())) {
             FXMLLoader fxmlLoader;
             Scene scene = stage.getScene();
-            AbstractController newController;
+            AbstractController newController = null;
             Usuario usuario = (Usuario) newValue;
             
             if (Usuario.isVazio(usuario)) {
                 fxmlLoader = new FXMLLoader(getClass().getResource("TelaLogin.fxml"));
-                newController = new TelaLogin();
             } else {
                 fxmlLoader = new FXMLLoader(getClass().getResource("tela_menu_principal.fxml"));
-                newController = new TelaMenuPrincipal();
             }
             
             if (scene == null) {
-                fxmlLoader.setController(newController);
-                getControllers().add(newController);
-                
                 try {
                     scene = new Scene(fxmlLoader.load());
                 } catch (IOException e) {
                     return;
                 }
                 
+                newController = fxmlLoader.getController();
+                fxmlLoader.setController(fxmlLoader);
+                getControllers().add(newController);
                 addMousePressedAndDraggedListener(scene.getRoot());
             }
             
@@ -191,12 +175,14 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
             if (pastScene != null) {
                 pastController = getController(pastScene.getRoot());
                 
-                if (pastController != null)
-                        resolverDependencias(pastController, false);
+                if (pastController != null){
+                    resolverDependencias(pastController, false);
+                }
             }
             
-            if (currentController != null)
-                    resolverDependencias(currentController, true);
+            if (currentController != null) {
+                resolverDependencias(currentController, true);
+            }
             
             stage.getScene().rootProperty().addListener(this);
             observable.removeListener(this);
@@ -208,25 +194,30 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
             if (oldValue != null) {
                 pastController = getController((Parent) oldValue);
                 
-                if (pastController != null) 
-                        resolverDependencias(pastController, false);
+                if (pastController != null) {
+                    resolverDependencias(pastController, false);
+                }
             }
             
-            if (currentController != null)
-                    resolverDependencias(currentController, true);
+            if (currentController != null) {
+                resolverDependencias(currentController, true);
+            }
         }
     }
     
     private void resolverDependencias(AbstractController abstractController, boolean add) {
         if (add) {
-            if (abstractController.getUiClassID().equals("TelaLogin")) {
+            if (abstractController.getUiClassID().equals(TelaLogin.class.getTypeName())) {
                 TelaLogin telaLogin = (TelaLogin) abstractController;
                 telaLogin.setParentMouseEventHandler(getMouseEventHandler());
                 telaLogin.setUsuarioProperty(getUsuarioProperty());
                 telaLogin.setAutenticacaoRepository(getAutenticacaoRepository());
-            } else if (abstractController.getUiClassID().equals("TelaMenuPrincipal")) {
+            } else if (abstractController.getUiClassID().equals(TelaMenuPrincipal.class.getTypeName())) {
                 TelaMenuPrincipal telaMenuPrincipal = (TelaMenuPrincipal) abstractController;
                 telaMenuPrincipal.setParentMouseEventHandler(getMouseEventHandler());
+                telaMenuPrincipal.setLocalConnection(getDatabaseConnection().getLocalConnection());
+                telaMenuPrincipal.setRemoteConnection(getDatabaseConnection().getRemoteConnection());
+                telaMenuPrincipal.setAutenticacaoRepository(getAutenticacaoRepository());
                 telaMenuPrincipal.changed(getUsuarioProperty(), getUsuarioProperty().get(), getUsuarioProperty().get());
             }
             
@@ -234,14 +225,17 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
         } else {
             abstractController.removerListeners();
             
-            if (abstractController.getUiClassID().equals("TelaLogin")) {
+            if (abstractController.getUiClassID().equals(TelaLogin.class.getTypeName())) {
                 TelaLogin telaLogin = (TelaLogin) abstractController;
                 telaLogin.setParentMouseEventHandler(null);
                 telaLogin.setUsuarioProperty(null);
                 telaLogin.setAutenticacaoRepository(null);
-            } else if (abstractController.getUiClassID().equals("TelaMenuPrincipal")) {
+            } else if (abstractController.getUiClassID().equals(TelaMenuPrincipal.class.getTypeName())) {
                 TelaMenuPrincipal telaMenuPrincipal = (TelaMenuPrincipal) abstractController;
                 telaMenuPrincipal.setParentMouseEventHandler(null);
+                telaMenuPrincipal.setAutenticacaoRepository(null);
+                telaMenuPrincipal.setLocalConnection(null);
+                telaMenuPrincipal.setRemoteConnection(null);
                 getUsuarioProperty().removeListener(telaMenuPrincipal);
             }   
         }
@@ -287,13 +281,6 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
         removerListeners();
         getDatabaseConnection().closeAllConnections();
         getUsuarioProperty().removeListener(this);
-        cancelarTarefaBuscarUsuario();
-    }
-    
-    private void cancelarTarefaBuscarUsuario() {
-        if (r != null) r = null;
-        if (tarefaBuscarUsuario != null && tarefaBuscarUsuario.isRunning()) tarefaBuscarUsuario.cancel(true);
-        if (backgroundThread != null) backgroundThread.interrupt();
     }
 
     public SimpleObjectProperty<Usuario> getUsuarioProperty() {
@@ -302,40 +289,18 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
     }
 
     private void verificarUsuarioAutenticado() {
-        tarefaBuscarUsuario = new Task<Result<Usuario>>() {
-            @Override
-            protected Result<Usuario> call() throws Exception {
-                return getAutenticacaoRepository().getCurrentUser();
-            };
-        };
+        r = getAutenticacaoRepository().getCurrentUser();
         
-        backgroundThread = new Thread(tarefaBuscarUsuario);
-        backgroundThread.start();
+        Result.Success<Usuario> success;
         
         try {
-            r = tarefaBuscarUsuario.get(1500, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | CancellationException | TimeoutException | ExecutionException e) {
-            switch (e.getClass().getSimpleName()) {
-                case "InterruptedException": 
-                    break;
-                case "CancellationException":
-                    break;
-                case "TimeoutException":
-                    break;
-                case "ExecutionException":
-                    break;
-            }
+            success = (Result.Success<Usuario>) r;
+        } catch (Exception e) {
+            success = null;
         }
         
-        if (!backgroundThread.isInterrupted()) {
-            try {
-                backgroundThread.interrupt();
-            } catch (Exception e) {
-                System.err.println(e);
-            }
-        }
-        
-        getUsuarioProperty().set((r instanceof Result.Error) ? null : ((Result.Success<Usuario>) r).getData());
+        if (success != null && success.getData() != null)
+            getUsuarioProperty().set(success.getData());
     }
     
     private AutenticacaoRepository getAutenticacaoRepository() {

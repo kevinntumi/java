@@ -16,26 +16,25 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
+import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 
 /**
  *
@@ -43,7 +42,7 @@ import javafx.scene.layout.AnchorPane;
  */
 public class TelaLogin extends AbstractController implements Initializable, EventHandler<Event>, ChangeListener<Object>{
     @FXML
-    private TextField txtEmail;
+    private TextField txtId;
     
     @FXML
     private TextField txtPalavraPasse;
@@ -61,7 +60,10 @@ public class TelaLogin extends AbstractController implements Initializable, Even
     private ImageView minimize;
     
     @FXML
-    private AnchorPane root;
+    private StackPane root;
+    
+    @FXML
+    private AnchorPane dialog;
     
     @Dependency
     private AutenticacaoRepository autenticacaoRepository;
@@ -71,22 +73,17 @@ public class TelaLogin extends AbstractController implements Initializable, Even
     
     @Dependency
     private SimpleObjectProperty<Usuario> usuarioProperty;
-    
-    private SimpleObjectProperty<DialogDetails> dialogDetailsProperty;
-    private Task<Result<Usuario>> tarefaFazerLogin, tarefaBuscarUsuario;
-    private Thread bgThreadOne, bgThreadTwo;
     private Result<Usuario> rsltThreadOne, rsltThreadTwo;
-    private String email, palavraPasse;
-    private final int TENTATIVAS_MAXIMAS_INTERRUPCAO_THREADS = 5, TENTATIVAS_MAXIMAS_INTERRUPCAO_TAREFAS = 5;
+    private String palavraPasse;
+    private Long id;
     private AbstractController abstractController = null;
     
     @Override
     public void adicionarListeners() {
         txtPalavraPasse.textProperty().addListener(this);
-        txtEmail.textProperty().addListener(this);
+        txtId.textProperty().addListener(this);
         btnIniciarSessao.setOnMouseClicked(this);
         btnRecuperarPalavraPasse.setOnMouseClicked(this);
-        
         getCloseButton().setOnMouseClicked(parentMouseEventHandler);
         getMinimizeButton().setOnMouseClicked(parentMouseEventHandler);
     }
@@ -94,14 +91,11 @@ public class TelaLogin extends AbstractController implements Initializable, Even
     @Override
     public void removerListeners() {
         txtPalavraPasse.textProperty().removeListener(this);
-        txtEmail.textProperty().removeListener(this);
+        txtId.textProperty().removeListener(this);
         btnIniciarSessao.setOnMouseClicked(null);
         btnRecuperarPalavraPasse.setOnMouseClicked(null);
         getCloseButton().setOnMouseClicked(null);
         getMinimizeButton().setOnMouseClicked(null);
-        
-        interromperTodasThreads();
-        interromperTodasTarefas();
         removerTodasReferencias();
     }
     
@@ -116,8 +110,8 @@ public class TelaLogin extends AbstractController implements Initializable, Even
         Object source = event.getSource();
         
         if (eventType.equals(LifecycleEvent.CLOSE_REQUEST)) {
-            if (abstractController == null || !source.equals(abstractController.getRoot()) || !(abstractController instanceof DialogController)) return;
-            removerTodasReferencias();            
+            if (abstractController != null && source.equals(abstractController.getRoot()))
+                esconderMsgErro(eventType);
         } else if (eventType.equals(MouseEvent.MOUSE_CLICKED)) {
             if (source.equals(btnIniciarSessao)) 
                 iniciarSessao();
@@ -128,25 +122,20 @@ public class TelaLogin extends AbstractController implements Initializable, Even
     
     @Override
     public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-        if (observable.equals(txtEmail.textProperty()))
-            observarMudancasTxtEmail((String) newValue);
+        if (abstractController != null && observable.equals(abstractController.getRoot().visibleProperty())) {
+            observarVisibilidade(newValue);
+            return;
+        }
+        
+        if (observable.equals(txtId.textProperty()))
+            observarMudancasTxtId((String) newValue);
         else if (observable.equals(txtPalavraPasse.textProperty()))
             observarMudancasTxtPalavraPasse((String) newValue);
-    }
-
-    @Override
-    public void setUiClassID(String uiClassID) {
-        super.setUiClassID(uiClassID); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-    }
-
-    @Override
-    public String getUiClassID() {
-        return super.getUiClassID(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
     }
     
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        setUiClassID(getClass().getSimpleName());
+        setUiClassID(getClass().getTypeName());
     }
     
     private ImageView getCloseButton() {
@@ -155,11 +144,6 @@ public class TelaLogin extends AbstractController implements Initializable, Even
 
     private ImageView getMinimizeButton() {
         return minimize;
-    }
-
-    public SimpleObjectProperty<DialogDetails> getDialogDetailsProperty() {
-        if (dialogDetailsProperty == null) dialogDetailsProperty = new SimpleObjectProperty<>();
-        return dialogDetailsProperty;
     }
     
     public void setAutenticacaoRepository(AutenticacaoRepository autenticacaoRepository) {
@@ -180,164 +164,106 @@ public class TelaLogin extends AbstractController implements Initializable, Even
             
         DialogController dialogController = (DialogController) abstractController;
         dialogController.removerListeners();
+        abstractController.getRoot().visibleProperty().removeListener(this);
         dialogController.setLifecycleEventHandler(null);
-        
-        if (dialogDetailsProperty != null) 
-            getDialogDetailsProperty().removeListener(dialogController);
     }
     
-    private void observarMudancasTxtEmail(String newValue) {
-        email = newValue;
-        btnIniciarSessao.setDisable(!(LoginValidator.isPasswordValid(txtPalavraPasse.getText()) && LoginValidator.isEmailValid(email)));
-        btnRecuperarPalavraPasse.setDisable(!LoginValidator.isEmailValid(email));
+    private void observarMudancasTxtId(String newValue) {
+        Exception e = null;
+        try {
+            id = Long.valueOf(newValue);
+        } catch (NumberFormatException ex) {
+            e = ex;
+        }
+        
+        boolean disableButton;
+        
+        if (e == null) {
+            disableButton = !(LoginValidator.isPasswordValid(txtPalavraPasse.getText()));
+        } else {
+            disableButton = true;
+        }
+        
+        btnIniciarSessao.setDisable(disableButton);
+        btnRecuperarPalavraPasse.setDisable(e != null);
     }
 
     private void observarMudancasTxtPalavraPasse(String newValue) {
         palavraPasse = newValue;
-        btnIniciarSessao.setDisable(!(LoginValidator.isPasswordValid(palavraPasse) && LoginValidator.isEmailValid(txtEmail.getText())));
+        
+        Exception e = null;
+        
+        try {
+            id = Long.valueOf(txtId.getText());
+        } catch (NumberFormatException ex) {
+            e = ex;
+        }
+        
+        btnIniciarSessao.setDisable(!(LoginValidator.isPasswordValid(palavraPasse) && e == null));
     }
 
     private void iniciarSessao() {
-        if (tarefaFazerLogin == null) {
-            tarefaFazerLogin = new Task<Result<Usuario>>() {
-                @Override
-                protected Result<Usuario> call() throws Exception {
-                    return autenticacaoRepository.logIn(1, palavraPasse);
-                }
-            };
-        }
+        mostrarProgressBar();
         
-        Thread.State state = null;
+        rsltThreadOne = autenticacaoRepository.logIn(id, palavraPasse);
         
-        if (bgThreadOne != null) {
-            state = bgThreadOne.getState();
-            
-            if (state != Thread.State.TERMINATED){
-                interromperThreadRecursivamente(0, bgThreadOne);
-            }
-        }
-        
-        if (bgThreadOne == null || state == Thread.State.TERMINATED) bgThreadOne = new Thread(tarefaFazerLogin);
-        
-        try {
-            bgThreadOne.start();
-        } catch (Exception e) {
+        if (rsltThreadOne == null)
             return;
-        }
-     
-        //mostrarProgressBar
-        try {
-            rsltThreadOne = tarefaFazerLogin.get(1500, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | CancellationException | TimeoutException | ExecutionException e) {
-            rsltThreadOne = new Result.Error<>(e);
+        
+        esconderProgressBar();
+        
+        String descricao = null;
+   
+        if (rsltThreadOne instanceof Result.Success) {
+            Usuario usuario = (Usuario) rsltThreadOne.getValue();
+            
+            if (usuario == null)
+                descricao = "Usuário ou palavra-passe inválido(a).";
+            else
+                usuarioProperty.set(usuario);
+        } else {
+            Result.Error<Usuario> error = (Result.Error<Usuario>) rsltThreadOne;
+            descricao = (error.getException().getClass().equals(SQLException.class)) ? "Não foi possivel estabelecer uma conexão a base de dados remota." : "Não foi possivel realizar o pedido. Tente novamente em uma outra altura.";
         }
         
-        interromperThreadRecursivamente(0, bgThreadOne);
-        //naoMostrarProgressBar
-        System.out.println(rsltThreadOne.getValue());
-        if (rsltThreadOne instanceof Result.Error) {
-            Result.Error<Usuario> error = (Result.Error<Usuario>) rsltThreadOne;
-            String descricao = (error.getException().getClass().equals(SQLException.class)) ? "Não foi possivel estabelecer uma conexão a base de dados remota." : "Não foi possivel realizar o pedido. Tente novamente em uma outra altura.";
+        if (descricao != null)
             mostrarMsgErro("Ocorreu algo inesperado", descricao);
-            System.err.println(error.getException());
-        } else {
-            Result.Success<Usuario> success = (Result.Success<Usuario>) rsltThreadOne;
-            Usuario usuario = success.getData();
-            
-            if (usuario == null) {
-                mostrarMsgErro("Ocorreu algo inesperado", "Usuário ou palavra-passe inválido(a).");
-            } else {
-                usuarioProperty.set(usuario);
-                System.out.println("yup");
-            }
-        }
     }
     
     private void recuperarPalavraPasse() {
-        if (tarefaBuscarUsuario == null) {
-            tarefaBuscarUsuario = new Task<Result<Usuario>>() {
-                @Override
-                protected Result<Usuario> call() throws Exception {
-                    return autenticacaoRepository.getUserById(90);
-                }
-            };
-        }
+        mostrarProgressBar();
         
-        Thread.State state = null;
+        rsltThreadTwo = autenticacaoRepository.getUserById(id);
         
-        if (bgThreadTwo != null) {
-            state = bgThreadTwo.getState();
-            
-            if (state != Thread.State.TERMINATED) 
-                interromperThreadRecursivamente(0, bgThreadTwo);
-        }
-        
-        if (bgThreadTwo == null || state == Thread.State.TERMINATED) bgThreadTwo = new Thread(tarefaBuscarUsuario);
-        
-        try {
-            bgThreadTwo.start();
-        } catch (Exception e) {
+        if (rsltThreadTwo == null)
             return;
-        }
         
-        try {
-            rsltThreadTwo = tarefaBuscarUsuario.get(1500, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | CancellationException | TimeoutException | ExecutionException e) {
-            rsltThreadTwo = new Result.Error<>(e);
-        }
+        esconderProgressBar();
         
-        interromperThreadRecursivamente(0, bgThreadTwo);
+        String descricao = null;
         
         if (rsltThreadTwo instanceof Result.Error) {
-            
+            Result.Error<Usuario> error = (Result.Error<Usuario>) rsltThreadTwo;
+            descricao = (error.getException().getClass().equals(SQLException.class)) ? "Não foi possivel estabelecer uma conexão a base de dados remota." : "Não foi possivel realizar o pedido. Tente novamente em uma outra altura.";
         } else {
             Result.Success<Usuario> success = (Result.Success<Usuario>) rsltThreadTwo;
+            Usuario usuario = success.getData();
+            
+            if (usuario == null)
+                descricao = "Usuário ou palavra-passe inválido(a).";
+            else
+                System.err.println("");
         }
-    }
-    
-    private void interromperTodasTarefas() {
-        if (tarefaFazerLogin != null) 
-            interromperTarefaRecursivamente(0, tarefaFazerLogin);
         
-        if (tarefaBuscarUsuario != null) 
-            interromperTarefaRecursivamente(0, tarefaBuscarUsuario);
+        if (descricao != null)
+            mostrarMsgErro("Ocorreu algo inesperado", descricao);
     }
     
-    private void interrromperTarefa(Task<? extends Object> tarefa) {
-        if (tarefa.isRunning()) tarefa.cancel(true);
-    }
-    
-    private void interromperTarefaRecursivamente(int tentativa, Task<?> tarefa) {
-        if (tentativa < 0 || tentativa > TENTATIVAS_MAXIMAS_INTERRUPCAO_TAREFAS || !tarefa.isRunning()) return;
-        interrromperTarefa(tarefa);
-        interromperTarefaRecursivamente(tentativa + 1, tarefa);
-    }
-    
-    private void interromperTodasThreads() {
-        interromperThreadRecursivamente(0, bgThreadOne);
-        interromperThreadRecursivamente(0, bgThreadTwo);
-    }
-    
-    private void interromperThread(Thread thread) {
-        if (!thread.isInterrupted()) {
-            try {
-                thread.interrupt();
-            } catch (Exception e) {
-                System.err.println(e);
-            }
-        }
-    }
-    
-    private void interromperThreadRecursivamente(int tentativa, Thread thread) {
-        if (tentativa < 0 || tentativa > TENTATIVAS_MAXIMAS_INTERRUPCAO_THREADS || thread == null || thread.getState() == Thread.State.TERMINATED) return;
-        interromperThread(thread);
-        interromperThreadRecursivamente(tentativa + 1, thread);
-    }
-
     private void mostrarMsgErro(String title, String description) {
+        Parent content;
+        
         if (abstractController == null) {
             FXMLLoader fXMLLoader = new FXMLLoader(Path.getFXMLURL("error_dialog"));
-            Parent content;
 
             try {
                 content = fXMLLoader.load();
@@ -347,33 +273,105 @@ public class TelaLogin extends AbstractController implements Initializable, Even
             
             if (content == null) return;
             
+            content.setVisible(false);
             abstractController = fXMLLoader.getController();
-            //adicionar content a root
+            abstractController.getRoot().visibleProperty().addListener(this);
+            root.getChildren().add(content);
+        } else {
+            content = abstractController.getRoot();
         }
         
-        //mostrar content
+        if (content != null && !content.isVisible()) {
+            content.setVisible(true);
+        }
         
         if (!(abstractController instanceof DialogController)) return;
         
         DialogController dialogController = (DialogController) abstractController;
-        getDialogDetailsProperty().removeListener(dialogController);
-        
-        DialogDetails dialogDetails = getDialogDetailsProperty().get();
-        
-        if (dialogDetails == null) {
-            dialogDetails = new DialogDetails(title, description);
-        } else {
-            dialogDetails.setTitle(title);
-            dialogDetails.setDescription(description);
-        }
-        
-        getDialogDetailsProperty().addListener(dialogController);
-        getDialogDetailsProperty().set(dialogDetails);
-        dialogController.setLifecycleEventHandler(getEventHandler());
-        dialogController.adicionarListeners();
+        DialogDetails dialogDetails = new DialogDetails(title, description);
+        dialogController.changed(null, null, dialogDetails);
     }
     
     EventHandler<Event> getEventHandler() {
         return this;
+    }
+    
+    private Parent encontrarComponenteUIPorTypeNameEId(ObservableList<Node> children, String typeName, String id) {
+        for (Node node : children) {
+            String nodeTypeName = node.getClass().getTypeName(), nodeId = node.getId();
+            
+            if (nodeTypeName.equals(typeName) && nodeId.equals(id) && node instanceof Parent)
+                return (Parent) node;
+        }
+        
+        return null;
+    }
+    
+    private Node encontrarComponenteUIPorTypeName(ObservableList<Node> children, String typeName) {
+        for (Node node : children) {
+            String nodeTypeName = node.getClass().getTypeName();
+            
+            if (nodeTypeName.equals(typeName))
+                return node;
+        }
+        
+        return null;
+    }
+
+    private void mostrarProgressBar() {
+        alterarEstadoVisibilidadeDialog(true);
+        
+        Node progressIndicator = encontrarComponenteUIPorTypeName(root.getChildren(), ProgressIndicator.class.getTypeName());
+        
+        if (progressIndicator == null) {
+            progressIndicator = new ProgressIndicator();
+            root.getChildren().add(progressIndicator);
+        }
+        
+        progressIndicator.setVisible(true);
+    }
+    
+    private void alterarEstadoVisibilidadeDialog(boolean mostrar) {
+        dialog.setVisible(mostrar);
+    }
+
+    private void esconderProgressBar() {
+        Node progressIndicator = encontrarComponenteUIPorTypeName(root.getChildren(), ProgressIndicator.class.getTypeName());
+        
+        if (progressIndicator != null) {
+            progressIndicator.setVisible(false);
+        }
+    }
+    
+    private void esconderMsgErro(EventType<? extends Event> eventType) {
+        if (abstractController == null || !(abstractController instanceof DialogController))
+            return;
+        
+        ObservableList<Node> children = root.getChildren();
+
+        for (Node node : children) {
+            if (node.equals(abstractController.getRoot())){
+                node.setVisible(false);
+                break;
+            }
+        }
+        
+        removerTodasReferencias();
+        alterarEstadoVisibilidadeDialog(false);
+    }
+
+    private void observarVisibilidade(Object newValue) {
+        if (!(abstractController instanceof DialogController))
+            return;
+            
+        DialogController dialogController = (DialogController) abstractController;
+        boolean estaVisivel = (boolean) newValue;
+        dialogController.setLifecycleEventHandler(estaVisivel ? getEventHandler() : null);
+        
+        if (estaVisivel) {
+            dialogController.adicionarListeners();
+        } else {
+            dialogController.removerListeners();
+        }
     }
 }

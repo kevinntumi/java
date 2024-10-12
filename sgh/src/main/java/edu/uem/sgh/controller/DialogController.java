@@ -27,7 +27,7 @@ import javafx.scene.layout.VBox;
  */
 public class DialogController extends AbstractController implements Initializable, EventHandler<ActionEvent>, ChangeListener<DialogDetails> {
     @FXML
-    private VBox root;
+    private VBox dialog;
     
     @FXML
     private Label title;
@@ -60,7 +60,7 @@ public class DialogController extends AbstractController implements Initializabl
 
     @Override
     public Parent getRoot() {
-        return root;
+        return dialog;
     }    
 
     @Override
@@ -75,7 +75,7 @@ public class DialogController extends AbstractController implements Initializabl
         
         if (!(eventSource.equals(btnOK))) return;
         
-        LifecycleEvent e = new LifecycleEvent(root, LifecycleEvent.CLOSE_REQUEST);
+        LifecycleEvent e = new LifecycleEvent(dialog, LifecycleEvent.CLOSE_REQUEST);
         lifecycleEventHandler.handle(e);
     }
 

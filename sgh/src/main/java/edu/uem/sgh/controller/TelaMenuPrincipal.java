@@ -11,10 +11,12 @@ import static edu.uem.sgh.model.Usuario.Tipo.CLIENTE;
 import static edu.uem.sgh.model.Usuario.Tipo.FUNCIONARIO;
 import static edu.uem.sgh.model.Usuario.Tipo.GERENTE;
 import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
+import edu.uem.sgh.repository.hospede.HospedeRepository;
 import edu.uem.sgh.repository.quarto.QuartoRepository;
 import edu.uem.sgh.repository.servico.ServicoRepository;
 import edu.uem.sgh.util.Path;
 import java.net.URL;
+import java.sql.Connection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,9 +65,11 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     private EnumMap<Usuario.Tipo, Map<Class<?>, URL>> resourcePaths;
     private EnumMap<Usuario.Tipo, Map<String, Class<?>>> resourcePathMap;
     private ServicoRepository servicoRepository;
-private AutenticacaoRepository autenticacaoRepository;
+    private AutenticacaoRepository autenticacaoRepository;
     private QuartoRepository quartoRepository;
+    private HospedeRepository hospedeRepository;
     private EventHandler<MouseEvent> parentMouseEventHandler;
+    private Connection localConnection, remoteConnection;
 
     public TelaMenuPrincipal() {
         super();
@@ -109,6 +113,18 @@ private AutenticacaoRepository autenticacaoRepository;
         return getResourcePathMap().get(tipo).keySet();
     }
 
+    public void setAutenticacaoRepository(AutenticacaoRepository autenticacaoRepository) {
+        this.autenticacaoRepository = autenticacaoRepository;
+    }
+
+    public void setLocalConnection(Connection localConnection) {
+        this.localConnection = localConnection;
+    }
+
+    public void setRemoteConnection(Connection remoteConnection) {
+        this.remoteConnection = remoteConnection;
+    }
+    
     @SuppressWarnings("unchecked")
     public EnumMap<Usuario.Tipo, Map<String, Class<?>>> getResourcePathMap() {
         if (resourcePathMap == null) {
@@ -294,6 +310,8 @@ private AutenticacaoRepository autenticacaoRepository;
             try {
                 tabContent = createTabContentByName(tabName, i);
             } catch (Exception e) {
+                System.err.println(e);
+                System.err.println(e.getCause());
                 continue;
             }
             
@@ -327,26 +345,10 @@ private AutenticacaoRepository autenticacaoRepository;
         tabContentControllers[i] = loader.getController();
         return node;
     }
-    
-    private Node getTabContentAt(int index) {
-        if (index < 0 || index >= tabContentControllers.length) return null;
-        Node node = tabContentControllers[index].getRoot();
-        return node;
-    }
-    
-    @Override
-    protected void setUiClassID(String uiClassID) {
-        super.setUiClassID(uiClassID); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-    }
-
-    @Override
-    public String getUiClassID() {
-        return super.getUiClassID(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        setUiClassID(getClass().getSimpleName());
+        setUiClassID(getClass().getTypeName());
     }
 
     private void inicializarTabContentsControllers(int size) {
@@ -357,5 +359,28 @@ private AutenticacaoRepository autenticacaoRepository;
     @Override
     public void handle(MouseEvent event) {
         
+    }
+
+    public ServicoRepository getServicoRepository() {
+        if (servicoRepository == null && remoteConnection == null) servicoRepository = new ServicoRepository(remoteConnection);
+        return servicoRepository;
+    }
+
+    public AutenticacaoRepository getAutenticacaoRepository() {
+        return autenticacaoRepository;
+    }
+
+    public QuartoRepository getQuartoRepository() {
+        if (quartoRepository == null && remoteConnection != null) quartoRepository = new QuartoRepository(remoteConnection);
+        return quartoRepository;
+    }
+
+    public HospedeRepository getHospedeRepository() {
+        if (hospedeRepository == null && remoteConnection != null) {
+            hospedeRepository = new HospedeRepository();
+            hospedeRepository.setRemoteConnection(remoteConnection);
+        }
+        
+        return hospedeRepository;
     }
 }

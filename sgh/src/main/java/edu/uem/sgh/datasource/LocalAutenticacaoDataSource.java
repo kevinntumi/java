@@ -52,11 +52,13 @@ public class LocalAutenticacaoDataSource extends AbstractDataSource {
                             break;
                         case "nome": usuario.setNome(rs.getString(columnName));
                             break;
-                        case "tipo": usuario.setTipo(obterTipoUsuario(rs.getString(columnName)));
+                        case "tipo": usuario.setTipo(Tipo.obterTipoViaString(rs.getString(columnName)));
                             break;
                         case "data_registo": usuario.setDataRegisto(rs.getDate(columnName).getTime());
                             break;
                         case "data_alterado": usuario.setDataAlterado(rs.getDate(columnName).getTime());
+                            break;
+                        case "palavra_passe": usuario.setPalavraPasse(rs.getString(columnName));
                             break;
                     }
                 }
@@ -76,13 +78,25 @@ public class LocalAutenticacaoDataSource extends AbstractDataSource {
     }
     
     public Result<Usuario> logIn(Usuario usuario) {
-        if (usuario == null) return new Result.Error<>(new Exception());
+        if (usuario == null || !Usuario.temTodosAtributos(usuario)) 
+            return new Result.Error<>(new Exception());
                 
-        Result<Usuario> result = null;
+        Result<Usuario> result;
         
         try {
-            
-        } catch (Exception e) {
+            PreparedStatement statement = getConnection().prepareStatement("INSERT INTO " + tblName + " (id, id_tipo, nome, tipo, data_registo, foto_perfil, palavra_passe, data_inicio) VALUES(?,?,?,?,?,?,?) ");
+            statement.setLong(1, usuario.getId());
+            statement.setLong(2, usuario.getIdTipo());
+            statement.setString(3, usuario.getNome());
+            statement.setString(4, Tipo.converterTipoParaString(usuario.getTipo()));
+            statement.setDate(5, new java.sql.Date(usuario.getDataRegisto()));
+            statement.setBlob(6, usuario.getFotoPerfil());
+            statement.setString(7, usuario.getPalavraPasse());
+            statement.setDate(8, new java.sql.Date(System.currentTimeMillis()));
+            boolean wasInserted = statement.executeUpdate() > 0;
+            result = new Result.Success<>(wasInserted ? usuario : null);
+        } catch (SQLException e) {
+            System.err.println(e);
             result = new Result.Error<>(e);
         }
         
@@ -90,27 +104,15 @@ public class LocalAutenticacaoDataSource extends AbstractDataSource {
     }
     
     public Result<Boolean> logOut() {                
-        Result<Boolean> result = null;
+        Result<Boolean> result;
         
         try {
-            
-        } catch (Exception e) {
+            PreparedStatement statement = getConnection().prepareStatement("DELETE * FROM " + tblName);
+            result = new Result.Success<>(statement.executeUpdate() > 0);
+        } catch (SQLException e) {
             result = new Result.Error<>(e);
         }
         
         return result;
-    }
-    
-    private Tipo obterTipoUsuario(String tipo) {
-        switch (tipo) {
-            case "CLIENTE":
-                return Tipo.CLIENTE;
-            case "FUNCIONARIO":
-                return Tipo.FUNCIONARIO;
-            case "GERENTE":
-                return Tipo.GERENTE;
-            default:
-                return Tipo.ADMINISTRADOR;
-        }
     }
 }

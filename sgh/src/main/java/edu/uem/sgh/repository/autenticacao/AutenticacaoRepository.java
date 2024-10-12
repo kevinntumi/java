@@ -12,6 +12,7 @@ import edu.uem.sgh.connection.Type;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  *
@@ -34,10 +35,22 @@ public class AutenticacaoRepository {
     }
 
     public Result<Usuario> logIn(long id, String password) {
+        if (remoteConnection == null)
+            return new Result.Error<>(new SQLException());
+        
         Result<Usuario> result = getRemoteAutenticacaoDataSource().logIn(id, password);
-        if (result instanceof Result.Error) return new Result.Error<>(((Result.Error<Usuario>) result).getException());        
+        
+        if (result instanceof Result.Error) 
+            return new Result.Error<>(((Result.Error<Usuario>) result).getException());        
+        
         Result.Success<Usuario> success = ((Result.Success<Usuario>) result);
-        return getLocalAutenticacaoDataSource().logIn(success.getData());
+        Usuario usuario = success.getData();
+        
+        if (usuario == null) {
+            return result;
+        } else {
+            return getLocalAutenticacaoDataSource().logIn(success.getData());
+        }
     }
 
     public Result<Usuario> getCurrentUser() {

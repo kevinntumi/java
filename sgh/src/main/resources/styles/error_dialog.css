@@ -1,26 +1,22 @@
-#root {
+#dialog {
     -fx-background-color: white;
-    -fx-border-color: #000;
+    -fx-border-color: none;
     -fx-border-width: 2;
-    -fx-border-style: solid inside;
     -fx-border-radius: 0;
 }
 
-#close {
-    -fx-image: url("/images/close.png");
-    -fx-transition: 0.5s;
+#btnOK {
+    -fx-border-width: 0; 
+    -fx-background-color:  rgba(0, 0, 0, 0.08);
+    -fx-text-fill: rgba(0, 0, 0, 0.6);
+    -fx-border-radius: 0;
+    -fx-border-color: none;
 }
 
-#close:hover {
-    -fx-image: url("/images/close_hovered.png");
-    -fx-transition: 0.5s;
+#btnOK:hover {
+    -fx-background-color:  rgba(0, 0, 0, 0.16);
 }
 
-#close:pressed {
-    -fx-image: url("/images/close_pressed.png");
-    -fx-transition: 0.5s;
-}
-
-#btn {
-   -fx-border-width: 0; 
+#btnOK:pressed {
+    -fx-background-color:  rgba(0, 0, 0, 0.12);
 }

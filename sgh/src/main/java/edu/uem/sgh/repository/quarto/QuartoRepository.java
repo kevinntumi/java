@@ -18,44 +18,37 @@ import java.util.List;
  * @author Kevin Ntumi
  */
 public class QuartoRepository {
-    private final Connection remoteConnection, localConnection;
+    private Connection remoteConnection, localConnection;
     private RemoteQuartoRepository remoteQuartoRepository;
     private LocalQuartoRepository localQuartoRepository;
 
     @Constructor
-    public QuartoRepository(@ConnectionType(type = Type.REMOTE) Connection remoteConnection, @ConnectionType Connection localConnection) {
+    public QuartoRepository(@ConnectionType(type = Type.REMOTE) Connection remoteConnection) {
         this.remoteConnection = remoteConnection;
-        this.localConnection = localConnection;
     }
 
+    public void setRemoteConnection(Connection remoteConnection) {
+        this.remoteConnection = remoteConnection;
+    }
+    
     public Result<Boolean> add(Quarto t, FileInputStream fis) {
-        Result<Boolean> remoteResult = getRemoteQuartoRepository().add(t, fis);
-        if (remoteResult instanceof Result.Success) return remoteResult;
-        return getLocalQuartoRepository().add(t, fis);
+        return getRemoteQuartoRepository().add(t, fis);
     }
 
     public Result<Boolean> edit(Quarto t, FileInputStream fis) {
-        Result<Boolean> remoteResult = getRemoteQuartoRepository().edit(t, fis);
-        if (remoteResult instanceof Result.Success) return remoteResult;
-        return getLocalQuartoRepository().edit(t, fis);
+        return getRemoteQuartoRepository().edit(t, fis);
     }
 
     public Result<Boolean> delete(long id, boolean delete) {
-        Result<Boolean> remoteResult = getRemoteQuartoRepository().deleteOrUndelete(id, delete);
-        if (remoteResult instanceof Result.Success) return remoteResult;
-        return getLocalQuartoRepository().deleteOrUndelete(id, delete);
+        return getRemoteQuartoRepository().deleteOrUndelete(id, delete);
     }
 
     public Result<List<Quarto>> getAll() {
-        Result<List<Quarto>> remoteResult = getRemoteQuartoRepository().getAll();
-        if (remoteResult instanceof Result.Success) return remoteResult;
-        return getLocalQuartoRepository().getAll();
+        return getRemoteQuartoRepository().getAll();
     }
 
     public Result<Quarto> get(long id) {
-        Result<Quarto> remoteResult = getRemoteQuartoRepository().get(id);
-        if (remoteResult instanceof Result.Success) return remoteResult;
-        return getLocalQuartoRepository().get(id);
+        return getRemoteQuartoRepository().get(id);
     }   
 
     public RemoteQuartoRepository getRemoteQuartoRepository() {

@@ -4,11 +4,22 @@
  */
 package edu.uem.sgh.util;
 
+import java.util.concurrent.TimeoutException;
+
 /**
  *
  * @author Kevin Ntumi
  */
 public class ThreadUtil {
+    public static Exception obterExceptionAtiradaNaBackgroundThread(int startDay, int startHour, int startMinute, int startSeconds, int endDay, int endHour, int endMinute, int endSeconds) {
+        Exception e = null;
+        
+        if ((endDay > startDay) || (endHour > startHour) || (endMinute > startMinute) || (endSeconds - startSeconds >= 2))
+            e = new TimeoutException();
+        
+        return e;
+    }
+    
     public static void interromperThread(Thread thread) {
         if (!thread.isInterrupted()) {
             try {

@@ -6,6 +6,7 @@ package edu.uem.sgh.datasource;
 
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
+import edu.uem.sgh.model.Usuario.Tipo;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -54,7 +55,7 @@ public class RemoteAutenticacaoDataSource extends AbstractDataSource {
                             usuario.setDataRegisto(rs.getDate(nomeColuna).getTime());
                                 break;
                         case "tipo":
-                            usuario.setTipo(Usuario.obterTipoViaString(rs.getString(nomeColuna)));
+                            usuario.setTipo(Tipo.obterTipoViaString(rs.getString(nomeColuna)));
                                 break;
                         case "id_usuario": 
                             usuario.setIdTipo(rs.getInt(nomeColuna));
@@ -79,7 +80,7 @@ public class RemoteAutenticacaoDataSource extends AbstractDataSource {
         Result<Usuario> result;
         
         try {
-            PreparedStatement statement = getConnection().prepareStatement("SELECT id_usuario, tipo, data_registo, data_alterado FROM " + tblName + " WHERE id = ? AND palavra_passe = ?");
+            PreparedStatement statement = getConnection().prepareStatement("SELECT id_usuario, tipo, data_registo, data_alterado, palavra_passe FROM " + tblName + " WHERE id = ? AND palavra_passe = ?");
             statement.setLong(1, id);
             statement.setString(2, password);
             ResultSet rs = statement.executeQuery();
@@ -87,12 +88,12 @@ public class RemoteAutenticacaoDataSource extends AbstractDataSource {
             
             Usuario usuario = null;
             
-            while (rs.next()) {
+            while (usuario == null && rs.next()) {
                 usuario = new Usuario(System.currentTimeMillis(), id);
                 
-                for (int i = 1 ; i < resultSetMetaData.getColumnCount() ; i++) {
+                for (int i = 1 ; i <= resultSetMetaData.getColumnCount() ; i++) {
                     String nomeColuna = resultSetMetaData.getColumnName(i);
-
+                    System.out.println("coluna: " + nomeColuna);
                     switch (nomeColuna) {
                         case "data_alterado":
                             usuario.setDataAlterado(rs.getDate(nomeColuna).getTime());
@@ -101,16 +102,20 @@ public class RemoteAutenticacaoDataSource extends AbstractDataSource {
                             usuario.setDataRegisto(rs.getDate(nomeColuna).getTime());
                                 break;
                         case "tipo":
-                            usuario.setTipo(Usuario.obterTipoViaString(rs.getString(nomeColuna)));
+                            usuario.setTipo(Tipo.obterTipoViaString(rs.getString(nomeColuna)));
                                 break;
                         case "id_usuario": 
                             usuario.setIdTipo(rs.getInt(nomeColuna));
                                 break;
+                        case "palavra_passe": 
+                            usuario.setPalavraPasse(rs.getString(nomeColuna));
+                                break;
                     }
                 }
-                
-                break;
             }
+            
+            if (usuario != null && (usuario.getPalavraPasse() == null || !usuario.getPalavraPasse().equals(password)))
+                usuario = null;
             
             result = new Result.Success<>(usuario);
             rs.close();

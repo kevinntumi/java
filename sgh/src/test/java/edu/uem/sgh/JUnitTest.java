@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,24 @@ public class JUnitTest {
     public void findResourcesFXML() throws MalformedURLException {
         File f = new File(System.getProperty("user.dir") + "\\src\\main\\resources\\edu\\uem\\sgh\\error_dialog.fxml");
         if (f.exists() && f.isFile()) System.out.println(f.toURI().toURL());
+    }
+    
+    @Test
+    public void testBackgroundThreadTimeout() throws Exception {
+        Calendar start = Calendar.getInstance(), end = Calendar.getInstance();
+        start.setTimeInMillis(System.currentTimeMillis());
+        int startDay = start.get(Calendar.DAY_OF_MONTH), startHour = start.get(Calendar.HOUR), startMinute = start.get(Calendar.MINUTE), startSeconds = start.get(Calendar.SECOND); 
+
+        Thread.sleep(6000);
+        
+        end.setTimeInMillis(System.currentTimeMillis());
+        int endDay = end.get(Calendar.DAY_OF_MONTH), endHour = end.get(Calendar.HOUR), endMinute = end.get(Calendar.MINUTE), endSeconds = end.get(Calendar.SECOND); 
+        System.out.println(endSeconds + ", " + startSeconds);
+        
+        if ((endDay > startDay) || (endHour > startHour) || (endMinute > startMinute) || (endSeconds > startSeconds)) {
+            System.out.println((endDay > startDay) + ", " + (endHour > startHour) + ", " + (endMinute > startMinute) + ", " + (endSeconds - startSeconds >= 2));
+            System.out.println(endSeconds - startSeconds);
+        }
     }
 
     @Test

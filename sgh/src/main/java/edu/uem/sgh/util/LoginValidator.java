@@ -21,6 +21,19 @@ public class LoginValidator {
           .matches();
     }
     
+    public static boolean isIdValid(String id) {
+        if(id == null || id.isBlank()) return false;
+        
+        int numberCount = 0, size = id.length();
+        
+        for (int i = 0 ; i < size ; i++) {
+            if (Character.isDigit(id.charAt(i)))
+                numberCount++;
+        }
+        
+        return numberCount == size;
+    }
+    
     public static boolean isPasswordValid(String password) {
         if (password == null || password.isBlank()) return false;
         

@@ -18,6 +18,7 @@ public class Usuario {
     private Long dataInicio;
     private Long dataRegisto;
     private Blob fotoPerfil;
+    private String palavraPasse;
     private Long dataAlterado;
     
     public static Usuario VAZIO = new Usuario();
@@ -78,6 +79,14 @@ public class Usuario {
         this.id = id;
     }
 
+    public String getPalavraPasse() {
+        return palavraPasse;
+    }
+
+    public void setPalavraPasse(String palavraPasse) {
+        this.palavraPasse = palavraPasse;
+    }
+
     public String getNome() {
         return nome;
     }
@@ -99,26 +108,43 @@ public class Usuario {
         return usuario.dataAlterado == null && usuario.dataInicio == null && usuario.dataRegisto == null && usuario.id == null && usuario.idTipo == null && usuario.nome == null && usuario.tipo == null;
     }
     
-    public static Tipo obterTipoViaString (String tipo) {
-        if (tipo == null || tipo.isBlank()) return null;
-        
-        if (tipo.equals(Tipo.CLIENTE.toString())) {
-            return Tipo.CLIENTE;
-        } else if (tipo.equals(Tipo.FUNCIONARIO.toString())) {
-            return Tipo.FUNCIONARIO;
-        } else if (tipo.equals(Tipo.GERENTE.toString())) {
-            return Tipo.GERENTE;
-        } else if (tipo.equals(Tipo.ADMINISTRADOR.toString())) {
-            return Tipo.ADMINISTRADOR;
-        }
-        
-        return null;
+    public static boolean temTodosAtributos(Usuario usuario) {
+        if (usuario == null) throw new RuntimeException();
+        return (usuario.id != null && usuario.idTipo != null && usuario.nome != null && usuario.palavraPasse != null && usuario.tipo != null && usuario.fotoPerfil != null && usuario.dataAlterado != null && usuario.dataRegisto != null);
+    } 
+
+    @Override
+    public String toString() {
+        return "Usuario{" + "id=" + id + ", idTipo=" + idTipo + ", nome=" + nome + ", tipo=" + tipo + ", dataInicio=" + dataInicio + ", dataRegisto=" + dataRegisto + ", fotoPerfil=" + fotoPerfil + ", palavraPasse=" + palavraPasse + ", dataAlterado=" + dataAlterado + '}';
     }
     
     public enum Tipo {
         CLIENTE,
         FUNCIONARIO,
         GERENTE,
-        ADMINISTRADOR
+        ADMINISTRADOR;
+        
+        public static String converterTipoParaString(Tipo tipo) {
+            if (tipo == null)
+                return null;
+            
+            return tipo.toString();
+        }
+        
+        public static Tipo obterTipoViaString (String tipo) {
+            if (tipo == null || tipo.isBlank()) return null;
+
+            if (tipo.equals(Tipo.CLIENTE.toString())) {
+                return Tipo.CLIENTE;
+            } else if (tipo.equals(Tipo.FUNCIONARIO.toString())) {
+                return Tipo.FUNCIONARIO;
+            } else if (tipo.equals(Tipo.GERENTE.toString())) {
+                return Tipo.GERENTE;
+            } else if (tipo.equals(Tipo.ADMINISTRADOR.toString())) {
+                return Tipo.ADMINISTRADOR;
+            }
+
+            return null;
+        }
     }
 }

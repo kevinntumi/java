@@ -18,44 +18,33 @@ import java.util.List;
  * @author Kevin Ntumi
  */
 public class ServicoRepository implements ServicoDao{
-    private final Connection remoteConnection, localConnection;
+    private Connection remoteConnection, localConnection;
     private LocalServicoRepository localServicoRepository;
     private RemoteServicoRepository remoteServicoRepository;
 
     @Constructor
-    public ServicoRepository(@ConnectionType(type = Type.REMOTE) Connection remoteConnection, @ConnectionType Connection localConnection) {
+    public ServicoRepository(@ConnectionType(type = Type.REMOTE) Connection remoteConnection) {
         this.remoteConnection = remoteConnection;
-        this.localConnection = localConnection;
     }
 
     public Result<Servico> get(long id) {
-        Result<Servico> remoteResult = getRemoteServicoRepository().get(id);
-        if (remoteResult instanceof Result.Success) return remoteResult;
-        return localServicoRepository.get(id);
+        return getRemoteServicoRepository().get(id);
     }
 
     public Result<List<Servico>> getAll() {
-        Result<List<Servico>> remoteResult = getRemoteServicoRepository().getAll();
-        if (remoteResult instanceof Result.Success) return remoteResult;
-        return localServicoRepository.getAll();
+        return getRemoteServicoRepository().getAll();
     }
 
     public Result<Boolean> deleteOrUndelete(long id, boolean delete) {
-        Result<Boolean> remoteResult = getRemoteServicoRepository().deleteOrUndelete(id, delete);
-        if (remoteResult instanceof Result.Success) return remoteResult;
-        return localServicoRepository.deleteOrUndelete(id, delete);
+        return getRemoteServicoRepository().deleteOrUndelete(id, delete);
     }
 
     public Result<Boolean> edit(Servico servico) {
-        Result<Boolean> remoteResult = getRemoteServicoRepository().edit(servico);
-        if (remoteResult instanceof Result.Success) return remoteResult;
-        return localServicoRepository.edit(servico);
+        return getRemoteServicoRepository().edit(servico);
     }
 
     public Result<Boolean> add(Servico servico) {
-        Result<Boolean> remoteResult = getRemoteServicoRepository().add(servico);
-        if (remoteResult instanceof Result.Success) return remoteResult;
-        return localServicoRepository.add(servico);
+        return getRemoteServicoRepository().add(servico);
     }
 
     public LocalServicoRepository getLocalServicoRepository() {

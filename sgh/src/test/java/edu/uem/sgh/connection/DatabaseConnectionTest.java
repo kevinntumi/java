@@ -4,12 +4,16 @@
  */
 package edu.uem.sgh.connection;
 
+import edu.uem.sgh.model.Result;
+import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
+import edu.uem.sgh.repository.servico.ServicoRepository;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import javafx.concurrent.Task;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +22,10 @@ import org.junit.jupiter.api.Test;
  * @author Kevin Ntumi
  */
 public class DatabaseConnectionTest {
+    @Test
+    public void testTaskProgress() {
+    }
+    
     /**
      * Test of initLocalConnection method, of class DatabaseConnection.
      */

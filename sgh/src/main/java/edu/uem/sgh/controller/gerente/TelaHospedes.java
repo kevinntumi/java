@@ -8,6 +8,8 @@ import edu.uem.sgh.controller.AbstractController;
 import edu.uem.sgh.model.Hospede;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
+import edu.uem.sgh.repository.hospede.HospedeRepository;
+import edu.uem.sgh.util.TarefaUtil;
 import edu.uem.sgh.util.ThreadUtil;
 import java.net.URL;
 import java.sql.SQLException;
@@ -20,6 +22,7 @@ import java.util.concurrent.TimeoutException;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -27,7 +30,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
 
 /**
  *
@@ -35,7 +38,7 @@ import javafx.scene.layout.VBox;
  */
 public class TelaHospedes extends AbstractController implements EventHandler<ActionEvent>, ChangeListener<Object>, Initializable {
     @FXML
-    private VBox root;
+    private StackPane root;
     
     @FXML
     private TableView<Hospede> tableView;
@@ -43,20 +46,24 @@ public class TelaHospedes extends AbstractController implements EventHandler<Act
     @FXML
     private Button btnCarregarHospedes;
     
-    private Usuario usuario;
+    private Usuario usuario; 
     private Task<Result<List<Hospede>>> tarefaBuscarHospedes;
     private Result<List<Hospede>> rslt;
     private final int TENTATIVAS_MAXIMAS_INTERRUPCAO_THREADS = 5, TENTATIVAS_MAXIMAS_INTERRUPCAO_TAREFAS = 5;
+    private HospedeRepository hospedeRepository;
+    private int totalTimesVisible;
     private Thread bgThread;
 
     @Override
     public void adicionarListeners() {
         btnCarregarHospedes.setOnAction(this);
+        root.visibleProperty().addListener(this);
     }
 
     @Override
     public void removerListeners() {
         btnCarregarHospedes.setOnAction(null);
+        root.visibleProperty().removeListener(this);
         interromperTodasThreads();
         interromperTodasTarefas();
     }
@@ -73,11 +80,64 @@ public class TelaHospedes extends AbstractController implements EventHandler<Act
         if (!source.equals(btnCarregarHospedes))
             return;
         
+        carregarHospedes();
+    }
+
+    @Override
+    public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
+        if (!(newValue instanceof Usuario)){
+            if (observable.equals(root.visibleProperty())) {
+                if (totalTimesVisible == 0) {
+                    carregarHospedes();
+                    totalTimesVisible++;
+                }
+                
+                observable.removeListener(this);
+            } 
+            
+            if (tarefaBuscarHospedes != null) {
+                
+            }
+            
+            return;
+        }
+            
+        usuario = (Usuario) newValue;
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        setUiClassID(getClass().getTypeName());
+    }
+
+    public void setHospedeRepository(HospedeRepository hospedeRepository) {
+        this.hospedeRepository = hospedeRepository;
+    }
+    
+    private void limparTabela() {
+        if (tableView.getItems().isEmpty()) 
+            return;
+        
+        tableView.getItems().clear();
+    }
+    
+    private void interromperTodasThreads() {
+        ThreadUtil.interromperThreadRecursivamente(0, TENTATIVAS_MAXIMAS_INTERRUPCAO_THREADS, bgThread);
+    }
+    
+    private void interromperTodasTarefas() {
+        TarefaUtil.interromperTarefaRecursivamente(0, TENTATIVAS_MAXIMAS_INTERRUPCAO_TAREFAS, tarefaBuscarHospedes);
+    }
+
+    private void carregarHospedes() {
+        if (hospedeRepository == null) 
+            return;
+        
         if (tarefaBuscarHospedes == null) {
             tarefaBuscarHospedes = new Task<Result<List<Hospede>>>() {
                 @Override
                 protected Result<List<Hospede>> call() throws Exception {
-                    return null;
+                    return hospedeRepository.obterTodos();
                 }
             };
         }
@@ -124,49 +184,8 @@ public class TelaHospedes extends AbstractController implements EventHandler<Act
                 return;
                 
             for (Hospede hospede : hospedes) {
-                
+                tableView.getItems().add(hospede);
             }
         }
-    }
-
-    @Override
-    public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-        if (!(newValue instanceof Usuario))
-            return;
-            
-        usuario = (Usuario) newValue;
-    }
-
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        setUiClassID(getClass().getTypeName());
-    }
-    
-    private void limparTabela() {
-        if (tableView.getItems().isEmpty()) 
-            return;
-        
-        tableView.getItems().clear();
-    }
-    
-    private void interromperTodasThreads() {
-        
-        //interromperThreadRecursivamente(0, bgThread);
-    }
-    
-    private void interromperTodasTarefas() {
-        if (tarefaBuscarHospedes != null) 
-            interromperTarefaRecursivamente(0, tarefaBuscarHospedes);
-    }
-    
-    private void interromperTarefa(Task<?> tarefa) {
-        if (tarefa.isRunning()) 
-            tarefa.cancel(true);
-    }
- 
-    private void interromperTarefaRecursivamente(int tentativa, Task<?> tarefa) {
-        if (tentativa < 0 || tentativa > TENTATIVAS_MAXIMAS_INTERRUPCAO_TAREFAS || !tarefa.isRunning()) return;
-        interromperTarefa(tarefa);
-        interromperTarefaRecursivamente(tentativa + 1, tarefa);
     }
 }
