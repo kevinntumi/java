@@ -20,7 +20,8 @@ public class HospedeRepository {
     private RemoteHospedeDataSource remoteHospedeDataSource;
     private LocalHospedeDataSource localHospedeDataSource;
 
-    public HospedeRepository() {
+    public HospedeRepository(Connection remoteConnection) {
+        this.remoteConnection = remoteConnection;
     }
 
     public void setRemoteConnection(Connection remoteConnection) {

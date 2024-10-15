@@ -4,6 +4,14 @@
  */
 package edu.uem.sgh.controller;
 
+import edu.uem.sgh.controller.gerente.TelaCheckIns;
+import edu.uem.sgh.controller.gerente.TelaCheckOuts;
+import edu.uem.sgh.controller.gerente.TelaFuncionarios;
+import edu.uem.sgh.controller.gerente.TelaHospedes;
+import edu.uem.sgh.controller.gerente.TelaQuartos;
+import edu.uem.sgh.controller.gerente.TelaRelatorios;
+import edu.uem.sgh.controller.gerente.TelaReservas;
+import edu.uem.sgh.controller.gerente.TelaServicos;
 import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.model.Usuario.Tipo;
 import static edu.uem.sgh.model.Usuario.Tipo.ADMINISTRADOR;
@@ -79,16 +87,40 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     public void adicionarListeners() {
         getCloseButton().setOnMouseClicked(parentMouseEventHandler);
         getMinimizeButton().setOnMouseClicked(parentMouseEventHandler);
+        tabPane.getSelectionModel().selectedItemProperty().addListener(this);
     }
 
     @Override
     public void removerListeners() {
         getCloseButton().setOnMouseClicked(null);
         getMinimizeButton().setOnMouseClicked(null);
+        tabPane.getSelectionModel().selectedItemProperty().removeListener(this);
     }
 
     @Override
     public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
+        if (observable.equals(tabPane.getSelectionModel().selectedItemProperty())) {
+            Tab newTab = (Tab) newValue;
+            Node newTabNode = newTab.getContent();
+            
+            if (oldValue != null) {
+                Tab oldTab = (Tab) oldValue;
+                Node oldTabNode = oldTab.getContent();
+                
+                AbstractController abstractController = findControllerByRoot(oldTabNode);
+                
+                if (abstractController != null)
+                    resolverDependencias(abstractController, false);
+            }
+            
+            AbstractController abstractController = findControllerByRoot(newTabNode);
+            
+            if (abstractController == null) 
+                return;
+            
+            resolverDependencias(abstractController, true);
+        }
+        
         if (newValue instanceof Usuario) {
             usuario = (Usuario) newValue;
             definirMenu(getTabs(usuario.getTipo()));
@@ -320,6 +352,15 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         }
     }
     
+    private AbstractController findControllerByRoot(Node node) {
+        for (AbstractController abstractController : tabContentControllers) {
+            if (abstractController.getRoot().equals(node))
+                return abstractController;
+        }
+        
+        return null;
+    }
+    
     private URL getResourcePath(String name) {
         if (!getResourcePaths().containsKey(usuario.getTipo()) || !getResourcePathMap().get(usuario.getTipo()).containsKey(name)) throw new RuntimeException();
         return getResourcePaths().get(usuario.getTipo()).get(getResourcePathMap().get(usuario.getTipo()).get(name));
@@ -335,14 +376,20 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     }
     
     private Node createTabContentByName(String name, int i) throws Exception {
-        if (name == null || name.isBlank()) throw new RuntimeException();
+        if (name == null || name.isBlank()) 
+            throw new RuntimeException();
         
         FXMLLoader loader = getFXMLoader(name);
         
-        if (loader == null) throw new RuntimeException();
+        if (loader == null) 
+            throw new RuntimeException();
         
         Node node = loader.load();
-        tabContentControllers[i] = loader.getController();
+        Object controller = loader.getController();
+        
+        if (controller != null && controller instanceof AbstractController)
+            tabContentControllers[i] = loader.getController();
+        
         return node;
     }
 
@@ -358,11 +405,11 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
 
     @Override
     public void handle(MouseEvent event) {
-        
+        Object source = event.getSource();
     }
 
     public ServicoRepository getServicoRepository() {
-        if (servicoRepository == null && remoteConnection == null) servicoRepository = new ServicoRepository(remoteConnection);
+        if (servicoRepository == null && remoteConnection != null) servicoRepository = new ServicoRepository(remoteConnection);
         return servicoRepository;
     }
 
@@ -376,11 +423,144 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     }
 
     public HospedeRepository getHospedeRepository() {
-        if (hospedeRepository == null && remoteConnection != null) {
-            hospedeRepository = new HospedeRepository();
-            hospedeRepository.setRemoteConnection(remoteConnection);
-        }
-        
+        if (hospedeRepository == null && remoteConnection != null) hospedeRepository = new HospedeRepository(remoteConnection);
         return hospedeRepository;
+    }
+    
+    private void resolverDependencias(AbstractController abstractController, boolean add) {
+        if (abstractController == null)
+            return;
+        
+        String uiClassId = abstractController.getUiClassID();
+        
+        if (uiClassId == null || uiClassId.isBlank())
+            return;
+        
+        if (!add)
+            abstractController.removerListeners();
+        
+        if (uiClassId.equals(edu.uem.sgh.controller.gerente.TelaServicos.class.getTypeName()))
+            resolverDependenciasTelaServicos(abstractController, add);
+        else if (uiClassId.equals(edu.uem.sgh.controller.gerente.TelaCheckIns.class.getTypeName()))
+            resolverDependenciasTelaCheckIns(abstractController, add);
+        else if (uiClassId.equals(edu.uem.sgh.controller.gerente.TelaCheckOuts.class.getTypeName()))
+            resolverDependenciasTelaCheckOuts(abstractController, add);
+        else if (uiClassId.equals(edu.uem.sgh.controller.gerente.TelaFuncionarios.class.getTypeName()))
+            resolverDependenciasTelaFuncionarios(abstractController, add);
+        else if (uiClassId.equals(edu.uem.sgh.controller.gerente.TelaHospedes.class.getTypeName()))
+            resolverDependenciasTelaHospedes(abstractController, add);
+        else if (uiClassId.endsWith(edu.uem.sgh.controller.gerente.TelaQuartos.class.getTypeName()))
+            resolverDependenciasTelaQuartos(abstractController, add);
+        else if (uiClassId.equals(edu.uem.sgh.controller.gerente.TelaRelatorios.class.getTypeName()))
+            resolverDependenciasTelaRelatorios(abstractController, add);
+        else if (uiClassId.equals(edu.uem.sgh.controller.gerente.TelaReservas.class.getTypeName()))
+            resolverDependenciasTelaReservs(abstractController, add);
+        
+        if (add)
+            abstractController.adicionarListeners();
+    }
+
+    private void resolverDependenciasTelaServicos(AbstractController abstractController, boolean add) {
+        if (abstractController == null || !(abstractController instanceof TelaServicos))
+            return;
+        
+        TelaServicos telaServicos = (TelaServicos) abstractController;
+        System.out.println("add: " + add);
+        if (add) {
+            telaServicos.setServicoRepository(getServicoRepository());
+        } else {
+            telaServicos.setServicoRepository(null);
+        }
+    }
+
+    private void resolverDependenciasTelaCheckIns(AbstractController abstractController, boolean add) {
+        if (abstractController == null || !(abstractController instanceof TelaCheckIns))
+            return;
+        
+        TelaCheckIns telaCheckIns = (TelaCheckIns) abstractController;
+        
+        if (add) {
+            
+        } else {
+            
+        }
+    }
+
+    private void resolverDependenciasTelaCheckOuts(AbstractController abstractController, boolean add) {
+        if (abstractController == null || !(abstractController instanceof TelaCheckOuts))
+            return;
+        
+        TelaCheckOuts telaCheckOuts = (TelaCheckOuts) abstractController;
+        
+        if (add) {
+            
+        } else {
+            
+        }
+    }
+
+    private void resolverDependenciasTelaFuncionarios(AbstractController abstractController, boolean add) {
+        if (abstractController == null || !(abstractController instanceof TelaFuncionarios))
+            return;
+        
+        TelaFuncionarios telaFuncionarios = (TelaFuncionarios) abstractController;
+        
+        if (add) {
+            
+        } else {
+            
+        }
+    }
+
+    private void resolverDependenciasTelaHospedes(AbstractController abstractController, boolean add) {
+        if (abstractController == null || !(abstractController instanceof TelaHospedes))
+            return;
+        
+        TelaHospedes telaHospedes = (TelaHospedes) abstractController;
+        
+        if (add) {
+            
+        } else {
+            
+        }
+    }
+
+    private void resolverDependenciasTelaQuartos(AbstractController abstractController, boolean add) {
+        if (abstractController == null || !(abstractController instanceof TelaQuartos))
+            return;
+        
+        TelaQuartos telaQuartos = (TelaQuartos) abstractController;
+        
+        if (add) {
+            
+        } else {
+            
+        }
+    }
+
+    private void resolverDependenciasTelaRelatorios(AbstractController abstractController, boolean add) {
+        if (abstractController == null || !(abstractController instanceof TelaRelatorios))
+            return;
+        
+        TelaRelatorios telaRelatorios = (TelaRelatorios) abstractController;
+        
+        if (add) {
+            
+        } else {
+            
+        }
+    }
+
+    private void resolverDependenciasTelaReservs(AbstractController abstractController, boolean add) {
+        if (abstractController == null || !(abstractController instanceof TelaReservas))
+            return;
+        
+        TelaReservas telaReservas = (TelaReservas) abstractController;
+        
+        if (add) {
+            
+        } else {
+            
+        }
     }
 }

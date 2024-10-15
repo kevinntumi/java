@@ -1,9 +1,14 @@
-/*
- * Empty Stylesheet file.
- */
+#root {
+    -fx-border-color: #ccc;
+    -fx-border-width: 0.5px;
+}
 
 #appBar {
     -fx-background-color: #4772A3; 
+}
+
+#rootServicos{
+    -fx-padding: 0;
 }
 
 #close {
@@ -60,6 +65,7 @@
     -fx-padding: 0 24px 0 24px;
     -fx-font-size: 12;
     -fx-font-family: "Inter Bold";
+    -fx-background-color: none;
 }
 
 .tab-label {
@@ -73,6 +79,6 @@
 
 .tab-header-background {
     -fx-background-color: none;
-    -fx-border-width: 0 0 0.5px 0;
-    -fx-border-color: transparent transparent #ccc transparent;
+    -fx-border-width: 0 0.5px 0 0.5px;
+    -fx-border-color: transparent #ccc transparent #ccc;
 }

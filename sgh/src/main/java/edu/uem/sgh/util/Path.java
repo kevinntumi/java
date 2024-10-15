@@ -36,6 +36,19 @@ public class Path {
         return absoluteFolderPath.replace(BASE_JAVA_SRC_FOLDER_PATH, "").replace("\\", ".");
     }
     
+    public static URL getFXMLURL(String fxmlLayout, String additionalPath) {
+        File f = new File(BASE_RESOURCE_PATH + "\\edu\\uem\\sgh\\" + ((additionalPath != null) ? additionalPath : "") + fxmlLayout + ".fxml");
+        URL url = null;
+        
+        try {
+            if (f.exists() && f.isFile()) url = f.toURI().toURL();
+        } catch (MalformedURLException e) {
+            return null;
+        }
+        
+        return url;
+    }
+    
     public static URL getFXMLURL(String fxmlLayout) {
         File f = new File(BASE_RESOURCE_PATH + "\\edu\\uem\\sgh\\" + fxmlLayout + ".fxml");
         URL url = null;

@@ -2,9 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package edu.uem.sgh.model;
-
-import edu.uem.sgh.helper.ServicoSituacao;
+package edu.uem.sgh.model.table;
 
 /**
  *
@@ -13,9 +11,17 @@ import edu.uem.sgh.helper.ServicoSituacao;
 public class Servico {
     private long id;
     private String descricao;
-    private long dataRegisto;
-    private ServicoSituacao situacao;
-    private Gerente gerente;
+    private String dataRegisto;
+    private String situacao;
+    private String gerente;
+
+    public Servico(long id, String descricao, String dataRegisto, String situacao, String gerente) {
+        this.id = id;
+        this.descricao = descricao;
+        this.dataRegisto = dataRegisto;
+        this.situacao = situacao;
+        this.gerente = gerente;
+    }
 
     public long getId() {
         return id;
@@ -33,32 +39,27 @@ public class Servico {
         this.descricao = descricao;
     }
 
-    public long getDataRegisto() {
+    public String getDataRegisto() {
         return dataRegisto;
     }
 
-    public void setDataRegisto(long dataRegisto) {
+    public void setDataRegisto(String dataRegisto) {
         this.dataRegisto = dataRegisto;
     }
 
-    public ServicoSituacao getSituacao() {
+    public String getSituacao() {
         return situacao;
     }
 
-    public void setSituacao(ServicoSituacao situacao) {
+    public void setSituacao(String situacao) {
         this.situacao = situacao;
     }
 
-    public Gerente getGerente() {
+    public String getGerente() {
         return gerente;
     }
 
-    public void setGerente(Gerente gerente) {
+    public void setGerente(String gerente) {
         this.gerente = gerente;
-    }   
-
-    @Override
-    public String toString() {
-        return "Servico{" + "id=" + id + ", descricao=" + descricao + ", dataRegisto=" + dataRegisto + ", situacao=" + situacao + ", gerente=" + gerente + '}';
     }
 }

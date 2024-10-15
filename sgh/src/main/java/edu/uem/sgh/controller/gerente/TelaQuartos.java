@@ -28,6 +28,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 /**
@@ -36,7 +37,7 @@ import javafx.scene.layout.VBox;
  */
 public class TelaQuartos extends AbstractController implements ChangeListener<Object>, EventHandler<ActionEvent>, Initializable {
     @FXML
-    private VBox root;
+    private StackPane root;
     
     @FXML
     private Button btnAdicionar;

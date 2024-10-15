@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.uem.sgh.controller.gerente.DialogInserirServicoController">
+   <stylesheets>
+        <URL value="@/styles/dialog_inserir_servico.css" />
+   </stylesheets>
+   <children>
+      <HBox fx:id="topBar" alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="48.0" prefWidth="303.0">
+         <children>
+            <Text boundsType="LOGICAL_VERTICAL_CENTER" strokeType="OUTSIDE" strokeWidth="0.0" text="Novo Serviço" textOrigin="CENTER">
+               <font>
+                  <Font name="Inter Regular" size="12.0" />
+               </font>
+               <HBox.margin>
+                  <Insets left="24.0" right="154.0" />
+               </HBox.margin>
+            </Text>
+            <ImageView fx:id="close" fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true" />
+         </children>
+      </HBox>
+      <Label text="Descrição:">
+         <font>
+            <Font name="Inter Regular" size="12.0" />
+         </font>
+         <VBox.margin>
+            <Insets left="24.0" top="24.0" />
+         </VBox.margin>
+      </Label>
+      <TextField fx:id="txtDescricao" maxWidth="1.7976931348623157E308">
+         <VBox.margin>
+            <Insets bottom="16.0" left="24.0" right="24.0" top="16.0" />
+         </VBox.margin>
+      </TextField>
+      <Label text="Situação:">
+         <font>
+            <Font name="Inter Regular" size="12.0" />
+         </font>
+         <VBox.margin>
+            <Insets left="24.0" />
+         </VBox.margin>
+      </Label>
+      <ComboBox fx:id="cbSituacao" maxWidth="1.7976931348623157E308" visibleRowCount="3">
+         <VBox.margin>
+            <Insets left="24.0" right="24.0" top="16.0" />
+         </VBox.margin>
+      </ComboBox>
+      <Button fx:id="btnAdicionar" mnemonicParsing="false" text="Adicionar">
+         <VBox.margin>
+            <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+         </VBox.margin>
+      </Button>
+   </children>
+</VBox>

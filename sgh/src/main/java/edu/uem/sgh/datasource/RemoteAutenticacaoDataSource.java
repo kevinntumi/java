@@ -93,19 +93,25 @@ public class RemoteAutenticacaoDataSource extends AbstractDataSource {
                 
                 for (int i = 1 ; i <= resultSetMetaData.getColumnCount() ; i++) {
                     String nomeColuna = resultSetMetaData.getColumnName(i);
-                    System.out.println("coluna: " + nomeColuna);
+                    
                     switch (nomeColuna) {
-                        case "data_alterado":
-                            usuario.setDataAlterado(rs.getDate(nomeColuna).getTime());
+                        case "id": 
+                            usuario.setId(rs.getInt(nomeColuna));
                                 break;
-                        case "data_registo":
-                            usuario.setDataRegisto(rs.getDate(nomeColuna).getTime());
+                        case "id_tipo": 
+                            usuario.setIdTipo(rs.getInt(nomeColuna));
                                 break;
-                        case "tipo":
+                        case "nome": 
+                            usuario.setNome(rs.getString(nomeColuna));
+                                break;
+                        case "tipo": 
                             usuario.setTipo(Tipo.obterTipoViaString(rs.getString(nomeColuna)));
                                 break;
-                        case "id_usuario": 
-                            usuario.setIdTipo(rs.getInt(nomeColuna));
+                        case "data_registo": 
+                            usuario.setDataRegisto(rs.getDate(nomeColuna).getTime());
+                                break;
+                        case "data_alterado": 
+                            usuario.setDataAlterado(rs.getDate(nomeColuna).getTime());
                                 break;
                         case "palavra_passe": 
                             usuario.setPalavraPasse(rs.getString(nomeColuna));

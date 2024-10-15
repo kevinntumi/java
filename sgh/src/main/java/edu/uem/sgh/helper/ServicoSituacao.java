@@ -10,5 +10,28 @@ package edu.uem.sgh.helper;
  */
 public enum ServicoSituacao {
     EM_MANUNTENCAO,
-    EM_FUNCIONAMENTO
+    EM_FUNCIONAMENTO;
+    
+    public static ServicoSituacao obterViaString(String servicoSituacaoStr) {
+        if (servicoSituacaoStr == null || servicoSituacaoStr.isBlank())
+            return null;
+        
+        ServicoSituacao[] servicoSituacao = ServicoSituacao.values();
+        
+        for (ServicoSituacao situacao : servicoSituacao) {
+            String str = situacao.toString();
+            
+            if (servicoSituacaoStr.equals(str))
+                return situacao;
+        }
+        
+        return null;
+    }
+    
+    public static String obterPorValor(ServicoSituacao servicoSituacao) {
+        if (servicoSituacao == null)
+            return null;
+        
+        return servicoSituacao.toString();
+    }
 }

@@ -29,6 +29,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 /**
@@ -37,7 +38,7 @@ import javafx.scene.layout.VBox;
  */
 public class TelaReservas extends AbstractController implements ChangeListener<Object>, EventHandler<ActionEvent>, Initializable{
     @FXML
-    private VBox root;
+    private StackPane root;
     
     @FXML
     private TableView<Hospede> tableView;
@@ -48,8 +49,6 @@ public class TelaReservas extends AbstractController implements ChangeListener<O
     private Usuario usuario;
     private Task<Result<List<Reserva>>> tarefaBuscarReservas;
     private Result<List<Reserva>> rslt;
-    private final int TENTATIVAS_MAXIMAS_INTERRUPCAO_THREADS = 5, TENTATIVAS_MAXIMAS_INTERRUPCAO_TAREFAS = 5;
-    private Thread bgThread;
 
     @Override
     public void adicionarListeners() {
@@ -59,8 +58,6 @@ public class TelaReservas extends AbstractController implements ChangeListener<O
     @Override
     public void removerListeners() {
         btnCarregar.setOnAction(null);
-        interromperTodasThreads();
-        interromperTodasTarefas();
     }
 
     @Override
@@ -91,41 +88,12 @@ public class TelaReservas extends AbstractController implements ChangeListener<O
         setUiClassID(getClass().getTypeName());
     }
 
-    private void interromperTodasThreads() {
-        ThreadUtil.interromperThreadRecursivamente(0, TENTATIVAS_MAXIMAS_INTERRUPCAO_THREADS, bgThread);
-    }
-
-    private void interromperTodasTarefas() {
-        TarefaUtil.interromperTarefaRecursivamente(0, TENTATIVAS_MAXIMAS_INTERRUPCAO_TAREFAS, tarefaBuscarReservas);
-    }
-
     private void carregarReservas() {
-        if (tarefaBuscarReservas == null) {
-            tarefaBuscarReservas = new Task<Result<List<Reserva>>>() {
-                @Override
-                protected Result<List<Reserva>> call() throws Exception {
-                    return null;
-                }
-            };
-        }
         
-        Thread.State state = null;
         
-        if (bgThread != null) {
-            state = bgThread.getState();
-            
-            if (state != Thread.State.TERMINATED)
-                ThreadUtil.interromperThreadRecursivamente(0, TENTATIVAS_MAXIMAS_INTERRUPCAO_THREADS, bgThread);
-            
-        }
         
-        if (bgThread == null || state == Thread.State.TERMINATED) bgThread = new Thread(tarefaBuscarReservas);
-        
-        try {
-            bgThread.start();
-        } catch (Exception e) {
+        if (rslt == null)
             return;
-        }
      
         //mostrarProgressBar
         try {
@@ -133,9 +101,8 @@ public class TelaReservas extends AbstractController implements ChangeListener<O
         } catch (InterruptedException | CancellationException | TimeoutException | ExecutionException e) {
             rslt = new Result.Error<>(e);
         }
+
         
-        ThreadUtil.interromperThreadRecursivamente(0, TENTATIVAS_MAXIMAS_INTERRUPCAO_THREADS, bgThread);
-        //naoMostrarProgressBar
         
         if (rslt instanceof Result.Error) {
             Result.Error<List<Reserva>> error = (Result.Error<List<Reserva>>) rslt;

@@ -5,6 +5,7 @@
 package edu.uem.sgh.controller.gerente;
 
 import edu.uem.sgh.controller.AbstractController;
+import edu.uem.sgh.model.CheckOut;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.util.TarefaUtil;
@@ -27,6 +28,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 /**
@@ -35,13 +37,13 @@ import javafx.scene.layout.VBox;
  */
 public class TelaCheckOuts extends AbstractController implements ChangeListener<Object>, EventHandler<ActionEvent>, Initializable{
     @FXML
-    private VBox root;
+    private StackPane root;
     
     @FXML
     private Button btnCarregar;
     
     @FXML
-    private TableView tableView;
+    private TableView<CheckOut> tableView;
     
     private Usuario usuario;
     private Task<Result<List<?>>> tarefaBuscarCheckOuts;

@@ -18,19 +18,28 @@ public class CheckInReservaRepository {
     private Connection remoteConnection;
     private RemoteCheckInReservaDataSource remoteCheckInReservaDataSource;
 
-    public CheckInReservaRepository() {
+    public CheckInReservaRepository(Connection remoteConnection) {
+        this.remoteConnection = remoteConnection;
     }
     
     public Result<Boolean> efectuar(CheckIn.Reserva checkInReserva) {
+        if (remoteConnection == null) {
+            return new Result.Error<>(new Exception());
+        }
+        
         return getRemoteCheckInReservaDataSource().efectuar(checkInReserva);
     }
     
-    public Result<List<CheckIn.Reserva>> obterTodos() {
+    public Result<List<edu.uem.sgh.model.CheckIn.Reserva>> obterTodos() {
+        if (remoteConnection == null) {
+            return new Result.Error<>(new Exception());
+        }
+        
         return getRemoteCheckInReservaDataSource().obterTodos();
     }
 
     public RemoteCheckInReservaDataSource getRemoteCheckInReservaDataSource() {
-        if (remoteCheckInReservaDataSource == null) remoteCheckInReservaDataSource = new RemoteCheckInReservaDataSource(remoteConnection);
+        if (remoteCheckInReservaDataSource == null && remoteConnection != null) remoteCheckInReservaDataSource = new RemoteCheckInReservaDataSource(remoteConnection);
         return remoteCheckInReservaDataSource;
     }
 }

@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class ServicoRepository implements ServicoDao{
     private Connection remoteConnection, localConnection;
+    private final String tblName = "servico";
     private LocalServicoRepository localServicoRepository;
     private RemoteServicoRepository remoteServicoRepository;
 
@@ -43,17 +44,17 @@ public class ServicoRepository implements ServicoDao{
         return getRemoteServicoRepository().edit(servico);
     }
 
-    public Result<Boolean> add(Servico servico) {
+    public Result<Boolean> add(edu.uem.sgh.schema.Servico servico) {
         return getRemoteServicoRepository().add(servico);
     }
 
     public LocalServicoRepository getLocalServicoRepository() {
-        if (localServicoRepository == null) localServicoRepository = new LocalServicoRepository(localConnection);
+        if (localServicoRepository == null && localConnection != null) localServicoRepository = new LocalServicoRepository(localConnection, tblName);
         return localServicoRepository;
     }
 
     public RemoteServicoRepository getRemoteServicoRepository() {
-        if (remoteServicoRepository == null) remoteServicoRepository = new RemoteServicoRepository(remoteConnection);
+        if (remoteServicoRepository == null && remoteConnection != null) remoteServicoRepository = new RemoteServicoRepository(remoteConnection, tblName);
         return remoteServicoRepository;
     }
 }

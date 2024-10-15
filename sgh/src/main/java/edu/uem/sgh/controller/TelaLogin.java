@@ -207,10 +207,10 @@ public class TelaLogin extends AbstractController implements Initializable, Even
         
         rsltThreadOne = autenticacaoRepository.logIn(id, palavraPasse);
         
+        esconderProgressBar();
+        
         if (rsltThreadOne == null)
             return;
-        
-        esconderProgressBar();
         
         String descricao = null;
    

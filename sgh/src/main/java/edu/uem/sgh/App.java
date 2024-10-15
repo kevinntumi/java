@@ -23,10 +23,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.Window;
 
 /**
  * JavaFX App
@@ -71,7 +74,18 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
         stage.setResizable(false);
         stage.initStyle(StageStyle.UNDECORATED);
         getUsuarioProperty().addListener(this);
-        verificarUsuarioAutenticado();
+        
+        Usuario usuario = new Usuario();
+        usuario.setId(1);
+        usuario.setIdTipo(1);
+        usuario.setDataInicio(System.currentTimeMillis());
+        usuario.setDataRegisto(System.currentTimeMillis());
+        usuario.setTipo(Usuario.Tipo.GERENTE);
+        getUsuarioProperty().set(usuario);
+        
+        
+        
+        //verificarUsuarioAutenticado();
     }
     
     @Override

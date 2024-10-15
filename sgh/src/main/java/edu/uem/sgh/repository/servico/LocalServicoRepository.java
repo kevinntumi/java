@@ -15,8 +15,8 @@ import java.util.List;
  * @author Kevin Ntumi
  */
 public class LocalServicoRepository extends AbstractServicoRepository implements ServicoDao{
-    public LocalServicoRepository(Connection connection) {
-        super(connection);
+    public LocalServicoRepository(Connection connection, String tblName) {
+        super(connection, tblName);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class LocalServicoRepository extends AbstractServicoRepository implements
     }
 
     @Override
-    public Result<Boolean> add(Servico servico) {
+    public Result<Boolean> add(edu.uem.sgh.schema.Servico servico) {
         return super.add(servico); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
     }
 

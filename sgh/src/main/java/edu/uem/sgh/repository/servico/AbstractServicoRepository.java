@@ -4,12 +4,16 @@
  */
 package edu.uem.sgh.repository.servico;
 
+import edu.uem.sgh.helper.ServicoSituacao;
+import edu.uem.sgh.model.Gerente;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Servico;
 import edu.uem.sgh.repository.AbstractRepository;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +23,11 @@ import java.util.List;
  * @author Kevin Ntumi
  */
 public abstract class AbstractServicoRepository extends AbstractRepository {
-    AbstractServicoRepository(Connection connection) {
+    private final String tblName;
+            
+    AbstractServicoRepository(Connection connection, String tblName) {
         super(connection);
+        this.tblName = tblName;
     }
 
     @Override
@@ -28,12 +35,17 @@ public abstract class AbstractServicoRepository extends AbstractRepository {
         return super.getConnection();
     }
     
-    public Result<Boolean> add(Servico servico){
-         Result<Boolean> r;
+    public Result<Boolean> add(edu.uem.sgh.schema.Servico servico){
+        if (servico == null)
+            return new Result.Error<>(new NullPointerException());
+        
+        Result<Boolean> r;
 
-        try (PreparedStatement statement = getConnection().prepareStatement("INSERT INTO servicos(descricao, status) VALUES(?,?)")){
+        try (PreparedStatement statement = getConnection().prepareStatement("INSERT INTO " + tblName + " (descricao, situacao, id_gerente, data_registo) VALUES(?,?,?,?)")){
             statement.setString(1, servico.getDescricao());
-//            statement.setBoolean(5, servico.estaEmUso());
+            statement.setString(2, servico.getSituacao());
+            statement.setLong(3, servico.getIdGerente());
+            statement.setDate(4, new Date(servico.getDataRegisto()));
             r = new Result.Success<>(statement.executeUpdate() > 0);
             statement.close();
         } catch (SQLException e) {
@@ -46,9 +58,10 @@ public abstract class AbstractServicoRepository extends AbstractRepository {
     public Result<Boolean> edit(Servico servico) {
        Result<Boolean> r;
 
-        try (PreparedStatement statement = getConnection().prepareStatement("UPDATE quartos SET descricao = ?WHERE id = ?")){
+        try (PreparedStatement statement = getConnection().prepareStatement("UPDATE " + tblName + " SET descricao = ? AND situacao = ? WHERE id = ?")){
             statement.setString(1, servico.getDescricao());
-            statement.setLong(2, servico.getId());
+            statement.setString(2, ServicoSituacao.obterPorValor(servico.getSituacao()));
+            statement.setLong(3, servico.getId());
             r = new Result.Success<>(statement.executeUpdate() > 0);
             statement.close();
         } catch (SQLException e) {
@@ -61,7 +74,7 @@ public abstract class AbstractServicoRepository extends AbstractRepository {
     public Result<Boolean> deleteOrUndelete(long id, boolean delete) {
         Result<Boolean> r;
         
-        try (PreparedStatement statement = getConnection().prepareStatement("UPDATE quartos SET status = ? WHERE id = ?")){
+        try (PreparedStatement statement = getConnection().prepareStatement("UPDATE " + tblName + " SET status = ? WHERE id = ?")){
             statement.setBoolean(1, delete);
             statement.setLong(2, id);
             r = new Result.Success<>(statement.executeUpdate() > 0);
@@ -75,16 +88,59 @@ public abstract class AbstractServicoRepository extends AbstractRepository {
     public Result<List<Servico>> getAll() {
         Result<List<Servico>> r;
         
-        try (PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM servicos")){
+        try (PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM " + tblName)){
             ResultSet rs = statement.executeQuery();
+            ResultSetMetaData resultSetMetaData = rs.getMetaData();
+            int columnCount = resultSetMetaData.getColumnCount();
             List<Servico> servicos = new ArrayList<>();
             
-            while (rs.next()) {
-//                servicos.add(new Servico(rs.getLong("id"), rs.getString("descricao"), rs.getBoolean("status")));
+            if (columnCount != 0) {
+                while (rs.next()) {
+                    Servico servico = new Servico();
+                    servico.setGerente(new Gerente());
+                    
+                    for (int i = 1 ; i <= columnCount ; i++) {
+                        String columnName = resultSetMetaData.getColumnName(i);
+                        
+                        switch (columnName) {
+                            case "id": 
+                                servico.setId(rs.getLong(columnName));
+                                    break;
+                            case "descricao":
+                                servico.setDescricao(rs.getString(columnName));
+                                    break;
+                            case "data_registo":
+                                servico.setDataRegisto(rs.getDate(columnName).getTime());
+                                    break;
+                            case "id_gerente":
+                                servico.getGerente().setId(rs.getLong(columnName));
+                                    break;
+                            case "gerente_nome":
+                                servico.getGerente().setNome(rs.getString(columnName));
+                                    break;
+                            case "gerente_sexo":
+                                servico.getGerente().setSexo(rs.getString(columnName).charAt(0));
+                                    break;
+                            case "gerente_num_telefone":
+                                servico.getGerente().setNumTelefone(rs.getInt(columnName));
+                                    break;
+                            case "gerente_num_bilhete_identidade":
+                                servico.getGerente().setNumBilheteIdentidade(rs.getString(columnName));
+                                    break;
+                            case "gerente_data_nascimento":
+                                servico.getGerente().setDataNascimento(rs.getDate(columnName).getTime());
+                                    break;
+                            case "situacao": 
+                                servico.setSituacao(ServicoSituacao.obterViaString(rs.getString(columnName)));
+                                    break;
+                        }
+                    }
+                    
+                    servicos.add(servico);
+                }
             }
             
             r = new Result.Success<>(servicos);
-            rs.close();
         } catch(SQLException e) {
             r = new Result.Error<>(e);
         }
@@ -93,21 +149,60 @@ public abstract class AbstractServicoRepository extends AbstractRepository {
     }
     
     public Result<Servico> get(long id) {
-        Result r;
+        Result<Servico> r;
         
-        try (PreparedStatement statement = getConnection().prepareStatement("SELECT descricao, status FROM quartos WHERE id = ?")){
+        try (PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM " + tblName + " WHERE id = ?")){
             statement.setLong(1, id);
             ResultSet rs = statement.executeQuery();
-            
+            ResultSetMetaData resultSetMetaData = rs.getMetaData();
+            int columnCount = resultSetMetaData.getColumnCount();
             Servico servico = null;
             
-            while (rs.next()) {
-    //            servico = new Servico(id, rs.getString("descricao"), rs.getBoolean("status"));
+            if (columnCount != 0) {
+                while (rs.next()) {
+                    servico = new Servico();
+                    servico.setGerente(new Gerente());
+                    
+                    for (int i = 1 ; i <= columnCount ; i++) {
+                        String columnName = resultSetMetaData.getColumnName(i);
+                        
+                        switch (columnName) {
+                            case "id": 
+                                servico.setId(rs.getLong(columnName));
+                                    break;
+                            case "descricao":
+                                servico.setDescricao(rs.getString(columnName));
+                                    break;
+                            case "data_registo":
+                                servico.setDataRegisto(rs.getDate(columnName).getTime());
+                                    break;
+                            case "id_gerente":
+                                servico.getGerente().setId(rs.getLong(columnName));
+                                    break;
+                            case "gerente_nome":
+                                servico.getGerente().setNome(rs.getString(columnName));
+                                    break;
+                            case "gerente_sexo":
+                                servico.getGerente().setSexo(rs.getString(columnName).charAt(0));
+                                    break;
+                            case "gerente_num_telefone":
+                                servico.getGerente().setNumTelefone(rs.getInt(columnName));
+                                    break;
+                            case "gerente_num_bilhete_identidade":
+                                servico.getGerente().setNumBilheteIdentidade(rs.getString(columnName));
+                                    break;
+                            case "gerente_data_nascimento":
+                                servico.getGerente().setDataNascimento(rs.getDate(columnName).getTime());
+                                    break;
+                            case "situacao": 
+                                servico.setSituacao(ServicoSituacao.obterViaString(rs.getString(columnName)));
+                                    break;
+                        }
+                    }
+                }
             }
             
             r = new Result.Success<>(servico);
-            rs.close();
-            statement.close();
         } catch(SQLException e) {
             r = new Result.Error<>(e);
         }
