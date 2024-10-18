@@ -23,9 +23,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 
 /**
@@ -41,12 +41,6 @@ public class DialogInserirServicoController extends AbstractController implement
     
     @FXML
     private ComboBox<String> cbSituacao;
-    
-    @FXML
-    private ImageView close;
-    
-    @FXML
-    private Button btnAdicionar;
     
     private EventHandler<Event> parentEventHandler;
     private ReadOnlyIntegerProperty selectedIndexProperty;
@@ -83,18 +77,14 @@ public class DialogInserirServicoController extends AbstractController implement
 
     @Override
     public void adicionarListeners() {
-        btnAdicionar.setOnAction(this);
         selectedIndexProperty.addListener(changeListener);
-        close.setOnMouseClicked(parentEventHandler);
         descricaoProperty.addListener(changeListener);
     }
 
     @Override
     public void removerListeners() {
-        btnAdicionar.setOnAction(null);
         selectedIndexProperty.removeListener(changeListener);
         descricaoProperty.removeListener(changeListener);
-        close.setOnMouseClicked(null);
     }
 
     @Override
@@ -104,14 +94,6 @@ public class DialogInserirServicoController extends AbstractController implement
 
     private boolean temLinhaSelecionada(int selectedIndex) {
         return selectedIndex != -1;
-    }
-
-    public ImageView getCloseButton() {
-        return close;
-    }
-    
-    public Button getBtnAdicionar() {
-        return btnAdicionar;
     }
 
     public void setParentEventHandler(EventHandler<Event> parentEventHandler) {
@@ -130,13 +112,13 @@ public class DialogInserirServicoController extends AbstractController implement
         this.usuario = usuario;
     }
     
+    public void clicarBotao() {
+    
+    }
+    
     @Override
     public void handle(ActionEvent event) {
         Object source = event.getSource();
-        
-        if (!source.equals(btnAdicionar)) {
-            return;
-        }
         
         boolean isUsuarioNotValid = (usuario == null || usuario.getTipo() == null || usuario.getTipo() != Usuario.Tipo.GERENTE), 
                 isDescricaoNotValid = (descricao == null || descricao.isBlank()),
@@ -185,7 +167,7 @@ public class DialogInserirServicoController extends AbstractController implement
 
         Number number = (Number) value;
         Integer selectedIndex = number.intValue();
-        btnAdicionar.setDisable(!temLinhaSelecionada(selectedIndex) || !ServicoValidator.isDescricaoValid(txtDescricao.getText()));
+//        btnAdicionar.setDisable(!temLinhaSelecionada(selectedIndex) || !ServicoValidator.isDescricaoValid(txtDescricao.getText()));
         situacao = temLinhaSelecionada(selectedIndex) ? cbSituacao.getSelectionModel().getSelectedItem() : null;
     }
 
@@ -194,6 +176,6 @@ public class DialogInserirServicoController extends AbstractController implement
             return;
 
         descricao = (String) value;
-        btnAdicionar.setDisable(!temLinhaSelecionada(selectedIndexProperty.get()) || !ServicoValidator.isDescricaoValid(descricao));
+     //   btnAdicionar.setDisable(!temLinhaSelecionada(selectedIndexProperty.get()) || !ServicoValidator.isDescricaoValid(descricao));
     }
 }

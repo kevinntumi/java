@@ -12,6 +12,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.animation.FadeTransition;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -22,6 +23,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.StackPane;
+import javafx.util.Duration;
 
 /**
  *
@@ -43,12 +45,14 @@ public class TelaHospedes extends AbstractController implements EventHandler<Act
 
     @Override
     public void adicionarListeners() {
+        alterarVisibilidadeRoot(true);
         btnCarregar.setOnAction(this);
         root.visibleProperty().addListener(this);
     }
 
     @Override
     public void removerListeners() {
+        alterarVisibilidadeRoot(false);
         btnCarregar.setOnAction(null);
         root.visibleProperty().removeListener(this);
     }
@@ -94,6 +98,23 @@ public class TelaHospedes extends AbstractController implements EventHandler<Act
             return;
         
         tableView.getItems().clear();
+    }
+    
+    private void alterarVisibilidadeRoot(boolean visivel) {
+        System.out.println("visibilidade: " + visivel);
+        if (visivel) {
+            FadeTransition fadeTransition = new FadeTransition(Duration.millis(400), root);
+            fadeTransition.setFromValue(0.0);
+            fadeTransition.setToValue(1.0);
+            fadeTransition.play();
+        }
+        
+        if (!visivel && root.getOpacity() == 1.0) {
+            FadeTransition fadeTransition = new FadeTransition(Duration.millis(400), root);
+            fadeTransition.setFromValue(1.0);
+            fadeTransition.setToValue(0.0);
+            fadeTransition.play();
+        }
     }
     
     private void carregarHospedes() {

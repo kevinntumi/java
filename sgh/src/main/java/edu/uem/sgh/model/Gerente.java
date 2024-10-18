@@ -17,6 +17,13 @@ public class Gerente {
     private long dataNascimento;
     private long dataRegisto;
 
+    public Gerente() {
+    }
+
+    public Gerente(Long id) {
+        this.id = id;
+    }
+
     public long getId() {
         return id;
     }

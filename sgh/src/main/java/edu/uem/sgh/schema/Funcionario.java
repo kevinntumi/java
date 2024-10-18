@@ -9,17 +9,36 @@ package edu.uem.sgh.schema;
  * @author Kevin Ntumi
  */
 public class Funcionario {
-    private long id;
+    private Long id;
     private String nome;
-    private long dataNascimento;
-    private long dataRegisto;
-    private String numDocIdentidade;
+    private Long dataNascimento;
+    private Long dataRegisto;
+    private String morada;
+    private String numBilheteIdentidade;
+    private Integer numTelefone;
+    private String email;
+    private Long idGerente;
 
-    public long getId() {
+    public Funcionario() {
+    }
+    
+    public Funcionario(Long id, String nome, Long dataNascimento, Long dataRegisto, String morada, String numBilheteIdentidade, Integer numTelefone, String email, Long idGerente) {
+        this.id = id;
+        this.nome = nome;
+        this.dataNascimento = dataNascimento;
+        this.dataRegisto = dataRegisto;
+        this.morada = morada;
+        this.numBilheteIdentidade = numBilheteIdentidade;
+        this.numTelefone = numTelefone;
+        this.email = email;
+        this.idGerente = idGerente;
+    }
+    
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -31,27 +50,59 @@ public class Funcionario {
         this.nome = nome;
     }
 
-    public long getDataNascimento() {
+    public Long getDataNascimento() {
         return dataNascimento;
     }
 
-    public void setDataNascimento(long dataNascimento) {
+    public void setDataNascimento(Long dataNascimento) {
         this.dataNascimento = dataNascimento;
     }
 
-    public long getDataRegisto() {
+    public Long getDataRegisto() {
         return dataRegisto;
     }
 
-    public void setDataRegisto(long dataRegisto) {
+    public void setDataRegisto(Long dataRegisto) {
         this.dataRegisto = dataRegisto;
     }
 
-    public String getNumDocIdentidade() {
-        return numDocIdentidade;
+    public String getMorada() {
+        return morada;
     }
 
-    public void setNumDocIdentidade(String numDocIdentidade) {
-        this.numDocIdentidade = numDocIdentidade;
+    public void setMorada(String morada) {
+        this.morada = morada;
+    }
+
+    public String getNumBilheteIdentidade() {
+        return numBilheteIdentidade;
+    }
+
+    public void setNumBilheteIdentidade(String numBilheteIdentidade) {
+        this.numBilheteIdentidade = numBilheteIdentidade;
+    }
+
+    public Integer getNumTelefone() {
+        return numTelefone;
+    }
+
+    public void setNumTelefone(Integer numTelefone) {
+        this.numTelefone = numTelefone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Long getIdGerente() {
+        return idGerente;
+    }
+
+    public void setIdGerente(Long idGerente) {
+        this.idGerente = idGerente;
     }
 }

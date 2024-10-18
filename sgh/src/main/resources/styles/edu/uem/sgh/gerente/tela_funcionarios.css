@@ -2,6 +2,41 @@
  * Empty Stylesheet file.
  */
 
-.mainFxmlClass {
+.table-view {
+    -fx-font-family: "Inter";
+    -fx-font-size: 12;
+}
 
+#tableView .table-row-cell{
+    -fx-background-insets: 0;
+}
+
+.table-view .column-header,
+.table-view .column-header .filler,
+.table-view .column-header-background .filler {
+    -fx-background-color: #f1f1f1;
+    -fx-border-width: 0;
+    -fx-min-height: 32px;
+    -fx-max-height: 32px;
+    -fx-pref-height: 32px;
+}
+
+.button {
+    -fx-background-color: #eee;
+    -fx-border-color: #ccc;
+    -fx-border-width: 0.5px;
+    -fx-padding: 0 24px 0 24px;
+    -fx-min-height: 24px;
+    -fx-max-height: 24px;
+    -fx-pref-height: 24px;
+    -fx-border-style: solid inside;
+    -fx-border-radius: 0;
+}
+
+.button:hover {
+    -fx-background-color: #ddd;
+}
+
+.button:pressed {
+    -fx-background-color: #e1e1e1;
 }

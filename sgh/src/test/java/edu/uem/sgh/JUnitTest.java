@@ -12,17 +12,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -37,6 +32,40 @@ public class JUnitTest {
     //
     // @Test
     // public void hello() {}
+    
+    @Test
+    public void findCharacters() {
+        Scanner sc = new Scanner(System.in);
+        char c = sc.next().charAt(0);
+        System.out.println((int) c == (27));
+    }
+    
+    @Test
+    public void testNumBIValidator() {
+        String numBI = "100101711899m";
+        System.out.println(isNumBIValid(numBI));
+    }
+    
+    public static boolean isNumBIValid(String numBilheteId) {
+        if (numBilheteId == null || numBilheteId.isBlank() || numBilheteId.length() != 13)
+            return false;
+        
+        int digitCount = 0, length = numBilheteId.length() - 2;
+        
+        for (int i = 0 ; i <= length; i++) {
+            char ch = numBilheteId.charAt(i);
+            
+            if (Character.isDigit(ch))
+                digitCount += 1;
+        }
+        
+        if (digitCount != 12) {
+            return false;
+        } else {
+            char lastCh = numBilheteId.charAt(numBilheteId.length() - 1);
+            return Character.isLetter(lastCh) && Character.isUpperCase(lastCh);
+        }
+    }
     
     @Test
     public void findResourcesFXML() throws MalformedURLException {

@@ -44,7 +44,7 @@ public class RemoteAutenticacaoDataSource extends AbstractDataSource {
             while (rs.next()) {
                 usuario = new Usuario(System.currentTimeMillis(), id);
                 
-                for (int i = 1 ; i < resultSetMetaData.getColumnCount() ; i++) {
+                for (int i = 1 ; i <= resultSetMetaData.getColumnCount() ; i++) {
                     String nomeColuna = resultSetMetaData.getColumnName(i);
 
                     switch (nomeColuna) {

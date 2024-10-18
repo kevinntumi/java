@@ -1,0 +1,17 @@
+.button {
+    -fx-background-color: rgba(0, 0, 0, 0.08);
+    -fx-text-fill: rgba(0, 0, 0, 0.6);
+    -fx-font-size: 12;
+    -fx-font-family: "Inter Bold";
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+}
+
+#txtNome, #txtEmail, #txtNumTelefone, #txtNumBI, #txtMorada, #dataNascimentoInput {
+    -fx-background-color: rgba(0,0,0,0);
+    -fx-border-color: #CCC;
+    -fx-border-width: 0.5px;
+    -fx-border-style: solid inside;
+    -fx-text-fill: #000;
+    -fx-border-radius: 0;
+}

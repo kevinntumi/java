@@ -19,6 +19,7 @@ import static edu.uem.sgh.model.Usuario.Tipo.CLIENTE;
 import static edu.uem.sgh.model.Usuario.Tipo.FUNCIONARIO;
 import static edu.uem.sgh.model.Usuario.Tipo.GERENTE;
 import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
+import edu.uem.sgh.repository.funcionario.FuncionarioRepository;
 import edu.uem.sgh.repository.hospede.HospedeRepository;
 import edu.uem.sgh.repository.quarto.QuartoRepository;
 import edu.uem.sgh.repository.servico.ServicoRepository;
@@ -76,6 +77,7 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     private AutenticacaoRepository autenticacaoRepository;
     private QuartoRepository quartoRepository;
     private HospedeRepository hospedeRepository;
+    private FuncionarioRepository funcionarioRepository;
     private EventHandler<MouseEvent> parentMouseEventHandler;
     private Connection localConnection, remoteConnection;
 
@@ -102,7 +104,7 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         if (observable.equals(tabPane.getSelectionModel().selectedItemProperty())) {
             Tab newTab = (Tab) newValue;
             Node newTabNode = newTab.getContent();
-            
+           
             if (oldValue != null) {
                 Tab oldTab = (Tab) oldValue;
                 Node oldTabNode = oldTab.getContent();
@@ -119,6 +121,7 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
                 return;
             
             resolverDependencias(abstractController, true);
+            return;
         }
         
         if (newValue instanceof Usuario) {
@@ -454,7 +457,7 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         else if (uiClassId.equals(edu.uem.sgh.controller.gerente.TelaRelatorios.class.getTypeName()))
             resolverDependenciasTelaRelatorios(abstractController, add);
         else if (uiClassId.equals(edu.uem.sgh.controller.gerente.TelaReservas.class.getTypeName()))
-            resolverDependenciasTelaReservs(abstractController, add);
+            resolverDependenciasTelaReservas(abstractController, add);
         
         if (add)
             abstractController.adicionarListeners();
@@ -465,11 +468,13 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
             return;
         
         TelaServicos telaServicos = (TelaServicos) abstractController;
-        System.out.println("add: " + add);
+        
         if (add) {
             telaServicos.setServicoRepository(getServicoRepository());
+            telaServicos.setUsuario(usuario);
         } else {
             telaServicos.setServicoRepository(null);
+            telaServicos.setUsuario(null);
         }
     }
 
@@ -480,9 +485,11 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         TelaCheckIns telaCheckIns = (TelaCheckIns) abstractController;
         
         if (add) {
-            
+            telaCheckIns.setCheckInReservaRepository(null);
+            telaCheckIns.setUsuario(usuario);
         } else {
-            
+            telaCheckIns.setCheckInReservaRepository(null);
+            telaCheckIns.setUsuario(null);
         }
     }
 
@@ -504,11 +511,13 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
             return;
         
         TelaFuncionarios telaFuncionarios = (TelaFuncionarios) abstractController;
-        
+            
         if (add) {
-            
+            telaFuncionarios.setFuncionarioRepository(getFuncionarioRepository());
+            telaFuncionarios.setUsuario(usuario);
         } else {
-            
+            telaFuncionarios.setFuncionarioRepository(null);
+            telaFuncionarios.setUsuario(null);
         }
     }
 
@@ -517,7 +526,7 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
             return;
         
         TelaHospedes telaHospedes = (TelaHospedes) abstractController;
-        
+        System.out.println("yes");
         if (add) {
             
         } else {
@@ -551,7 +560,7 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         }
     }
 
-    private void resolverDependenciasTelaReservs(AbstractController abstractController, boolean add) {
+    private void resolverDependenciasTelaReservas(AbstractController abstractController, boolean add) {
         if (abstractController == null || !(abstractController instanceof TelaReservas))
             return;
         
@@ -562,5 +571,10 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         } else {
             
         }
+    }
+
+    public FuncionarioRepository getFuncionarioRepository() {
+        if (funcionarioRepository == null && remoteConnection != null) funcionarioRepository = new FuncionarioRepository(remoteConnection);
+        return funcionarioRepository;
     }
 }

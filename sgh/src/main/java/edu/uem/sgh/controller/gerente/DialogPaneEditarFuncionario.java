@@ -4,23 +4,12 @@
  */
 package edu.uem.sgh.controller.gerente;
 
-import javafx.application.Application;
 import javafx.scene.control.DialogPane;
-import javafx.stage.Stage;
 
 /**
  *
  * @author Kevin Ntumi
  */
-public class DialogXX extends Application {
-
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        
-        primaryStage.show();
-    }
+public class DialogPaneEditarFuncionario extends DialogPane {
     
-    public static void main(String[] args) {
-        DialogXX.launch(args);
-    }
 }

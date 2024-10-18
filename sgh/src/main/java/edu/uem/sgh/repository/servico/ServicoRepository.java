@@ -40,7 +40,7 @@ public class ServicoRepository implements ServicoDao{
         return getRemoteServicoRepository().deleteOrUndelete(id, delete);
     }
 
-    public Result<Boolean> edit(Servico servico) {
+    public Result<Boolean> edit(edu.uem.sgh.schema.Servico servico) {
         return getRemoteServicoRepository().edit(servico);
     }
 

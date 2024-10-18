@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package edu.uem.sgh.controller.gerente;
+package edu.uem.sgh.controller.gerente.dialog;
 
 import edu.uem.sgh.helper.ServicoSituacao;
 import edu.uem.sgh.model.Result;
@@ -12,6 +12,7 @@ import edu.uem.sgh.util.Path;
 import edu.uem.sgh.util.ServicoValidator;
 import java.io.IOException;
 import java.sql.SQLException;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -36,18 +37,19 @@ import javafx.stage.StageStyle;
  *
  * @author Kevin Ntumi
  */
-public class DialogInserirServico extends Dialog<Object> {
+public class DialogEditarServico extends Dialog<Object> {
     private TextField txtDescricao;
     private ComboBox<String> cbSituacao;
     private Button btnOK;
     private EventHandler<DialogEvent> eventHandler;
     private ServicoRepository servicoRepository;
     private ChangeListener<Object> changeListener;
-    private String descricao = null, situacao = null;
+    private StringProperty descricao, situacao;
+    private edu.uem.sgh.schema.Servico servico = null;
     private Usuario usuario;
     private Alert alert;
     
-    public DialogInserirServico() {
+    public DialogEditarServico() {
         setTitle("Novo serviço");
         FXMLLoader fXMLLoader = new FXMLLoader(Path.getFXMLURL("DialogInserirServico", "\\gerente\\dialog\\"));
         Parent content;
@@ -87,15 +89,7 @@ public class DialogInserirServico extends Dialog<Object> {
             
             Node n = null;
             
-            if (node instanceof Parent) {
-                n = findById(id, ((Parent) node).getChildrenUnmodifiable());
-            } else if (n instanceof Pane) {
-                n = findById(id, ((Parent) node).getChildrenUnmodifiable());
-            } else if (n instanceof Region) {
-                n = findById(id, ((Parent) node).getChildrenUnmodifiable());
-            } else if (n instanceof VBox) {
-                n = findById(id, ((Parent) node).getChildrenUnmodifiable());
-            } else if (n instanceof HBox) {
+            if (node instanceof Parent || n instanceof Pane || n instanceof Region || n instanceof VBox || n instanceof HBox) {
                 n = findById(id, ((Parent) node).getChildrenUnmodifiable());
             }
 
@@ -106,15 +100,32 @@ public class DialogInserirServico extends Dialog<Object> {
         return null;
     }
 
+    public void setDescricao(StringProperty descricao) {
+        this.descricao = descricao;
+    }
+
+    public void setSituacao(StringProperty situacao) {
+        this.situacao = situacao;
+    }
+    
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
     }
 
+    public void setServico(edu.uem.sgh.schema.Servico servico) {
+        this.servico = servico;
+    }
+    
     public void setServicoRepository(ServicoRepository servicoRepository) {
         this.servicoRepository = servicoRepository;
     }
     
     public void adicionarListeners() {
+        if (servico == null) {
+            System.out.println(btnOK.getOnAction());
+            System.out.println(btnOK.getOnMouseClicked());
+        }
+        
         if (changeListener == null) {
             changeListener = new ChangeListener<Object>() {
             @Override
@@ -128,66 +139,46 @@ public class DialogInserirServico extends Dialog<Object> {
         }
         
         if (eventHandler == null) {
-            eventHandler = new EventHandler<DialogEvent>() {
-                @Override
-                public void handle(DialogEvent event) {
-                    boolean isUsuarioNotValid = (usuario == null || usuario.getTipo() == null || usuario.getTipo() != Usuario.Tipo.GERENTE),
-                            isRepositoryNotValid = (servicoRepository == null),
-                            isDescricaoNotValid = (txtDescricao.getText() == null || txtDescricao.getText().isBlank()),
-                            isSituacaoNotValid = (cbSituacao.getSelectionModel().isEmpty());
-                    
-                    if (isUsuarioNotValid || isRepositoryNotValid || isDescricaoNotValid || isSituacaoNotValid) {
-                        System.out.println("isUsuarioNotValid: " + isUsuarioNotValid);
-                        System.out.println("isDescricaoNotValid: " + isDescricaoNotValid);
-                        System.out.println("isSituacaoNotValid: " + isSituacaoNotValid);
-                        
-                        if (isUsuarioNotValid) {
-                            
-                        } else if (isRepositoryNotValid) {
-                            
-                        } else if (isDescricaoNotValid) {
-
-                        } else {
-
-                        }
-
-                        return;
-                    }
-                    
-                    getDialogPane().getContent().setMouseTransparent(true);
-                    
-                    edu.uem.sgh.schema.Servico servico = new edu.uem.sgh.schema.Servico();
-                    servico.setDescricao(txtDescricao.getText());
-                    servico.setSituacao(situacao);
-                    servico.setIdGerente(usuario.getIdTipo());
-                    servico.setDataRegisto(System.currentTimeMillis());
-                    
-                    Result<Boolean> rslt = servicoRepository.add(servico);
-
-                    getDialogPane().getContent().setMouseTransparent(false);
-                    
-                    if (rslt == null) {
-                        return;
-                    }
-                    
-                    boolean consumeEvent = false;
-                    
-                    if (rslt instanceof Result.Error) {
-                        Result.Error<Boolean> error = (Result.Error<Boolean>) rslt;
-                        String descricao = (error.getException().getClass().equals(SQLException.class)) ? "Não foi possivel estabelecer uma conexão a base de dados remota." : "Não foi possivel realizar o pedido. Tente novamente em uma outra altura.";
-                        mostrarMsgErro(descricao);
-                        consumeEvent = true;
+            eventHandler = (DialogEvent event) -> {
+                boolean isUsuarioNotValid = (usuario == null || usuario.getTipo() == null || usuario.getTipo() != Usuario.Tipo.GERENTE), isRepositoryNotValid = (servicoRepository == null);
+                
+                if (isUsuarioNotValid || isRepositoryNotValid) {
+                    if (isUsuarioNotValid) {
+                        mostrarMsgErro("Inicie a sessao para realizar o pedido!");
                     } else {
-                        Result.Success<Boolean> success = (Result.Success<Boolean>) rslt;
-                        System.out.println("" + success.getData());
-                        if (!success.getData()) {
-                            consumeEvent = true;
-                        }
+                        mostrarMsgErro("Não foi possivel estabelecer uma conexão a base de dados remota.");
                     }
                     
-                    if (consumeEvent)
-                        event.consume();
+                    return;
                 }
+                
+                getDialogPane().getContent().setMouseTransparent(true);
+                servico.setDescricao(descricao.get());
+                servico.setSituacao(situacao.get());
+                Result<Boolean> rslt = servicoRepository.edit(servico);
+                getDialogPane().getContent().setMouseTransparent(false);
+                
+                if (rslt == null) {
+                    return;
+                }
+                
+                boolean consumeEvent = false;
+                
+                if (rslt instanceof Result.Error) {
+                    Result.Error<Boolean> error = (Result.Error<Boolean>) rslt;
+                    String descricao1 = (error.getException().getClass().equals(SQLException.class)) ? "Não foi possivel estabelecer uma conexão a base de dados remota." : "Não foi possivel realizar o pedido. Tente novamente em uma outra altura.";
+                    mostrarMsgErro(descricao1);
+                    consumeEvent = true;
+                } else {
+                    Result.Success<Boolean> success = (Result.Success<Boolean>) rslt;
+                    
+                    if (!success.getData()) {
+                        consumeEvent = true;
+                    }
+                }
+                
+                if (consumeEvent)
+                    event.consume();
             };
         } else {
             setOnCloseRequest(null);
@@ -220,7 +211,7 @@ public class DialogInserirServico extends Dialog<Object> {
         Number number = (Number) value;
         Integer selectedIndex = number.intValue();
         btnOK.setDisable(!temLinhaSelecionada(selectedIndex) || !ServicoValidator.isDescricaoValid(txtDescricao.getText()));
-        situacao = temLinhaSelecionada(selectedIndex) ? cbSituacao.getSelectionModel().getSelectedItem() : null;
+        situacao.set(temLinhaSelecionada(selectedIndex) ? cbSituacao.getSelectionModel().getSelectedItem() : null);
     }
      
     private Alert getAlert() {
@@ -237,8 +228,8 @@ public class DialogInserirServico extends Dialog<Object> {
         if (!(value instanceof String))
             return;
 
-        descricao = (String) value;
-        btnOK.setDisable(!temLinhaSelecionada(cbSituacao.getSelectionModel().getSelectedIndex()) || !ServicoValidator.isDescricaoValid(descricao));
+        descricao.set((String) value);
+        btnOK.setDisable(!temLinhaSelecionada(cbSituacao.getSelectionModel().getSelectedIndex()) || !ServicoValidator.isDescricaoValid(descricao.get()));
     }
     
     private boolean temLinhaSelecionada(int selectedIndex) {

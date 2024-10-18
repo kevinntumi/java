@@ -45,7 +45,7 @@ public abstract class AbstractServicoRepository extends AbstractRepository {
             statement.setString(1, servico.getDescricao());
             statement.setString(2, servico.getSituacao());
             statement.setLong(3, servico.getIdGerente());
-            statement.setDate(4, new Date(servico.getDataRegisto()));
+            statement.setDate(4, new Date(System.currentTimeMillis()));
             r = new Result.Success<>(statement.executeUpdate() > 0);
             statement.close();
         } catch (SQLException e) {
@@ -55,12 +55,15 @@ public abstract class AbstractServicoRepository extends AbstractRepository {
         return r;
     }
     
-    public Result<Boolean> edit(Servico servico) {
-       Result<Boolean> r;
+    public Result<Boolean> edit(edu.uem.sgh.schema.Servico servico) {
+        if (servico == null)
+            return new Result.Error<>(new NullPointerException());
+        
+        Result<Boolean> r;
 
         try (PreparedStatement statement = getConnection().prepareStatement("UPDATE " + tblName + " SET descricao = ? AND situacao = ? WHERE id = ?")){
             statement.setString(1, servico.getDescricao());
-            statement.setString(2, ServicoSituacao.obterPorValor(servico.getSituacao()));
+            statement.setString(2, servico.getSituacao());
             statement.setLong(3, servico.getId());
             r = new Result.Success<>(statement.executeUpdate() > 0);
             statement.close();
@@ -88,7 +91,7 @@ public abstract class AbstractServicoRepository extends AbstractRepository {
     public Result<List<Servico>> getAll() {
         Result<List<Servico>> r;
         
-        try (PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM " + tblName)){
+        try (PreparedStatement statement = getConnection().prepareStatement("SELECT servico.*, gerente.nome AS nome, gerente.num_doc_id AS num_bilhete_identidade FROM servico JOIN gerente ON servico.id_gerente = gerente.id")){
             ResultSet rs = statement.executeQuery();
             ResultSetMetaData resultSetMetaData = rs.getMetaData();
             int columnCount = resultSetMetaData.getColumnCount();
@@ -101,7 +104,7 @@ public abstract class AbstractServicoRepository extends AbstractRepository {
                     
                     for (int i = 1 ; i <= columnCount ; i++) {
                         String columnName = resultSetMetaData.getColumnName(i);
-                        
+                       
                         switch (columnName) {
                             case "id": 
                                 servico.setId(rs.getLong(columnName));
@@ -115,20 +118,11 @@ public abstract class AbstractServicoRepository extends AbstractRepository {
                             case "id_gerente":
                                 servico.getGerente().setId(rs.getLong(columnName));
                                     break;
-                            case "gerente_nome":
+                            case "nome":
                                 servico.getGerente().setNome(rs.getString(columnName));
                                     break;
-                            case "gerente_sexo":
-                                servico.getGerente().setSexo(rs.getString(columnName).charAt(0));
-                                    break;
-                            case "gerente_num_telefone":
-                                servico.getGerente().setNumTelefone(rs.getInt(columnName));
-                                    break;
-                            case "gerente_num_bilhete_identidade":
+                            case "num_bilhete_identidade":
                                 servico.getGerente().setNumBilheteIdentidade(rs.getString(columnName));
-                                    break;
-                            case "gerente_data_nascimento":
-                                servico.getGerente().setDataNascimento(rs.getDate(columnName).getTime());
                                     break;
                             case "situacao": 
                                 servico.setSituacao(ServicoSituacao.obterViaString(rs.getString(columnName)));
@@ -140,6 +134,7 @@ public abstract class AbstractServicoRepository extends AbstractRepository {
                 }
             }
             
+            rs.close();
             r = new Result.Success<>(servicos);
         } catch(SQLException e) {
             r = new Result.Error<>(e);

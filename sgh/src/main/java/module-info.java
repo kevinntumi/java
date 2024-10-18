@@ -11,8 +11,10 @@ module edu.uem.sgh {
     requires com.gluonhq.charm.glisten;
     requires org.controlsfx.controls;
     requires java.base;
+    requires com.dlsc.formsfx;
     
     opens edu.uem.sgh to javafx.fxml;
+    opens edu.uem.sgh.model.table to javafx.base;
     opens edu.uem.sgh.controller to javafx.fxml;
     opens edu.uem.sgh.controller.administrador to javafx.fxml;
     opens edu.uem.sgh.controller.cliente to javafx.fxml;

@@ -35,7 +35,7 @@ public class RemoteServicoRepository extends AbstractServicoRepository implement
     }
 
     @Override
-    public Result<Boolean> edit(Servico servico) {
+    public Result<Boolean> edit(edu.uem.sgh.schema.Servico servico) {
         return super.edit(servico); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
     }
 

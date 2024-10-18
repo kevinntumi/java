@@ -4,62 +4,65 @@
  */
 package edu.uem.sgh.model.table;
 
+import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleStringProperty;
+
 /**
  *
  * @author Kevin Ntumi
  */
 public class Servico {
-    private long id;
-    private String descricao;
-    private String dataRegisto;
-    private String situacao;
-    private String gerente;
+    private final SimpleLongProperty codigo;
+    private final SimpleStringProperty descricao;
+    private final SimpleStringProperty dataRegisto;
+    private final SimpleStringProperty situacao;
+    private final SimpleStringProperty inseridoPor;
 
-    public Servico(long id, String descricao, String dataRegisto, String situacao, String gerente) {
-        this.id = id;
-        this.descricao = descricao;
-        this.dataRegisto = dataRegisto;
-        this.situacao = situacao;
-        this.gerente = gerente;
+    public Servico(long codigo, String descricao, String dataRegisto, String situacao, String inseridoPor) {
+        this.codigo = new SimpleLongProperty(codigo);
+        this.descricao = new SimpleStringProperty(descricao);
+        this.dataRegisto = new SimpleStringProperty(dataRegisto);
+        this.situacao = new SimpleStringProperty(situacao);
+        this.inseridoPor = new SimpleStringProperty(inseridoPor);
     }
 
-    public long getId() {
-        return id;
+    public long getCodigo() {
+        return codigo.get();
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setCodigo(long codigo) {
+        this.codigo.set(codigo);
     }
 
     public String getDescricao() {
-        return descricao;
+        return descricao.get();
     }
 
     public void setDescricao(String descricao) {
-        this.descricao = descricao;
+        this.descricao.set(descricao);
     }
 
     public String getDataRegisto() {
-        return dataRegisto;
+        return dataRegisto.get();
     }
 
     public void setDataRegisto(String dataRegisto) {
-        this.dataRegisto = dataRegisto;
+        this.dataRegisto.set(dataRegisto);
     }
 
     public String getSituacao() {
-        return situacao;
+        return situacao.get();
     }
 
     public void setSituacao(String situacao) {
-        this.situacao = situacao;
+        this.situacao.set(situacao);
     }
 
-    public String getGerente() {
-        return gerente;
+    public String getInseridoPor() {
+        return inseridoPor.get();
     }
 
-    public void setGerente(String gerente) {
-        this.gerente = gerente;
+    public void setInseridoPor(String inseridoPor) {
+        this.inseridoPor.set(inseridoPor);
     }
 }
