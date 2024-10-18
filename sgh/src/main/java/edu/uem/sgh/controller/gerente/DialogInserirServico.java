@@ -74,6 +74,7 @@ public class DialogInserirServico extends Dialog<Object> {
         txtDescricao = (TextField)  findById("txtDescricao", content.getChildrenUnmodifiable());
         getDialogPane().setContent(content);
         getDialogPane().getButtonTypes().add(ButtonType.OK);
+        getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
         btnOK = (Button) getDialogPane().lookupButton(ButtonType.OK);
     }
     

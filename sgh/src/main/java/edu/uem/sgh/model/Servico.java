@@ -11,6 +11,9 @@ import edu.uem.sgh.helper.ServicoSituacao;
  * @author Kevin Ntumi
  */
 public class Servico {
+
+    public Servico() {
+    }
     private long id;
     private String descricao;
     private long dataRegisto;

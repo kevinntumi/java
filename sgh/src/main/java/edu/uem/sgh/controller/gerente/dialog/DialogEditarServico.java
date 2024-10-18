@@ -12,7 +12,6 @@ import edu.uem.sgh.util.Path;
 import edu.uem.sgh.util.ServicoValidator;
 import java.io.IOException;
 import java.sql.SQLException;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -44,7 +43,7 @@ public class DialogEditarServico extends Dialog<Object> {
     private EventHandler<DialogEvent> eventHandler;
     private ServicoRepository servicoRepository;
     private ChangeListener<Object> changeListener;
-    private StringProperty descricao, situacao;
+    private String descricao = null, situacao = null;
     private edu.uem.sgh.schema.Servico servico = null;
     private Usuario usuario;
     private Alert alert;
@@ -99,14 +98,6 @@ public class DialogEditarServico extends Dialog<Object> {
         
         return null;
     }
-
-    public void setDescricao(StringProperty descricao) {
-        this.descricao = descricao;
-    }
-
-    public void setSituacao(StringProperty situacao) {
-        this.situacao = situacao;
-    }
     
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
@@ -153,8 +144,8 @@ public class DialogEditarServico extends Dialog<Object> {
                 }
                 
                 getDialogPane().getContent().setMouseTransparent(true);
-                servico.setDescricao(descricao.get());
-                servico.setSituacao(situacao.get());
+                servico.setDescricao(descricao);
+                servico.setSituacao(situacao);
                 Result<Boolean> rslt = servicoRepository.edit(servico);
                 getDialogPane().getContent().setMouseTransparent(false);
                 
@@ -211,7 +202,7 @@ public class DialogEditarServico extends Dialog<Object> {
         Number number = (Number) value;
         Integer selectedIndex = number.intValue();
         btnOK.setDisable(!temLinhaSelecionada(selectedIndex) || !ServicoValidator.isDescricaoValid(txtDescricao.getText()));
-        situacao.set(temLinhaSelecionada(selectedIndex) ? cbSituacao.getSelectionModel().getSelectedItem() : null);
+        situacao = temLinhaSelecionada(selectedIndex) ? cbSituacao.getSelectionModel().getSelectedItem() : null;
     }
      
     private Alert getAlert() {
@@ -228,8 +219,8 @@ public class DialogEditarServico extends Dialog<Object> {
         if (!(value instanceof String))
             return;
 
-        descricao.set((String) value);
-        btnOK.setDisable(!temLinhaSelecionada(cbSituacao.getSelectionModel().getSelectedIndex()) || !ServicoValidator.isDescricaoValid(descricao.get()));
+        descricao = (String) value;
+        btnOK.setDisable(!temLinhaSelecionada(cbSituacao.getSelectionModel().getSelectedIndex()) || !ServicoValidator.isDescricaoValid(descricao));
     }
     
     private boolean temLinhaSelecionada(int selectedIndex) {
