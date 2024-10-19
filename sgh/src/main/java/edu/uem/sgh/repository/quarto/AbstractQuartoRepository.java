@@ -4,6 +4,7 @@
  */
 package edu.uem.sgh.repository.quarto;
 
+import edu.uem.sgh.helper.ServicoSituacao;
 import edu.uem.sgh.model.Quarto;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.repository.AbstractRepository;
@@ -11,6 +12,7 @@ import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,12 +34,12 @@ public abstract class AbstractQuartoRepository extends AbstractRepository {
     public Result<Boolean> add(Quarto quarto, FileInputStream fis) {
         Result<Boolean> r;
 
-        try (PreparedStatement statement = getConnection().prepareStatement("INSERT INTO quartos(descricao, capacidade, foto, preco, status) VALUES(?,?,?,?,?)")){
+        try (PreparedStatement statement = getConnection().prepareStatement("INSERT INTO quartos(descricao, capacidade, foto, preco, situacao) VALUES(?,?,?,?,?)")){
             statement.setString(1, quarto.getDescricao());
             statement.setInt(2, quarto.getCapacidade());
             statement.setBlob(3, fis);
             statement.setDouble(4, quarto.getPreco());
-//            statement.setBoolean(5, quarto.estaEmFuncionamento());
+            statement.setString(5, ServicoSituacao.obterPorValor(quarto.getSituacao()));
             r = new Result.Success<>(statement.executeUpdate() > 0);
             statement.close();
         } catch (SQLException e) {
@@ -50,12 +52,12 @@ public abstract class AbstractQuartoRepository extends AbstractRepository {
     public Result<Boolean> edit(Quarto t, FileInputStream fis) {
         Result<Boolean> r;
 
-        try (PreparedStatement statement = getConnection().prepareStatement("UPDATE quartos SET descricao = ?, capacidade = ?, foto = ?, preco = ?, status = ? WHERE id = ?")){
+        try (PreparedStatement statement = getConnection().prepareStatement("UPDATE quartos SET descricao = ?, capacidade = ?, foto = ?, preco = ?, situacao = ? WHERE id = ?")){
             statement.setString(1, t.getDescricao());
             statement.setInt(2, t.getCapacidade());
             statement.setBlob(3, fis);
             statement.setDouble(4, t.getPreco());
-            //statement.setBoolean(5, t.estaEmFuncionamento());
+            statement.setString(5, ServicoSituacao.obterPorValor(t.getSituacao()));
             statement.setLong(6, t.getId());
             r = new Result.Success<>(statement.executeUpdate() > 0);
             statement.close();
@@ -83,16 +85,46 @@ public abstract class AbstractQuartoRepository extends AbstractRepository {
     public Result<List<Quarto>> getAll(){
         Result<List<Quarto>> r;
         
-        try (PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM quartos")){
+        try (PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM quarto")){
             ResultSet rs = statement.executeQuery();  
+            ResultSetMetaData resultSetMetaData = rs.getMetaData();
+            int columnCount = resultSetMetaData.getColumnCount();
             List<Quarto> quartos = new ArrayList<>();
             
-            while (rs.next()) {
-//                quartos.add(new Quarto(rs.getLong("id"), rs.getString("descricao"), rs.getInt("capacidade"), rs.getBlob("foto"), rs.getDouble("preco"), rs.getBoolean("status")));
+            if (columnCount != 0) {
+                while (rs.next()) {
+                    Quarto quarto = new Quarto();
+                    
+                    for (int i = 1 ; i <= columnCount ; i++) {
+                        String columnName = resultSetMetaData.getColumnName(i);
+                        
+                        switch (columnName) {
+                            case "id":
+                                quarto.setId(rs.getLong(columnName));
+                                    break;
+                            case "descricao":
+                                quarto.setDescricao(rs.getString(columnName));
+                                    break;
+                            case "foto":
+                                quarto.setFoto(rs.getBlob(columnName));
+                                    break;  
+                            case "preco":
+                                quarto.setPreco(rs.getDouble(columnName));
+                                    break;
+                            case "situacao":
+                                quarto.setSituacao(ServicoSituacao.obterViaString(rs.getString(columnName)));
+                                    break;  
+                            case "capacidade":
+                                quarto.setCapacidade(rs.getInt(columnName));
+                                    break;
+                        }
+                    }
+                    
+                    quartos.add(quarto);
+                }
             }
             
             r = new Result.Success<>(quartos);
-            rs.close();
         } catch(SQLException e) {
             r = new Result.Error<>(e);
         }

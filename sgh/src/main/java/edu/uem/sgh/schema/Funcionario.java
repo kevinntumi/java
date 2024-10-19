@@ -105,4 +105,9 @@ public class Funcionario {
     public void setIdGerente(Long idGerente) {
         this.idGerente = idGerente;
     }
+
+    @Override
+    public String toString() {
+        return "Funcionario{" + "id=" + id + ", nome=" + nome + ", dataNascimento=" + dataNascimento + ", dataRegisto=" + dataRegisto + ", morada=" + morada + ", numBilheteIdentidade=" + numBilheteIdentidade + ", numTelefone=" + numTelefone + ", email=" + email + ", idGerente=" + idGerente + '}';
+    }
 }

@@ -13,12 +13,12 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="root" alignment="TOP_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.uem.sgh.controller.gerente.TelaQuartos">
+<StackPane fx:id="root" alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="636.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.uem.sgh.controller.gerente.TelaQuartos">
+   <stylesheets>
+      <URL value="@/styles/edu/uem/sgh/gerente/tela_quartos.css" />
+   </stylesheets>
    <children>
       <VBox maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity">
-         <stylesheets>
-            <URL value="@/styles/edu/uem/sgh/gerente/tela_quartos.css" />
-         </stylesheets>
          <children>
             <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="24.0">
                <children>
@@ -40,18 +40,20 @@
                   <Insets left="24.0" right="24.0" top="24.0" />
                </VBox.margin>
             </HBox>
-            <TableView fx:id="tableView" maxWidth="1.7976931348623157E308" prefHeight="400.0">
+            <TableView fx:id="tableView" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="494.0">
                <columns>
-                  <TableColumn maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="-1.0" text="Código" />
-                  <TableColumn maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="-1.0" text="Nome" />
-                  <TableColumn maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="-1.0" text="Data de Nascimento" />
-                  <TableColumn maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="-1.0" text="Data de Registo" />
-                  <TableColumn maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="-1.0" text="Situação" />
-                  <TableColumn maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="-1.0" text="Gerente Responsável" />
+                  <TableColumn fx:id="tblColumnCodigo" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="50.0" text="Código" />
+                  <TableColumn fx:id="tblColumnDescricao" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="50.0" text="Descrição" />
+                  <TableColumn fx:id="tblColumnCapacidade" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="50.0" text="Capacidade" />
+                  <TableColumn fx:id="tblColumnPreco" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="50.0" text="Preço" />
+                  <TableColumn fx:id="tblColumnSituacao" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="50.0" text="Situação" />
                </columns>
                <VBox.margin>
                   <Insets left="24.0" right="24.0" top="24.0" />
                </VBox.margin>
+               <columnResizePolicy>
+                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+               </columnResizePolicy>
             </TableView>
             <HBox maxHeight="-Infinity" maxWidth="1.7976931348623157E308">
                <children>
@@ -63,12 +65,20 @@
                         <Font name="Inter Regular" size="12.0" />
                      </font>
                   </Button>
-                  <Button fx:id="btnCarregar" mnemonicParsing="false" text="Carregar">
+                  <Button fx:id="btnEditar" mnemonicParsing="false" text="Editar">
                      <font>
                         <Font name="Inter Regular" size="12.0" />
                      </font>
                      <HBox.margin>
                         <Insets bottom="24.0" top="24.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="btnCarregar" mnemonicParsing="false" text="Carregar">
+                     <font>
+                        <Font name="Inter Regular" size="12.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets left="18.0" top="24.0" />
                      </HBox.margin>
                   </Button>
                </children>

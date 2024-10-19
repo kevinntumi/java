@@ -79,7 +79,7 @@ public class JUnitTest {
         start.setTimeInMillis(System.currentTimeMillis());
         int startDay = start.get(Calendar.DAY_OF_MONTH), startHour = start.get(Calendar.HOUR), startMinute = start.get(Calendar.MINUTE), startSeconds = start.get(Calendar.SECOND); 
 
-        Thread.sleep(6000);
+        //Thread.sleep(6000);
         
         end.setTimeInMillis(System.currentTimeMillis());
         int endDay = end.get(Calendar.DAY_OF_MONTH), endHour = end.get(Calendar.HOUR), endMinute = end.get(Calendar.MINUTE), endSeconds = end.get(Calendar.SECOND); 

@@ -30,6 +30,55 @@ public class RemoteAutenticacaoDataSource extends AbstractDataSource {
         return super.getConnection(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
     }
     
+    public Result<Usuario> getUserByIdTipoETipo(long idTipo, Tipo tipo) {
+        Result<Usuario> result;
+        
+        try {
+            PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM " + tblName + " WHERE id_tipo = ? AND tipo = ?");
+            statement.setLong(1, idTipo);
+            statement.setString(2, Tipo.converterTipoParaString(tipo));
+            ResultSet rs = statement.executeQuery();
+            ResultSetMetaData resultSetMetaData = rs.getMetaData();
+            
+            Usuario usuario = null;
+            
+            while (rs.next()) {
+                usuario = new Usuario();
+                
+                for (int i = 1 ; i <= resultSetMetaData.getColumnCount() ; i++) {
+                    String nomeColuna = resultSetMetaData.getColumnName(i);
+
+                    switch (nomeColuna) {
+                        case "data_alterado":
+                            usuario.setDataAlterado(rs.getDate(nomeColuna).getTime());
+                                break;
+                        case "data_registo":
+                            usuario.setDataRegisto(rs.getDate(nomeColuna).getTime());
+                                break;
+                        case "id" :
+                            usuario.setId(rs.getLong(nomeColuna));
+                                break;
+                        case "tipo":
+                            usuario.setTipo(Tipo.obterTipoViaString(rs.getString(nomeColuna)));
+                                break;
+                        case "id_usuario": 
+                            usuario.setIdTipo(rs.getInt(nomeColuna));
+                                break;
+                    }
+                }
+                
+                break;
+            }
+            
+            statement.close();
+            result = new Result.Success<>(usuario);
+        } catch(SQLException e) {
+            result = new Result.Error<>(e);
+        }
+        
+        return result;
+    }
+    
     public Result<Usuario> getUserById(long id) {
         Result<Usuario> result;
         

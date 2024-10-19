@@ -11,6 +11,7 @@ import edu.uem.sgh.datasource.RemoteAutenticacaoDataSource;
 import edu.uem.sgh.connection.Type;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
+import edu.uem.sgh.model.Usuario.Tipo;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -30,8 +31,12 @@ public class AutenticacaoRepository {
         this.localConnection = localConnection;
     }
     
+    public Result<Usuario> getUserByIdTipoETipo(long id, Tipo tipo) {
+        return getRemoteAutenticacaoDataSource().getUserByIdTipoETipo(id, tipo);
+    }
+    
     public Result<Usuario> getUserById(long id) {
-        return remoteAutenticacaoDataSource.getUserById(id);
+        return getRemoteAutenticacaoDataSource().getUserById(id);
     }
 
     public Result<Usuario> logIn(long id, String password) {

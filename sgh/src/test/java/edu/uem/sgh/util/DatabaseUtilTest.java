@@ -25,25 +25,6 @@ public class DatabaseUtilTest {
     private static final String BASE_FOLDER_PATH = System.getProperty("user.dir");
     private static final String BASE_SRC_FOLDER_PATH = BASE_FOLDER_PATH + "\\src";
     private static final String BASE_JAVA_SRC_FOLDER_PATH = BASE_SRC_FOLDER_PATH + "\\main\\java\\";
-    
-    public DatabaseUtilTest() {
-    }
-    
-    @BeforeAll
-    public static void setUpClass() {
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
-    }
-    
-    @BeforeEach
-    public void setUp() {
-    }
-    
-    @AfterEach
-    public void tearDown() {
-    }
 
     /**
      * Test of fileSizeInMegaBytes method, of class DatabaseUtil.

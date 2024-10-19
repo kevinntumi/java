@@ -347,8 +347,6 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
             try {
                 tabContent = createTabContentByName(tabName, i);
             } catch (Exception e) {
-                System.err.println(e);
-                System.err.println(e.getCause());
                 continue;
             }
             
@@ -524,9 +522,11 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         if (add) {
             telaFuncionarios.setFuncionarioRepository(getFuncionarioRepository());
             telaFuncionarios.setUsuario(usuario);
+            telaFuncionarios.setAutenticacaoRepository(autenticacaoRepository);
         } else {
             telaFuncionarios.setFuncionarioRepository(null);
             telaFuncionarios.setUsuario(null);
+            telaFuncionarios.setAutenticacaoRepository(null);
         }
     }
 
@@ -535,7 +535,7 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
             return;
         
         TelaHospedes telaHospedes = (TelaHospedes) abstractController;
-        System.out.println("yes");
+       
         if (add) {
             
         } else {
@@ -550,9 +550,11 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         TelaQuartos telaQuartos = (TelaQuartos) abstractController;
         
         if (add) {
-            
+            telaQuartos.setQuartoRepository(getQuartoRepository());
+            telaQuartos.setUsuario(usuario);
         } else {
-            
+            telaQuartos.setQuartoRepository(null);
+            telaQuartos.setUsuario(usuario);
         }
     }
 

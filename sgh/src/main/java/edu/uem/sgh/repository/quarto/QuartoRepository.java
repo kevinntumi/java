@@ -52,12 +52,12 @@ public class QuartoRepository {
     }   
 
     private RemoteQuartoRepository getRemoteQuartoRepository() {
-        if (remoteQuartoRepository == null) remoteQuartoRepository = new RemoteQuartoRepository(remoteConnection);
+        if (remoteQuartoRepository == null && remoteConnection != null) remoteQuartoRepository = new RemoteQuartoRepository(remoteConnection);
         return remoteQuartoRepository;
     }
 
     private LocalQuartoRepository getLocalQuartoRepository() {
-        if (localQuartoRepository == null) localQuartoRepository = new LocalQuartoRepository(localConnection);
+        if (localQuartoRepository == null && localConnection != null) localQuartoRepository = new LocalQuartoRepository(localConnection);
         return localQuartoRepository;
     }
 }

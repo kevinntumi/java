@@ -192,14 +192,17 @@ public class DialogEditarFuncionario extends Dialog<Object> {
     
     private void observarNome(String nome) {
         this.nome = nome;
+        funcionario.setNome(nome);
     }
     
     private void observarEmail(String email) {
         this.email = email;
+        funcionario.setEmail(email);
     }
     
     private void observarNumBilheteId(String numBilheteId) {
         numBilheteIdentidade = numBilheteId;
+        funcionario.setNumBilheteIdentidade(numBilheteIdentidade);
     }
     
     private void observarNumTelefone(String numTelefoneStr) {
@@ -210,6 +213,8 @@ public class DialogEditarFuncionario extends Dialog<Object> {
         } catch (NumberFormatException e) {
             numTelefone = null;
         }
+        
+        funcionario.setNumTelefone(numTelefone);
     }
 
     public EventHandler<MouseEvent> getMouseClickedEventHandler() {
@@ -239,12 +244,9 @@ public class DialogEditarFuncionario extends Dialog<Object> {
 
     public EventHandler<DialogEvent> getDialogLifecycleEventHandler() {
         if (dialogLifecycleEventHandler == null) {
-            dialogLifecycleEventHandler = new EventHandler<DialogEvent>() {
-                @Override
-                public void handle(DialogEvent event) {
-                    if (!(event.getEventType().equals(DialogEvent.DIALOG_CLOSE_REQUEST))) {
-                        event.consume();
-                    }
+            dialogLifecycleEventHandler = (DialogEvent event) -> {
+                if (!(event.getEventType().equals(DialogEvent.DIALOG_CLOSE_REQUEST))) {
+                    event.consume();
                 }
             };
         }
@@ -276,32 +278,28 @@ public class DialogEditarFuncionario extends Dialog<Object> {
 
         if (temCamposInvalidos(camposInvalidos)) {
             determinarRestantesCamposInvalidos(camposInvalidos);
+            mostrarMsg("Existem campos invalidos! Coloque o cursor sobre cada um para ver quais os campos invalidos");
             return;
         }
 
         Funcionario f = new Funcionario();
+        f.setId(funcionario.getId());
         f.setNome(nome);
-        f.setDataRegisto(System.currentTimeMillis());
-        f.setDataNascimento(System.currentTimeMillis());
-        f.setIdGerente(usuario.getIdTipo());
+        f.setDataNascimento(obterDataNascimentoViaLocalDate(dataNascimento));
         f.setNumTelefone(numTelefone);
         f.setMorada(morada);
         f.setEmail(email);
         f.setNumBilheteIdentidade(numBilheteIdentidade);
-
-        getDialogPane().getContent().setMouseTransparent(true);
-
-        rslt = funcionarioRepository.inserirFuncionario(f);
-
-        getDialogPane().getContent().setMouseTransparent(false);
+        
+        rslt = funcionarioRepository.editarFuncionario(f);
         
         if (rslt instanceof Result.Error) {
-            getAlert().setContentText(rslt.getValue().toString());
-            getAlert().show();
+            mostrarMsg(rslt.getValue().toString());
         } else {
             Result.Success<Boolean> success = (Result.Success<Boolean>) rslt;
 
             if (!success.getData()) {
+                mostrarMsg("Nao foi possivel realizar o pedido");
                 return;
             }
             
@@ -420,12 +418,20 @@ public class DialogEditarFuncionario extends Dialog<Object> {
             return;
         }
         
-        txtNome.setText(funcionario.getNome());
-        txtEmail.setText(funcionario.getEmail());
-        txtMorada.setText(funcionario.getMorada());
-        txtNumBI.setText(funcionario.getNumBilheteIdentidade());
-        txtNumTelefone.setText(funcionario.getNumTelefone() + "");
-        dataNascimentoInput.setValue(obterViaMilisegundos(funcionario.getDataNascimento()));
+        nome = funcionario.getNome();
+        email = funcionario.getEmail();
+        morada = funcionario.getMorada();
+        numBilheteIdentidade = funcionario.getNumBilheteIdentidade();
+        numTelefone = funcionario.getNumTelefone();
+        numTelefoneStr = numTelefone + "";
+        dataNascimento = obterViaMilisegundos(funcionario.getDataNascimento());
+        
+        txtNome.setText(nome);
+        txtEmail.setText(email);
+        txtMorada.setText(morada);
+        txtNumBI.setText(numBilheteIdentidade);
+        txtNumTelefone.setText(numTelefoneStr);
+        dataNascimentoInput.setValue(dataNascimento);
     }
     
     private LocalDate obterViaMilisegundos(Long timeInMillis) {
@@ -440,5 +446,18 @@ public class DialogEditarFuncionario extends Dialog<Object> {
         }
         
         return localDate;
+    }
+
+    private void mostrarMsg(String toString) {
+        getAlert().setContentText(toString);
+        getAlert().show();
+    }
+
+    private Long obterDataNascimentoViaLocalDate(LocalDate dataNascimento) {
+        Calendar clndr = Calendar.getInstance();
+        clndr.set(Calendar.DAY_OF_MONTH, dataNascimento.getDayOfMonth());
+        clndr.set(Calendar.YEAR, dataNascimento.getYear());
+        clndr.set(Calendar.MONTH, dataNascimento.getMonthValue());
+        return clndr.getTimeInMillis();
     }
 }

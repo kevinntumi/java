@@ -7,6 +7,7 @@ package edu.uem.sgh.datasource;
 import edu.uem.sgh.helper.FuncionarioSituacao;
 import edu.uem.sgh.model.Funcionario;
 import edu.uem.sgh.model.Gerente;
+import edu.uem.sgh.model.Passagem;
 import edu.uem.sgh.model.Result;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -49,20 +50,65 @@ public class RemoteFuncionarioDataSource extends AbstractDataSource {
         return r;
     }
 
-    public Result<Boolean> editarFuncionario(Funcionario funcionario) {
+    public Result<Boolean> editarFuncionario(edu.uem.sgh.schema.Funcionario funcionario) {
         Result<Boolean> r;
         
-        try (PreparedStatement statement = getConnection().prepareStatement("UPDATE " + tblName + " SET nome = ?, data_nascimento = ?, data_registo = ?, num_bilhete_id = ?, morada = ?, num_telefone = ?, email = ?  WHERE id = ?")){
+        try (PreparedStatement statement = getConnection().prepareStatement("UPDATE " + tblName + " SET nome = ?, data_nascimento = ?, num_bilhete_id = ?, morada = ?, num_telefone = ?, email = ?  WHERE id = ?")){
             statement.setString(1, funcionario.getNome());
             statement.setDate(2, new java.sql.Date(funcionario.getDataNascimento()));
-            statement.setDate(3, new java.sql.Date(funcionario.getDataRegisto()));
-            statement.setString(4, funcionario.getNumBilheteIdentidade());
-            statement.setString(5, funcionario.getMorada());
-            statement.setInt(6, funcionario.getNumTelefone());
-            statement.setString(7, funcionario.getEmail());
-            statement.setLong(8, funcionario.getId());
+            statement.setString(3, funcionario.getNumBilheteIdentidade());
+            statement.setString(4, funcionario.getMorada());
+            statement.setInt(5, funcionario.getNumTelefone());
+            statement.setString(6, funcionario.getEmail());
+            statement.setLong(7, funcionario.getId());
             r = new Result.Success<>(statement.executeUpdate() > 0);
-            statement.close();
+        } catch(SQLException  e) {
+            r = new Result.Error<>(e);
+        }
+        
+        return r;
+    }
+    
+    public Result<List<Passagem>> obterPassagensPorFuncionario(long idFuncionario) {
+        Result<List<Passagem>> r;
+        
+        try (PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM passagem WHERE id_tipo = ? AND tipo = ?")){
+            statement.setLong(1, idFuncionario);
+            statement.setString(2, "FUNCIONARIO");
+            ResultSet rs = statement.executeQuery();
+            ResultSetMetaData resultSetMetaData = rs.getMetaData();
+            List<Passagem> passagens = new ArrayList<>();
+            int columnCount = resultSetMetaData.getColumnCount();
+            
+            while (rs.next()) {
+                Passagem passagem = new Passagem();
+                
+                for (int i = 1 ; i <= columnCount ; i++) {
+                    String nomeColuna = resultSetMetaData.getColumnName(i);
+                    
+                    switch (nomeColuna) {
+                        case "id":
+                            passagem.setId(rs.getLong(nomeColuna));
+                                break;
+                        case "id_tipo":
+                            passagem.setIdTipo(rs.getLong(nomeColuna));
+                                break;
+                        case "situacao":
+                            passagem.setSituacao(FuncionarioSituacao.obterViaString(rs.getString(nomeColuna)));
+                                break;
+                        case "data_inicio":
+                            passagem.setDataInicio(rs.getDate(nomeColuna).getTime());
+                                break;  
+                        case "data_fim":
+                            passagem.setDataFim(rs.getDate(nomeColuna).getTime());
+                                break;
+                    }
+                }
+                
+                passagens.add(passagem);
+            }
+            
+            r = new Result.Success<>(passagens);
         } catch(SQLException e) {
             r = new Result.Error<>(e);
         }
@@ -130,60 +176,65 @@ public class RemoteFuncionarioDataSource extends AbstractDataSource {
     public Result<List<Funcionario>> obterTodosFuncionarios() {
         Result<List<Funcionario>> r;
         
-        try (PreparedStatement statement = getConnection().prepareStatement("SELECT funcionario.*, gerente.nome AS gerente_nome, gerente.num_doc_id AS gerente_num_bilhete_identidade FROM " + tblName + " JOIN gerente ON gerente.id = funcionario.id_gerente")) {
+        try {
+            PreparedStatement statement = getConnection().prepareStatement("SELECT gerente.nome AS gerente_nome, gerente.num_doc_id AS gerente_num_bilhete_identidade, funcionario.* FROM funcionario JOIN gerente ON gerente.id = funcionario.id_gerente");
             ResultSet rs = statement.executeQuery();
             List<Funcionario> funcionarios = new ArrayList<>();
             ResultSetMetaData resultSetMetaData = rs.getMetaData();
             int columnCount = resultSetMetaData.getColumnCount();
             
-            while (rs.next()) {
-                Funcionario funcionario = new Funcionario();
-                Gerente gerente = new Gerente();
-                
-                for (int i = 1 ; i <= columnCount ; i++) {
-                    String nomeColuna = resultSetMetaData.getColumnName(i);
-                    
-                    switch (nomeColuna) {
-                        case "id":
-                            funcionario.setId(rs.getLong(nomeColuna));
-                                break;
-                        case "nome":
-                            funcionario.setNome(rs.getString(nomeColuna));
-                                break;
-                        case "data_nascimento":
-                            funcionario.setDataNascimento(rs.getDate(nomeColuna).getTime());
-                                break;
-                        case "data_registo":
-                            funcionario.setDataRegisto(rs.getDate(nomeColuna).getTime());
-                                break;  
-                        case "morada":
-                            funcionario.setMorada(rs.getString(nomeColuna));
-                                break;
-                        case "num_bilhete_id":
-                            funcionario.setNumBilheteIdentidade(rs.getString(nomeColuna));
-                                break;
-                        case "num_telefone":
-                            funcionario.setNumTelefone(rs.getInt(nomeColuna));
-                                break;
-                        case "email":
-                            funcionario.setEmail(rs.getString(nomeColuna));
-                                break;
-                        case "id_gerente":
-                            gerente.setId(rs.getLong(nomeColuna));
-                                break;
-                        case "gerente_nome":
-                            gerente.setNome(rs.getString(nomeColuna));
-                                break;
-                        case "situacao":
-                            funcionario.setFuncionarioSituacao(FuncionarioSituacao.obterViaString(rs.getString(nomeColuna)));
-                                break;
+            if (columnCount != 0) {
+                while (rs.next()) {
+                    Funcionario funcionario = new Funcionario();
+                    Gerente gerente = new Gerente();
+                  
+                    for (int i = 1 ; i <= columnCount ; i++) {
+                        String nomeColuna = resultSetMetaData.getColumnLabel(i);
+                        
+                        switch (nomeColuna) {
+                            case "id":
+                                funcionario.setId(rs.getLong(nomeColuna));
+                                    break;
+                            case "nome":
+                                funcionario.setNome(rs.getString(nomeColuna));
+                                    break;
+                            case "data_nascimento":
+                                funcionario.setDataNascimento(rs.getDate(nomeColuna).getTime());
+                                    break;
+                            case "data_registo":
+                                funcionario.setDataRegisto(rs.getDate(nomeColuna).getTime());
+                                    break;  
+                            case "morada":
+                                funcionario.setMorada(rs.getString(nomeColuna));
+                                    break;
+                            case "num_bilhete_id":
+                                funcionario.setNumBilheteIdentidade(rs.getString(nomeColuna));
+                                    break;
+                            case "num_telefone":
+                                funcionario.setNumTelefone(rs.getInt(nomeColuna));
+                                    break;
+                            case "email":
+                                funcionario.setEmail(rs.getString(nomeColuna));
+                                    break;
+                            case "id_gerente":
+                                gerente.setId(rs.getLong(nomeColuna));
+                                    break;
+                            case "gerente_nome":
+                                gerente.setNome(rs.getString(nomeColuna));
+                                    break;
+                            case "situacao":
+                                funcionario.setFuncionarioSituacao(FuncionarioSituacao.obterViaString(rs.getString(nomeColuna)));
+                                    break;
+                        }
                     }
+                    
+                    funcionario.setGerente(gerente);
+                    funcionarios.add(funcionario);
                 }
-                
-                funcionario.setGerente(gerente);
-                funcionarios.add(funcionario);
             }
             
+            rs.close();
+            statement.close();
             r = new Result.Success<>(funcionarios);
         } catch(SQLException e) {
             r = new Result.Error<>(e);

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="616.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1">
+   <stylesheets>
+      <URL value="@/styles/edu/uem/sgh/gerente/dialog_gerir_situacao.css" />
+   </stylesheets>
+   <children>
+      <AnchorPane fx:id="anchorPane" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="48.0">
+         <children>
+            <ImageView fx:id="close" fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <Label text="Novo quarto" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="24.0" AnchorPane.topAnchor="0.0">
+               <font>
+                  <Font name="Inter SemiBold" size="12.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+      <HBox fx:id="hBoxOne" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="568.0">
+         <children>
+            <ImageView fx:id="foto" fitHeight="200.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="true" />
+            <GridPane hgap="24.0" vgap="16.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label text="Descrição:">
+                     <font>
+                        <Font name="Inter Regular" size="12.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="txtDescricao" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" GridPane.columnIndex="1">
+                     <font>
+                        <Font name="Inter Regular" size="12.0" />
+                     </font>
+                  </TextField>
+                  <Label text="Capacidade:" GridPane.rowIndex="1">
+                     <font>
+                        <Font name="Inter Regular" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label text="Preço:" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="Inter Regular" size="12.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="txtCapacidade" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <font>
+                        <Font name="Inter Regular" size="12.0" />
+                     </font>
+                  </TextField>
+                  <TextField fx:id="txtPreco" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="Inter Regular" size="12.0" />
+                     </font>
+                  </TextField>
+                  <Button fx:id="btnOk" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" text="OK" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                     <font>
+                        <Font name="Inter Bold" size="12.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="btnRemoverFoto" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Remover foto" textFill="#00000099" underline="true" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                     <font>
+                        <Font name="Inter Bold" size="12.0" />
+                     </font>
+                  </Button>
+               </children>
+               <HBox.margin>
+                  <Insets left="24.0" />
+               </HBox.margin>
+            </GridPane>
+         </children>
+         <VBox.margin>
+            <Insets bottom="48.0" left="24.0" top="24.0" />
+         </VBox.margin>
+      </HBox>
+   </children>
+</VBox>

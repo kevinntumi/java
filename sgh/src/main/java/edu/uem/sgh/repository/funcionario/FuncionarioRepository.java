@@ -5,6 +5,7 @@
 package edu.uem.sgh.repository.funcionario;
 
 import edu.uem.sgh.datasource.RemoteFuncionarioDataSource;
+import edu.uem.sgh.model.Passagem;
 import edu.uem.sgh.model.Result;
 import java.sql.Connection;
 import java.util.List;
@@ -26,12 +27,17 @@ public class FuncionarioRepository {
         this.remoteConnection = remoteConnection;
     }
     
+    public Result<List<Passagem>> obterPassagensPorFuncionario(long idFuncionario) {
+        if (getRemoteFuncionarioDataSource() == null) return new Result.Error<>(new Exception());
+        return getRemoteFuncionarioDataSource().obterPassagensPorFuncionario(idFuncionario);
+    }
+    
     public Result<Boolean> inserirFuncionario(edu.uem.sgh.schema.Funcionario funcionario) {
         if (getRemoteFuncionarioDataSource() == null) return new Result.Error<>(new Exception());
         return getRemoteFuncionarioDataSource().inserirFuncionario(funcionario);
     }
 
-    public Result<Boolean> editarFuncionario(edu.uem.sgh.model.Funcionario funcionario) {
+    public Result<Boolean> editarFuncionario(edu.uem.sgh.schema.Funcionario funcionario) {
         if (getRemoteFuncionarioDataSource() == null) return new Result.Error<>(new Exception());
         return getRemoteFuncionarioDataSource().editarFuncionario(funcionario);
     }

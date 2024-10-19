@@ -1,0 +1,41 @@
+#close {
+    -fx-image: url("/images/close_dark.png");
+    -fx-transition: 0.5s;
+}
+
+#close:hover {
+    -fx-image: url("/images/close_hovered.png");
+    -fx-transition: 0.5s;
+}
+
+#close:pressed {
+    -fx-image: url("/images/close_pressed.png");
+    -fx-transition: 0.5s;
+}
+
+#lblAlterar {
+    -fx-text-fill: rgba(0, 0, 0, 0.6);
+}
+
+#lblAlterar:hover {
+    -fx-text-fill: rgba(0, 0, 0, 0.87);
+}
+
+.table-view {
+    -fx-font-family: "Inter";
+    -fx-font-size: 12;
+}
+
+#tableView .table-row-cell{
+    -fx-background-insets: 0;
+}
+
+.table-view .column-header,
+.table-view .column-header .filler,
+.table-view .column-header-background .filler {
+    -fx-background-color: #f1f1f1;
+    -fx-border-width: 0;
+    -fx-min-height: 32px;
+    -fx-max-height: 32px;
+    -fx-pref-height: 32px;
+}
