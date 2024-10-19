@@ -12,7 +12,9 @@ import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.repository.funcionario.FuncionarioRepository;
 import java.net.URL;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.animation.FadeTransition;
@@ -32,10 +34,10 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.skin.TableColumnHeader;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -43,6 +45,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 
 /**
  *
@@ -92,8 +95,11 @@ public class TelaFuncionarios extends AbstractController implements EventHandler
     private FuncionarioRepository funcionarioRepository;
     private FadeTransition fadeTransition;
     private boolean firstTimeVisible = true;
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("d.MMM.yyyy");
     private EventHandler<? super KeyEvent> keyEventHandler;
+    private EventHandler<MouseEvent> mouseEventHandler;
     private NodeEvent nodeEvent = null;
+    private Funcionario selectedFuncionario = null;
 
     @Override
     public void adicionarListeners() {
@@ -112,19 +118,7 @@ public class TelaFuncionarios extends AbstractController implements EventHandler
         recarregarVBoxOpacityProperty.addListener(this);
         vBoxOpacityProperty.addListener(this);
         tableView.setTableMenuButtonVisible(true);
-        tableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        tableView.setOnMouseClicked(new EventHandler<MouseEvent>(){
-            @Override
-            public void handle(MouseEvent event) {
-                if (!(event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY))
-                    return;
-                
-                Node intersectedNode = event.getPickResult().getIntersectedNode();
-                System.out.println(intersectedNode);
-                
-                System.out.println();
-            }
-        });
+        tableView.setOnMouseClicked(getMouseEventHandler());
     }
 
     @Override
@@ -135,6 +129,7 @@ public class TelaFuncionarios extends AbstractController implements EventHandler
         selectionIndexProperty.removeListener(this);
         vBoxOpacityProperty.removeListener(this);
         recarregarVBoxOpacityProperty.removeListener(this);
+        tableView.setOnMouseMoved(null);
         
         if (fadeTransition != null) {
             fadeTransition.setOnFinished(null);
@@ -213,7 +208,7 @@ public class TelaFuncionarios extends AbstractController implements EventHandler
         
         if (dialog != null && observable.equals(dialog.dialogPaneProperty())) {
             DialogPane dialogPane = (DialogPane) newValue;
-            adicionarBotaoDialog(dialogPane.getClass().getTypeName()); 
+            //adicionarBotaoDialog(dialogPane.getClass().getTypeName()); 
             return;
         }
         
@@ -284,7 +279,7 @@ public class TelaFuncionarios extends AbstractController implements EventHandler
                 return;
             
             for (Funcionario funcionario : funcionarios) {
-                edu.uem.sgh.model.table.Funcionario f = new edu.uem.sgh.model.table.Funcionario(funcionario.getId(), funcionario.getNome(), funcionario.getDataNascimento(), funcionario.getDataRegisto(), funcionario.getMorada(), funcionario.getNumBilheteIdentidade(), funcionario.getNumTelefone(), funcionario.getEmail(), funcionario.getGerente(), FuncionarioSituacao.obterPorValor(funcionario.getFuncionarioSituacao()));
+                edu.uem.sgh.model.table.Funcionario f = new edu.uem.sgh.model.table.Funcionario(funcionario.getId(), funcionario.getNome(), simpleDateFormat.format(new Date(funcionario.getDataNascimento())), simpleDateFormat.format(funcionario.getDataRegisto()), funcionario.getMorada(), funcionario.getNumBilheteIdentidade(), funcionario.getNumTelefone(), funcionario.getEmail(), funcionario.getGerente(), FuncionarioSituacao.obterPorValor(funcionario.getFuncionarioSituacao()));
                 tableView.getItems().add(f);
             }
         }
@@ -366,10 +361,8 @@ public class TelaFuncionarios extends AbstractController implements EventHandler
                 return;
             
             for (Funcionario funcionario : funcionarios) {
-                edu.uem.sgh.model.table.Funcionario f = new edu.uem.sgh.model.table.Funcionario(funcionario.getId(), funcionario.getNome(), funcionario.getDataNascimento(), funcionario.getDataRegisto(), funcionario.getMorada(), funcionario.getNumBilheteIdentidade(), funcionario.getNumTelefone(), funcionario.getEmail(), funcionario.getGerente(), FuncionarioSituacao.obterPorValor(funcionario.getFuncionarioSituacao()));
-                for (int i = 0 ; i < 25 ; i++) {
-                    tableView.getItems().add(f);
-                }
+                edu.uem.sgh.model.table.Funcionario f = new edu.uem.sgh.model.table.Funcionario(funcionario.getId(), funcionario.getNome(), simpleDateFormat.format(new Date(funcionario.getDataNascimento())), simpleDateFormat.format(new Date(funcionario.getDataRegisto())), funcionario.getMorada(), funcionario.getNumBilheteIdentidade(), funcionario.getNumTelefone(), funcionario.getEmail(), funcionario.getGerente(), FuncionarioSituacao.obterPorValor(funcionario.getFuncionarioSituacao()));
+                tableView.getItems().add(f);
             }
         }
     }
@@ -441,22 +434,20 @@ public class TelaFuncionarios extends AbstractController implements EventHandler
     private void editarFuncionario() {
         Integer selectedIndex = selectionIndexProperty.get();
         
-        if (temLinhaSelecionada(selectedIndex) || usuario == null || funcionarioRepository == null) 
+        if (!temLinhaSelecionada(selectedIndex) || usuario == null || funcionarioRepository == null || selectedFuncionario == null)  {
+            System.out.println("selectedIndex: " + selectedIndex);
+            System.out.println("usuario: " + usuario);
+            System.out.println("funcionarioRepository: " + funcionarioRepository);
+            System.err.println("selectedFuncionario: " + selectedFuncionario);
+            System.out.println();
             return;
-        
-        String typeName = DialogPaneEditarFuncionario.class.getTypeName();
-        DialogPane dialogPane = encontrarDialogPaneViaTypeName(typeName);
-        
-        if (dialogPane == null) {
-            dialogPane = criarDialogPaneViaTypeName(typeName);
-            getDialogPanes().add(dialogPane);
         }
         
-        getDialog().setDialogPane(dialogPane);
-        getDialog().dialogPaneProperty().addListener(this);
-        
-        if (!getDialog().isShowing())
-            getDialog().show();
+        DialogEditarFuncionario dialogEditarFuncionario = new DialogEditarFuncionario();
+        dialogEditarFuncionario.setFuncionario(selectedFuncionario);
+        dialogEditarFuncionario.setFuncionarioRepository(funcionarioRepository);
+        dialogEditarFuncionario.setUsuario(usuario);
+        dialogEditarFuncionario.show();
     }
     
     private void mostrarMsgErro(String titulo, String descricao) {
@@ -621,14 +612,84 @@ public class TelaFuncionarios extends AbstractController implements EventHandler
         return keyEventHandler;
     }
 
-    private void adicionarBotaoDialog(String typeName) {
-        if (typeName == null || typeName.isBlank() || !(typeName.equals(DialogPaneInserirFuncionario.class.getTypeName()) || typeName.equals(DialogPaneEditarFuncionario.class.getTypeName()))) {
-            return;
+    public EventHandler<MouseEvent> getMouseEventHandler() {
+        if (mouseEventHandler == null) {
+            mouseEventHandler = new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event) {
+                    System.out.println(event);
+                   
+                    if (event.getEventType() == MouseEvent.MOUSE_MOVED || (event.getEventType() == MouseEvent.MOUSE_CLICKED && event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY && tableView.getSelectionModel().getSelectedIndex() != -1)){
+                        Node intersectedNode = event.getPickResult().getIntersectedNode(), parent = intersectedNode.getParent();
+                        
+                        if (parent instanceof TableColumnHeader || (intersectedNode instanceof Text && parent instanceof Label)) {
+                            return;
+                        }
+
+                        String parentStr = (parent == null) ? null : parent.toString();
+
+                        if (!(intersectedNode instanceof Text && parentStr != null && parentStr.startsWith("TableColumn"))) {
+                            return;
+                        }
+
+                        int start = parentStr.indexOf("id="), end = parentStr.indexOf(",");
+
+                        if (start == -1 || end == -1 || end < start) {
+                            return;
+                        }
+
+                        String id = "";
+                        start += 3;
+
+                        for (int i = start ; i < end ; i++) {
+                            id += parentStr.charAt(i);
+                        }
+
+                        if (!(id.equals("tblColumnCodigo"))){
+                            return;
+                        }
+
+                        Text text = (Text) intersectedNode;
+                        Long idLng;
+
+                        try {
+                            idLng = Long.valueOf(text.getText());
+                        } catch (NumberFormatException e) {
+                            return;
+                        }
+
+                        if (event.getEventType() == MouseEvent.MOUSE_MOVED) {
+                            if (selectedFuncionario == null) {
+                                selectedFuncionario = new Funcionario();
+                            }
+                            
+                            ObservableList<edu.uem.sgh.model.table.Funcionario> funcionarios = tableView.getItems();
+                            edu.uem.sgh.model.table.Funcionario f = null;
+
+                            for (edu.uem.sgh.model.table.Funcionario funcionario : funcionarios) {
+                                if (funcionario.getCodigo() == idLng) {
+                                    f = funcionario;
+                                    break;
+                                }
+                            }
+                            
+                            selectedFuncionario.setId(f != null ? f.getCodigo(): null);
+                            selectedFuncionario.setMorada(f != null ? f.getMorada(): null);
+                            selectedFuncionario.setEmail(f != null ? f.getEmail(): null);
+                            selectedFuncionario.setNumBilheteIdentidade(f != null ? f.getNumBilheteIdentidade(): null);
+                            selectedFuncionario.setNumTelefone(f != null ? f.getNumTelefone(): null);
+
+                        } else {
+                            //abrirTelaServico(idLng);
+                        }
+                    }
+                }
+            };
         }
         
-        
+        return mouseEventHandler;
     }
-    
+
     private class NodeEvent {
         private Node target;
 

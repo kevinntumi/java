@@ -17,8 +17,8 @@ import javafx.beans.property.SimpleIntegerProperty;
 public class Funcionario {
     private final SimpleLongProperty codigo;
     private final SimpleStringProperty nome;
-    private final SimpleLongProperty dataNascimento;
-    private final SimpleLongProperty dataRegisto;
+    private final SimpleStringProperty dataNascimento;
+    private final SimpleStringProperty dataRegisto;
     private final SimpleStringProperty morada;
     private final SimpleStringProperty numBilheteIdentidade;
     private final SimpleIntegerProperty numTelefone;
@@ -26,11 +26,11 @@ public class Funcionario {
     private final SimpleStringProperty email;
     private final SimpleObjectProperty<Gerente> gerente;
 
-    public Funcionario(Long codigo, String nome, Long dataNascimento, Long dataRegisto, String morada, String numBilheteIdentidade, Integer numTelefone, String email, Gerente gerente, String situacao) {
+    public Funcionario(Long codigo, String nome, String dataNascimento, String dataRegisto, String morada, String numBilheteIdentidade, Integer numTelefone, String email, Gerente gerente, String situacao) {
         this.codigo = new SimpleLongProperty(codigo);
         this.nome = new SimpleStringProperty(nome);
-        this.dataNascimento = new SimpleLongProperty(dataNascimento);
-        this.dataRegisto = new SimpleLongProperty(dataRegisto);
+        this.dataNascimento = new SimpleStringProperty(dataNascimento);
+        this.dataRegisto = new SimpleStringProperty(dataRegisto);
         this.morada = new SimpleStringProperty(morada);
         this.numBilheteIdentidade = new SimpleStringProperty(numBilheteIdentidade);
         this.numTelefone = new SimpleIntegerProperty(numTelefone);
@@ -51,11 +51,11 @@ public class Funcionario {
         this.nome.set(nome);
     }
 
-    public void setDataNascimento(Long dataNascimento) {
+    public void setDataNascimento(String dataNascimento) {
         this.dataNascimento.set(dataNascimento);
     }
 
-    public void setDataRegisto(Long dataRegisto) {
+    public void setDataRegisto(String dataRegisto) {
         this.dataRegisto.set(dataRegisto);
     }
 
@@ -91,11 +91,11 @@ public class Funcionario {
         return nome.get();
     }
 
-    public Long getDataNascimento() {
+    public String getDataNascimento() {
         return dataNascimento.get();
     }
 
-    public Long getDataRegisto() {
+    public String getDataRegisto() {
         return dataRegisto.get();
     }
 

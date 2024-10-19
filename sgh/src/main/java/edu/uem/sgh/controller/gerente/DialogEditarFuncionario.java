@@ -11,7 +11,11 @@ import edu.uem.sgh.schema.Funcionario;
 import edu.uem.sgh.util.FuncionarioValidator;
 import edu.uem.sgh.util.Path;
 import java.io.IOException;
+import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -19,36 +23,49 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogEvent;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.StageStyle;
 
 /**
  *
  * @author Kevin Ntumi
  */
-public class DialogEditarFuncionario  extends Dialog<Object> {
+public class DialogEditarFuncionario extends Dialog<Object> {
     private Parent content;
-    private final String layoutName = "DialogInserirFuncionario", additionalPath = "\\gerente\\dialog\\";
+    private final String titulo = "Editar funcionário", layoutName = "DialogInserirFuncionario", additionalPath = "\\gerente\\dialog\\";
     private String nome = null, email = null, morada = null, numTelefoneStr = null, numBilheteIdentidade = null;
     private LocalDate dataNascimento = null;
     private Integer numTelefone;
     private TextField txtNome, txtEmail, txtNumTelefone, txtNumBI, txtMorada;
     private DatePicker dataNascimentoInput;
+    private ImageView close;
+    private Label lblTitulo;
     private ChangeListener<Object> changeListener;
-    private EventHandler<DialogEvent> eventHandler;
+    private EventHandler<MouseEvent> mouseClickedEventHandler;
+    private EventHandler<DialogEvent> dialogLifecycleEventHandler;
     private FuncionarioRepository funcionarioRepository;
+    private Button btnOk, btnFechar;
     private Result<Boolean> rslt = null;
+    private Alert alert = null;
+    private edu.uem.sgh.model.Funcionario funcionario = null;
     private Usuario usuario;
     
     public DialogEditarFuncionario() {
-        setTitle("Novo funcionário");
+        initStyle(StageStyle.UNDECORATED);
         
         try {
             content = new FXMLLoader(Path.getFXMLURL(layoutName, additionalPath)).load();
@@ -63,9 +80,12 @@ public class DialogEditarFuncionario  extends Dialog<Object> {
         txtNumBI = (TextField) findById("txtNumBI", children);
         txtMorada = (TextField) findById("txtMorada", children);
         dataNascimentoInput = (DatePicker) findById("dataNascimentoInput", children);
+        btnOk = (Button) findById("btnOk", children);
+        btnFechar = (Button) findById("btnFechar", children);
+        close = (ImageView) findById("close", children);
+        lblTitulo = (Label) findById("lblTitulo", children);
+        lblTitulo.setText(titulo);
         getDialogPane().setContent(content);
-        getDialogPane().getButtonTypes().add(ButtonType.OK);
-        System.out.println(getDialogPane().lookupButton(ButtonType.OK).getStyle());
     }
     
     private Node findById(String id, ObservableList<Node> children) {
@@ -98,20 +118,30 @@ public class DialogEditarFuncionario  extends Dialog<Object> {
     }
     
     public void adicionarListeners() {
-        if (content == null)
+        btnFechar.setOnMouseClicked(getMouseClickedEventHandler());
+        btnOk.setOnMouseClicked(getMouseClickedEventHandler());
+        close.setOnMouseClicked(getMouseClickedEventHandler());
+        setOnCloseRequest(getDialogLifecycleEventHandler());
+        
+        if (content == null || funcionario == null)
             return;
         
+        init();
         txtNome.textProperty().addListener(getChangeListener());
         txtEmail.textProperty().addListener(changeListener);
         txtNumTelefone.textProperty().addListener(changeListener);
         txtNumBI.textProperty().addListener(changeListener);
         txtMorada.textProperty().addListener(changeListener);
         dataNascimentoInput.valueProperty().addListener(changeListener);
-        setOnCloseRequest(getEventHandler());
     }
     
     public void removerListeners() {
-        if (content == null)
+        btnFechar.setOnMouseClicked(null);
+        btnOk.setOnMouseClicked(null);
+        close.setOnMouseClicked(null);
+        setOnCloseRequest(null);
+        
+        if (content == null || funcionario == null)
             return;
         
         txtNome.textProperty().removeListener(getChangeListener());
@@ -120,7 +150,6 @@ public class DialogEditarFuncionario  extends Dialog<Object> {
         txtNumBI.textProperty().removeListener(changeListener);
         txtMorada.textProperty().removeListener(changeListener);
         dataNascimentoInput.valueProperty().removeListener(changeListener);
-        setOnCloseRequest(null);
     }
 
     public ChangeListener<Object> getChangeListener() {
@@ -151,6 +180,13 @@ public class DialogEditarFuncionario  extends Dialog<Object> {
     }
     
     private void observarDataNascimento(LocalDate localDate) {
+        LocalDate now = LocalDate.now();
+        
+        if (localDate.isAfter(now)) {
+            dataNascimentoInput.setValue(now);
+            return;
+        }
+        
         dataNascimento = localDate;
     }
     
@@ -160,7 +196,6 @@ public class DialogEditarFuncionario  extends Dialog<Object> {
     
     private void observarEmail(String email) {
         this.email = email;
-        
     }
     
     private void observarNumBilheteId(String numBilheteId) {
@@ -176,81 +211,196 @@ public class DialogEditarFuncionario  extends Dialog<Object> {
             numTelefone = null;
         }
     }
-    
-    private DialogEditarFuncionario getDialogEditarFuncionario(){
-        return this;
-    }
 
-    public EventHandler<DialogEvent> getEventHandler() {
-        if (eventHandler == null) 
-            eventHandler = new EventHandler<DialogEvent>() {
+    public EventHandler<MouseEvent> getMouseClickedEventHandler() {
+        if (mouseClickedEventHandler == null) 
+            mouseClickedEventHandler = new EventHandler<MouseEvent>() {
                 @Override
-                public void handle(DialogEvent event) {
-                    DialogEditarFuncionario dialogEditarFuncionario = getDialogEditarFuncionario();
-                    
-                    if (usuario == null || funcionarioRepository == null || !event.getSource().equals(dialogEditarFuncionario)) {
-                        event.consume();
+                public void handle(MouseEvent event) {
+                    if (!(event.getEventType() == MouseEvent.MOUSE_CLICKED)) {
                         return;
                     }
                     
-                    if (!FuncionarioValidator.isNomeValid(nome)) {
-                        System.out.println("Nome invalido");
+                    Object source = event.getSource();
+                    
+                    if (!(source.equals(btnFechar) || source.equals(btnOk) || source.equals(close))) {
                         return;
                     }
                     
-                    if (!FuncionarioValidator.isDataNascimentoValid(dataNascimento)) {
-                        System.out.println("Data de Nascimento invalida");
-                        return;
-                    }
-                    
-                    if (!FuncionarioValidator.isNumBIValid(numBilheteIdentidade)) {
-                        System.out.println("NumBI invalido");
-                        return;
-                    }
-                    
-                    if (!FuncionarioValidator.isNumTelefoneValid(numTelefoneStr)) {
-                        System.out.println("Num telefone invalido");
-                        return;
-                    }
-                    
-                    if (!FuncionarioValidator.isMoradaValid(morada)) {
-                        System.out.println("Morada invalida");
-                        return;
-                    }
-                    
-                    if (!FuncionarioValidator.isEmailValid(email)) {
-                        System.out.println("Email invalido");
-                        return;
-                    }
-                    
-                    Funcionario f = new Funcionario();
-                    f.setNome(nome);
-                    f.setDataRegisto(System.currentTimeMillis());
-                    f.setDataNascimento(System.currentTimeMillis());
-                    f.setIdGerente(usuario.getIdTipo());
-                    f.setNumTelefone(numTelefone);
-                    f.setEmail(email);
-                    f.setNumBilheteIdentidade(numBilheteIdentidade);
-                    
-                    dialogEditarFuncionario.getDialogPane().getContent().setMouseTransparent(true);
-                    
-                    rslt = funcionarioRepository.inserirFuncionario(f);
-                    
-                    dialogEditarFuncionario.getDialogPane().getContent().setMouseTransparent(false);
-                    
-                    if (rslt instanceof Result.Error) {
-                        event.consume();
-                    } else {
-                        Result.Success<Boolean> success = (Result.Success<Boolean>) rslt;
-                        System.out.println(success);
-                        if (!success.getData()) {
-                            event.consume();
-                        }
-                    }
+                    if (source.equals(btnOk))
+                        cliqueBtnOk();
+                    else
+                        cliqueBtnFechar();
                 }
             };
         
-        return eventHandler;
+        return mouseClickedEventHandler;
+    }
+
+    public EventHandler<DialogEvent> getDialogLifecycleEventHandler() {
+        if (dialogLifecycleEventHandler == null) {
+            dialogLifecycleEventHandler = new EventHandler<DialogEvent>() {
+                @Override
+                public void handle(DialogEvent event) {
+                    if (!(event.getEventType().equals(DialogEvent.DIALOG_CLOSE_REQUEST))) {
+                        event.consume();
+                    }
+                }
+            };
+        }
+        
+        return dialogLifecycleEventHandler;
+    }
+    
+    private DialogEditarFuncionario getDialogEditarFuncionario() {
+        return this;
+    }
+    
+    private void cliqueBtnFechar() {
+        setResult(ButtonType.CANCEL);
+        getDialogLifecycleEventHandler().handle(new DialogEvent(getDialogEditarFuncionario(), DialogEvent.DIALOG_CLOSE_REQUEST));
+    }
+    
+    private void cliqueBtnOk() {
+        if (usuario == null || funcionarioRepository == null) {
+            return;
+        }
+
+        List<Boolean> camposInvalidos = new ArrayList<>();
+        camposInvalidos.add(!FuncionarioValidator.isNomeValid(nome));
+        camposInvalidos.add(!FuncionarioValidator.isDataNascimentoValid(dataNascimento));
+        camposInvalidos.add(!FuncionarioValidator.isNumBIValid(numBilheteIdentidade));
+        camposInvalidos.add(!FuncionarioValidator.isNumTelefoneValid(numTelefoneStr));
+        camposInvalidos.add(!FuncionarioValidator.isMoradaValid(morada));
+        camposInvalidos.add(!FuncionarioValidator.isEmailValid(email));
+
+        if (temCamposInvalidos(camposInvalidos)) {
+            determinarRestantesCamposInvalidos(camposInvalidos);
+            return;
+        }
+
+        Funcionario f = new Funcionario();
+        f.setNome(nome);
+        f.setDataRegisto(System.currentTimeMillis());
+        f.setDataNascimento(System.currentTimeMillis());
+        f.setIdGerente(usuario.getIdTipo());
+        f.setNumTelefone(numTelefone);
+        f.setMorada(morada);
+        f.setEmail(email);
+        f.setNumBilheteIdentidade(numBilheteIdentidade);
+
+        getDialogPane().getContent().setMouseTransparent(true);
+
+        rslt = funcionarioRepository.inserirFuncionario(f);
+
+        getDialogPane().getContent().setMouseTransparent(false);
+        
+        if (rslt instanceof Result.Error) {
+            getAlert().setContentText(rslt.getValue().toString());
+            getAlert().show();
+        } else {
+            Result.Success<Boolean> success = (Result.Success<Boolean>) rslt;
+
+            if (!success.getData()) {
+                return;
+            }
+            
+            setResult(ButtonType.OK);
+            getDialogLifecycleEventHandler().handle(new DialogEvent(getDialogEditarFuncionario(), DialogEvent.DIALOG_CLOSE_REQUEST));
+        }
+    }
+    
+    private boolean temCamposInvalidos(List<Boolean> camposInvalidos){
+        if (camposInvalidos.isEmpty())
+            return false;
+        
+        for (Boolean estaInvalido : camposInvalidos) {
+            if (estaInvalido)
+                return true;
+        }
+        
+        return false;
+    }
+    
+    private Alert getAlert() {
+        if (alert == null) {
+            alert = new Alert(Alert.AlertType.ERROR);
+            alert.setGraphic(null);
+            alert.setHeaderText(null);
+        }
+        
+        return alert;
+    }
+    
+    private void determinarRestantesCamposInvalidos(List<Boolean> camposInvalidos) {
+        if (camposInvalidos.isEmpty())
+            return;
+        
+        for (int i = 0 ; i < camposInvalidos.size() ; i++) {
+            boolean estaInvalido = camposInvalidos.get(i);
+            
+            Tooltip tooltip = null;
+            String text = null;
+            
+            switch (i) {
+                case 0:
+                    tooltip = obterTooltip(txtNome);
+                        text = estaInvalido ? "Nome inválido" : "Nome válido";
+                            break;
+                case 1:
+                    tooltip = obterTooltip(dataNascimentoInput);
+                        text = estaInvalido ? "Data inválida" : "Data válida";
+                            break;
+                case 2:
+                    tooltip = obterTooltip(txtNumBI);
+                        text = estaInvalido ? "Número de B.I inválido" : "Número de B.I válido";    
+                            break;
+                case 3:
+                    tooltip = obterTooltip(txtNumTelefone);
+                        text = estaInvalido ? "Número de telefone inválido" : "Número de telefone válido";
+                            break;
+                case 4:
+                    tooltip = obterTooltip(txtMorada);
+                        text = estaInvalido ? "Morada inválida" : "Morada válida";
+                            break;
+                case 5:
+                    tooltip = obterTooltip(txtEmail);
+                        text = estaInvalido ? "Email inválido" : "Email válido";
+                            break;
+            }
+            
+            if (tooltip == null)
+                continue;
+            
+            tooltip.setText(text);
+        }
+    }
+    
+    private Tooltip obterTooltip(Object source) {
+        if (!(source instanceof TextField || source instanceof DatePicker))
+            return null;
+            
+        Tooltip tooltip;
+        
+        if (source instanceof TextField) {
+            TextField textField = ((TextField) source);
+            tooltip = textField.getTooltip();
+            
+            if (tooltip == null) {
+                textField.setTooltip(new Tooltip());
+                tooltip = textField.getTooltip();
+            }
+        } else {
+            DatePicker datePicker = ((DatePicker) source);
+            tooltip = datePicker.getTooltip();
+            
+            if (tooltip == null) {
+                datePicker.setTooltip(new Tooltip());
+                tooltip = datePicker.getTooltip();
+            }
+        }
+        
+        return tooltip;
     }
     
     public void setFuncionarioRepository(FuncionarioRepository funcionarioRepository) {
@@ -259,5 +409,36 @@ public class DialogEditarFuncionario  extends Dialog<Object> {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public void setFuncionario(edu.uem.sgh.model.Funcionario funcionario) {
+        this.funcionario = funcionario;
+    }
+    
+    private void init() {
+        if (funcionario == null) {
+            return;
+        }
+        
+        txtNome.setText(funcionario.getNome());
+        txtEmail.setText(funcionario.getEmail());
+        txtMorada.setText(funcionario.getMorada());
+        txtNumBI.setText(funcionario.getNumBilheteIdentidade());
+        txtNumTelefone.setText(funcionario.getNumTelefone() + "");
+        dataNascimentoInput.setValue(obterViaMilisegundos(funcionario.getDataNascimento()));
+    }
+    
+    private LocalDate obterViaMilisegundos(Long timeInMillis) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timeInMillis);
+        LocalDate localDate;
+        
+        try {
+           localDate = LocalDate.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+        } catch (DateTimeException dateTimeException) {
+           localDate = null; 
+        }
+        
+        return localDate;
     }
 }

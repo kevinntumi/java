@@ -28,6 +28,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogEvent;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
@@ -44,13 +45,14 @@ import javafx.stage.StageStyle;
  */
 public class DialogInserirFuncionario extends Dialog<Object> {
     private Parent content;
-    private final String layoutName = "DialogInserirFuncionario", additionalPath = "\\gerente\\dialog\\";
+    private final String titulo = "Novo funcionário", layoutName = "DialogInserirFuncionario", additionalPath = "\\gerente\\dialog\\";
     private String nome = null, email = null, morada = null, numTelefoneStr = null, numBilheteIdentidade = null;
     private LocalDate dataNascimento = null;
     private Integer numTelefone;
     private TextField txtNome, txtEmail, txtNumTelefone, txtNumBI, txtMorada;
     private DatePicker dataNascimentoInput;
     private ImageView close;
+    private Label lblTitulo;
     private ChangeListener<Object> changeListener;
     private EventHandler<MouseEvent> mouseClickedEventHandler;
     private EventHandler<DialogEvent> dialogLifecycleEventHandler;
@@ -79,6 +81,8 @@ public class DialogInserirFuncionario extends Dialog<Object> {
         btnOk = (Button) findById("btnOk", children);
         btnFechar = (Button) findById("btnFechar", children);
         close = (ImageView) findById("close", children);
+        lblTitulo = (Label) findById("lblTitulo", children);
+        lblTitulo.setText(titulo);
         getDialogPane().setContent(content);
     }
     
@@ -171,6 +175,13 @@ public class DialogInserirFuncionario extends Dialog<Object> {
     }
     
     private void observarDataNascimento(LocalDate localDate) {
+        LocalDate now = LocalDate.now();
+        
+        if (localDate.isAfter(now)) {
+            dataNascimentoInput.setValue(now);
+            return;
+        }
+        
         dataNascimento = localDate;
     }
     
@@ -269,6 +280,7 @@ public class DialogInserirFuncionario extends Dialog<Object> {
         f.setDataNascimento(System.currentTimeMillis());
         f.setIdGerente(usuario.getIdTipo());
         f.setNumTelefone(numTelefone);
+        f.setMorada(morada);
         f.setEmail(email);
         f.setNumBilheteIdentidade(numBilheteIdentidade);
 
