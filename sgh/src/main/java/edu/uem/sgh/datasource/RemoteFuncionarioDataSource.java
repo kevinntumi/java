@@ -31,7 +31,7 @@ public class RemoteFuncionarioDataSource extends AbstractDataSource {
     public Result<Boolean> inserirFuncionario(edu.uem.sgh.schema.Funcionario funcionario) {
         Result<Boolean> r;
         
-        try (PreparedStatement statement = getConnection().prepareStatement("INSERT INTO " + tblName + "(nome, data_nascimento, data_registo, num_bilhete_id, morada, num_telefone, email, id_gerente) VALUES(?,?,?,?,?,?,?,?,?)")) {
+        try (PreparedStatement statement = getConnection().prepareStatement("INSERT INTO " + tblName + "(nome, data_nascimento, data_registo, num_bilhete_id, morada, num_telefone, email, id_gerente) VALUES(?,?,?,?,?,?,?,?)")) {
             statement.setString(1, funcionario.getNome());
             statement.setDate(2, new java.sql.Date(funcionario.getDataNascimento()));
             statement.setDate(3, new java.sql.Date(System.currentTimeMillis()));

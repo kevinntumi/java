@@ -7,10 +7,6 @@
     -fx-background-insets: 0;
 }
 
-#tableView .table-row-cell .text{
-    -fx-text-fill: blue;
-}
-
 .table-view #cell indexed-cell table-cell table-column {
     -fx-text-fill: blue;
 }

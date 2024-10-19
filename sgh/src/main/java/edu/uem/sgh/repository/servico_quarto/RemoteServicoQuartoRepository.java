@@ -16,7 +16,7 @@ public class RemoteServicoQuartoRepository extends AbstractServicoQuartoReposito
     public RemoteServicoQuartoRepository(Connection connection) {
         super(connection);
     }
-
+    
     @Override
     public Result<edu.uem.sgh.model.ServicoQuarto> get(long id) {
         return super.get(id); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody

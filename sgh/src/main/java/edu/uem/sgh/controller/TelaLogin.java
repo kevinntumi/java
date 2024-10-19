@@ -6,7 +6,6 @@ package edu.uem.sgh.controller;
 
 import com.gluonhq.charm.glisten.control.LifecycleEvent;
 import edu.uem.sgh.annotation.Dependency;
-import edu.uem.sgh.model.DialogDetails;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
@@ -96,7 +95,6 @@ public class TelaLogin extends AbstractController implements Initializable, Even
         btnRecuperarPalavraPasse.setOnMouseClicked(null);
         getCloseButton().setOnMouseClicked(null);
         getMinimizeButton().setOnMouseClicked(null);
-        removerTodasReferencias();
     }
     
     @Override
@@ -158,15 +156,7 @@ public class TelaLogin extends AbstractController implements Initializable, Even
         this.usuarioProperty = usuarioProperty;
     }
     
-    public void removerTodasReferencias() {
-        if (abstractController == null || !(abstractController instanceof DialogController)) 
-            return;
-            
-        DialogController dialogController = (DialogController) abstractController;
-        dialogController.removerListeners();
-        abstractController.getRoot().visibleProperty().removeListener(this);
-        dialogController.setLifecycleEventHandler(null);
-    }
+    
     
     private void observarMudancasTxtId(String newValue) {
         Exception e = null;
@@ -284,12 +274,6 @@ public class TelaLogin extends AbstractController implements Initializable, Even
         if (content != null && !content.isVisible()) {
             content.setVisible(true);
         }
-        
-        if (!(abstractController instanceof DialogController)) return;
-        
-        DialogController dialogController = (DialogController) abstractController;
-        DialogDetails dialogDetails = new DialogDetails(title, description);
-        dialogController.changed(null, null, dialogDetails);
     }
     
     EventHandler<Event> getEventHandler() {
@@ -344,7 +328,7 @@ public class TelaLogin extends AbstractController implements Initializable, Even
     }
     
     private void esconderMsgErro(EventType<? extends Event> eventType) {
-        if (abstractController == null || !(abstractController instanceof DialogController))
+        if (abstractController == null)
             return;
         
         ObservableList<Node> children = root.getChildren();
@@ -356,22 +340,10 @@ public class TelaLogin extends AbstractController implements Initializable, Even
             }
         }
         
-        removerTodasReferencias();
         alterarEstadoVisibilidadeDialog(false);
     }
 
     private void observarVisibilidade(Object newValue) {
-        if (!(abstractController instanceof DialogController))
-            return;
-            
-        DialogController dialogController = (DialogController) abstractController;
-        boolean estaVisivel = (boolean) newValue;
-        dialogController.setLifecycleEventHandler(estaVisivel ? getEventHandler() : null);
         
-        if (estaVisivel) {
-            dialogController.adicionarListeners();
-        } else {
-            dialogController.removerListeners();
-        }
     }
 }

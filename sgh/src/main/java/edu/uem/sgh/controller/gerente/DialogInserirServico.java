@@ -143,13 +143,13 @@ public class DialogInserirServico extends Dialog<Object> {
                         System.out.println("isSituacaoNotValid: " + isSituacaoNotValid);
                         
                         if (isUsuarioNotValid) {
-                            
+                            mostrarMsgErro("");
                         } else if (isRepositoryNotValid) {
-                            
+                            mostrarMsgErro("");
                         } else if (isDescricaoNotValid) {
-
+                            mostrarMsgErro("A descricao");
                         } else {
-
+                            mostrarMsgErro("");
                         }
 
                         return;
@@ -180,7 +180,7 @@ public class DialogInserirServico extends Dialog<Object> {
                         consumeEvent = true;
                     } else {
                         Result.Success<Boolean> success = (Result.Success<Boolean>) rslt;
-                        System.out.println("" + success.getData());
+                        
                         if (!success.getData()) {
                             consumeEvent = true;
                         }

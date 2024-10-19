@@ -6,19 +6,19 @@ package edu.uem.sgh.controller.gerente;
 
 import edu.uem.sgh.controller.AbstractController;
 import edu.uem.sgh.controller.gerente.dialog.DialogEditarServico;
+import edu.uem.sgh.controller.gerente.dialog.DialogTelaServico;
 import edu.uem.sgh.helper.ServicoSituacao;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Servico;
 import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.repository.servico.ServicoRepository;
+import edu.uem.sgh.repository.servico_quarto.ServicoQuartoRepository;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -28,7 +28,6 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
@@ -36,16 +35,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.skin.TableColumnHeader;
-import javafx.scene.control.skin.VirtualFlow;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
-import javafx.util.Callback;
 
 /**
  *
@@ -71,12 +67,10 @@ public class TelaServicos extends AbstractController implements EventHandler<Eve
     private Result<List<Servico>> rslt;
     private edu.uem.sgh.schema.Servico selectedServico = null;
     private ServicoRepository servicoRepository;
+    private ServicoQuartoRepository servicoQuartoRepository;
     private List<Dialog<?>> dialogs;
     private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("d MMM yyyy");
     private boolean firstTimeVisible = true;
-    private EventHandler<MouseEvent> rowEventHandler;
-    private Map<TableRow<edu.uem.sgh.model.table.Servico>, Integer> rowIndexes;
-    private ObservableList<String> tableColumnStyleClass, tableRowStyleClass;
     private Alert errorAlert;
 
     @Override
@@ -87,6 +81,8 @@ public class TelaServicos extends AbstractController implements EventHandler<Eve
         btnAdicionar.setOnMouseClicked(this);
         btnCarregar.setOnMouseClicked(this);
         btnEditar.setOnMouseClicked(this);
+        tableView.setOnMouseClicked(this);
+        tableView.setOnMouseMoved(this);
     }
 
     @Override
@@ -94,6 +90,8 @@ public class TelaServicos extends AbstractController implements EventHandler<Eve
         btnAdicionar.setOnMouseClicked(null);
         btnCarregar.setOnMouseClicked(null);
         btnEditar.setOnMouseClicked(null);
+        tableView.setOnMouseClicked(null);
+        tableView.setOnMouseMoved(null);
         
         if (errorAlert != null) 
             errorAlert.close();
@@ -106,26 +104,51 @@ public class TelaServicos extends AbstractController implements EventHandler<Eve
 
     @Override
     public void handle(Event event) {
-        Object source = event.getSource(), eventType = event.getEventType();
+        Object source = event.getSource();
         
-        if (!(source.equals(btnAdicionar) || source.equals(btnCarregar) || source.equals(btnEditar))) {
-            return;
+        if (event.getEventType() == MouseEvent.MOUSE_CLICKED) {
+            if (!(source.equals(btnAdicionar) || source.equals(btnCarregar) || source.equals(btnEditar) || source.equals(tableView))) {
+                return;
+            }
+
+            if (source.equals(btnAdicionar))
+                adicionarNovoServico();
+            else if (source.equals(btnCarregar))
+                carregarServicos();
+            else if (source.equals(tableView))
+                cliqueNaTabela((MouseEvent) event);
+            else
+                editarServico();
+        } else if (event.getEventType() == MouseEvent.MOUSE_MOVED) {
+            if (source.equals(tableView))
+                cliqueNaTabela((MouseEvent) event);
         }
-          
-        if (source.equals(btnAdicionar))
-            adicionarNovoServico();
-        else if (source.equals(btnCarregar))
-            carregarServicos();
-        else
-            editarServico();
     }
 
     @Override
     public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
         if (observable instanceof ReadOnlyBooleanProperty) {
             if (dialogs != null) {
+                List<Dialog<?>> dialogsToRemove = null;
+                
                 for (Dialog<?> d : dialogs) {
+                    if (!d.isShowing()) {
+                        if (dialogsToRemove == null){
+                            dialogsToRemove = new ArrayList<>();
+                        }
+                        
+                        dialogsToRemove.add(d);
+                    }
+                    
                     resolverDependencias(d.getClass().getTypeName(), d.isShowing());
+                }
+                
+                if (dialogsToRemove == null) {
+                    return;
+                }
+                
+                for (Dialog<?> d : dialogsToRemove) {
+                    dialogs.remove(d);
                 }
             }            
         }
@@ -147,6 +170,10 @@ public class TelaServicos extends AbstractController implements EventHandler<Eve
 
     public void setServicoRepository(ServicoRepository servicoRepository) {
         this.servicoRepository = servicoRepository;
+    }
+
+    public void setServicoQuartoRepository(ServicoQuartoRepository servicoQuartoRepository) {
+        this.servicoQuartoRepository = servicoQuartoRepository;
     }
     
     private Dialog<?> encontrarDialog(Class<?> clazz) {
@@ -173,18 +200,6 @@ public class TelaServicos extends AbstractController implements EventHandler<Eve
      
         dialogInserirServico.showingProperty().addListener(this);
         dialogInserirServico.show();
-    }
-    
-    private Dialog<?> encontrarDialogVisivel() {
-        if (dialogs == null || dialogs.isEmpty())
-            return null;
-        
-        for (Dialog<?> dialog : dialogs) {
-            if (dialog.isShowing())
-                return dialog;
-        }
-        
-        return null;
     }
     
     private void resolverDependencias(String uiClassId, boolean add) {
@@ -224,6 +239,22 @@ public class TelaServicos extends AbstractController implements EventHandler<Eve
                 dialogEditarServico.setUsuario(null);
                 dialogEditarServico.setServico(null);
                 dialogEditarServico.setServicoRepository(null);
+            }
+        } else if (uiClassId.contains(DialogTelaServico.class.getTypeName())) {
+            DialogTelaServico dialogTelaServico = (DialogTelaServico) encontrarDialog(DialogTelaServico.class);
+            
+            if (dialogTelaServico == null) {
+                return;
+            }
+            
+            if (add) {
+                dialogTelaServico.setServicoQuartoRepository(servicoQuartoRepository);
+                dialogTelaServico.setServicoRepository(servicoRepository);
+                dialogTelaServico.adicionarListeners();
+            } else {
+                dialogTelaServico.removerListeners();
+                dialogTelaServico.setServicoQuartoRepository(null);
+                dialogTelaServico.setServicoRepository(null);
             }
         }
     }
@@ -290,101 +321,6 @@ public class TelaServicos extends AbstractController implements EventHandler<Eve
             return;
         }
         
-        if (tableView.getRowFactory() == null) {
-            tableView.setRowFactory(new Callback<TableView<edu.uem.sgh.model.table.Servico>, TableRow<edu.uem.sgh.model.table.Servico>>() {  
-                private TableRow<edu.uem.sgh.model.table.Servico> currentRow = null;
-                
-                private ChangeListener<Number> changeListener = new ChangeListener<Number>() {
-                    @Override
-                    public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                        if (currentRow == null)
-                            return;
-                        
-                        getRowIndexes().put(currentRow, newValue.intValue());
-                    }
-                };
-                        
-                @Override
-                public TableRow<edu.uem.sgh.model.table.Servico> call(TableView<edu.uem.sgh.model.table.Servico> param) {
-                    TableRow<edu.uem.sgh.model.table.Servico> row = new TableRow<>();
-                
-                    if (row.getOnMouseClicked() == null) {
-                        row.setOnMouseClicked(getRowEventHandler());
-                    }
-                    
-                    if (tableRowStyleClass == null) {
-                        tableRowStyleClass = row.getStyleClass();
-                    }
-
-                    currentRow = row;
-                    row.indexProperty().addListener(changeListener);
-                    return row;
-                }
-            });
-        }
-        
-        tableView.setOnMouseClicked(new EventHandler<MouseEvent>(){
-            @Override
-            public void handle(MouseEvent event) {
-                if (!(event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY && tableView.getSelectionModel().getSelectedIndex() != -1)){
-                    return;
-                }
-                
-                Node intersectedNode = event.getPickResult().getIntersectedNode(), parent = intersectedNode.getParent();
-                
-                if (parent instanceof TableColumnHeader || (intersectedNode instanceof Text && parent instanceof Label)) {
-                    return;
-                }
-                
-                System.out.println("node: " + intersectedNode);
-                System.out.println("parent: " + intersectedNode.getParent());
-                
-                
-                
-            }
-        });
-      
-        tableView.setOnMouseMoved(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {             
-                Node intersectedNode = event.getPickResult().getIntersectedNode(); 
-                Parent parent = intersectedNode.getParent();
-                
-                if (parent instanceof TableColumnHeader || (intersectedNode instanceof Text && parent instanceof Label)) {
-                    return;
-                }
-                
-                String parentStr = (parent == null) ? null : parent.toString();
-                
-                if (!(intersectedNode instanceof Text && parentStr != null && parentStr.startsWith("TableColumn"))) {
-                    return;
-                }
-                
-                int start = parentStr.indexOf("id="), end = parentStr.indexOf(",");
-                
-                if (start == -1 || end == -1 || end < start) {
-                    return;
-                }
-                
-                String id = "";
-                start += 3;
-                    
-                for (int i = start ; i < end ; i++) {
-                    id += parentStr.charAt(i);
-                }
-                
-                if (id.isBlank() || !(id.startsWith("tblColumn"))){
-                    return;
-                }
-                
-                System.out.println("fuck " + id);
-                
-                if (id.equals("tblColumnCodigo")) {
-                    Text text = (Text) intersectedNode;
-                }
-            }
-        });
-        
         ObservableList<TableColumn<edu.uem.sgh.model.table.Servico, ?>> columns = tableView.getColumns();
         
         for (int i = 0 ; i < columns.size() ; i++) {
@@ -392,10 +328,6 @@ public class TelaServicos extends AbstractController implements EventHandler<Eve
             
             if (tableColumn.getCellValueFactory() != null || (tableColumn.getId() == null || tableColumn.getId().isBlank())) {
                 continue;
-            }
-            
-            if (tableColumnStyleClass == null) {
-                tableColumnStyleClass = tableColumn.getStyleClass();
             }
             
             PropertyValueFactory propertyValueFactory = null;
@@ -437,38 +369,85 @@ public class TelaServicos extends AbstractController implements EventHandler<Eve
         dialogEditarServico.show();
     }
 
-    public EventHandler<MouseEvent> getRowEventHandler() {
-        if (rowEventHandler == null) {
-            rowEventHandler = new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent event) {
-                    Object source = event.getSource();
-                    
-                    if (!(source instanceof TableRow)) {
-                        return;
-                    }
-                    
-                    @SuppressWarnings("unchecked")
-                    TableRow<edu.uem.sgh.schema.Servico> row = (TableRow<edu.uem.sgh.schema.Servico>) source;
-                    int index = getRowIndexes().getOrDefault(row, -1);
-                    
-                    if (index == -1) {
-                        return;
-                    }
-                    
-                    edu.uem.sgh.model.table.Servico servico = tableView.getItems().get(index);
-                    
-                    
-                    System.out.println(servico.getCodigo() + " " + getRowIndexes().size());
-                }
-            };
-        }
-        
-        return rowEventHandler;
-    }
+    private void cliqueNaTabela(MouseEvent event) {
+        if (event.getEventType() == MouseEvent.MOUSE_MOVED || (event.getEventType() == MouseEvent.MOUSE_CLICKED && event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY && tableView.getSelectionModel().getSelectedIndex() != -1)){
+            Node intersectedNode = event.getPickResult().getIntersectedNode(), parent = intersectedNode.getParent();
 
-    public Map<TableRow<edu.uem.sgh.model.table.Servico>, Integer> getRowIndexes() {
-        if (rowIndexes == null) rowIndexes = new HashMap<>();
-        return rowIndexes;
+            if (parent instanceof TableColumnHeader || (intersectedNode instanceof Text && parent instanceof Label)) {
+                return;
+            }
+
+            String parentStr = (parent == null) ? null : parent.toString();
+
+            if (!(intersectedNode instanceof Text && parentStr != null && parentStr.startsWith("TableColumn"))) {
+                return;
+            }
+
+            int start = parentStr.indexOf("id="), end = parentStr.indexOf(",");
+
+            if (start == -1 || end == -1 || end < start) {
+                return;
+            }
+
+            String id = "";
+            start += 3;
+
+            for (int i = start ; i < end ; i++) {
+                id += parentStr.charAt(i);
+            }
+
+            if (!(id.equals("tblColumnCodigo"))){
+                return;
+            }
+
+            Text text = (Text) intersectedNode;
+            Long idLng;
+
+            try {
+                idLng = Long.valueOf(text.getText());
+            } catch (NumberFormatException e) {
+                return;
+            }
+
+            if (event.getEventType() == MouseEvent.MOUSE_MOVED) {
+                if (selectedServico == null) {
+                    selectedServico = new edu.uem.sgh.schema.Servico();
+                }
+                
+                ObservableList<edu.uem.sgh.model.table.Servico> servicos = tableView.getItems();
+                edu.uem.sgh.model.table.Servico s = null;
+                
+                for (edu.uem.sgh.model.table.Servico servico : servicos) {
+                    if (!(servico.getCodigo() == idLng)) {
+                        continue;
+                    }
+                    
+                    s = servico;
+                    break;
+                }
+                
+                selectedServico.setId(s != null ? s.getCodigo(): null);
+                selectedServico.setDescricao(s != null ? s.getDescricao() : null);
+                selectedServico.setSituacao(s != null ? s.getSituacao(): null);
+                
+            } else {
+                abrirTelaServico(idLng);
+            }
+        }
+    }
+    
+    private void abrirTelaServico(Long id) {
+        DialogTelaServico dialogTelaServico = (DialogTelaServico) encontrarDialog(DialogTelaServico.class);
+        
+        if (dialogTelaServico == null) {
+            dialogTelaServico = new DialogTelaServico();
+            getDialogs().add(dialogTelaServico);
+        } else {
+            dialogTelaServico.showingProperty().removeListener(this);
+        }
+     
+        dialogTelaServico.setIdServico(id);
+        dialogTelaServico.showingProperty().addListener(this);
+        dialogTelaServico.show();
     }
 }

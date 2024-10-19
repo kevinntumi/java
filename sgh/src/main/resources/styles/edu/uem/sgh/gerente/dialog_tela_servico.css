@@ -1,0 +1,23 @@
+#root {
+   -fx-border-width: 0.5px;
+   -fx-border-color: #ccc;
+}
+
+.table-view {
+    -fx-font-family: "Inter";
+    -fx-font-size: 12;
+}
+
+#tableView .table-row-cell{
+    -fx-background-insets: 0;
+}
+
+.table-view .column-header,
+.table-view .column-header .filler,
+.table-view .column-header-background .filler {
+    -fx-background-color: #f1f1f1;
+    -fx-border-width: 0;
+    -fx-min-height: 32px;
+    -fx-max-height: 32px;
+    -fx-pref-height: 32px;
+}

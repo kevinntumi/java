@@ -4,6 +4,7 @@
  */
 package edu.uem.sgh.repository.servico_quarto;
 
+import edu.uem.sgh.model.Quarto;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.ServicoQuarto;
 import edu.uem.sgh.repository.AbstractRepository;
@@ -88,6 +89,29 @@ public class AbstractServicoQuartoRepository extends AbstractRepository{
             }
             
             r = new Result.Success<>(servicosQuartos);
+            rs.close();
+        } catch(SQLException e) {
+            r = new Result.Error<>(e);
+        }
+        
+        return r;
+    }
+    
+    public Result<List<Quarto>> obterQuartosPorServico(long idServico) {
+        Result<List<Quarto>> r;
+        
+        try (PreparedStatement statement = getConnection().prepareStatement("SELECT id_servico, id_quarto FROM servico_quarto WHERE id = ?")){
+            statement.setLong(1, idServico);
+            ResultSet rs = statement.executeQuery();
+            List<Quarto> quartos = new ArrayList<>();
+            
+            while (rs.next()) {
+         //       Servico servico = new Servico(rs.getLong("id_servico"), rs.getString("descricao_servico"), rs.getBoolean("status_servico"));
+           //     Quarto quarto = new Quarto(rs.getLong("id_quarto"), rs.getString("descricao_quarto"), rs.getInt("capacidade"), rs.getBlob("foto"), rs.getDouble("preco"), rs.getBoolean("status_quarto"));
+             //   servicoQuarto = new ServicoQuarto(id, servico, quarto);
+            }
+            
+            r = new Result.Success<>(quartos);
             rs.close();
         } catch(SQLException e) {
             r = new Result.Error<>(e);

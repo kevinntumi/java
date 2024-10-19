@@ -17,7 +17,6 @@ import java.util.List;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -31,10 +30,13 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogEvent;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.StageStyle;
 
 /**
  *
@@ -48,16 +50,18 @@ public class DialogInserirFuncionario extends Dialog<Object> {
     private Integer numTelefone;
     private TextField txtNome, txtEmail, txtNumTelefone, txtNumBI, txtMorada;
     private DatePicker dataNascimentoInput;
+    private ImageView close;
     private ChangeListener<Object> changeListener;
-    private EventHandler<ActionEvent> eventHandler;
+    private EventHandler<MouseEvent> mouseClickedEventHandler;
+    private EventHandler<DialogEvent> dialogLifecycleEventHandler;
     private FuncionarioRepository funcionarioRepository;
-    private Button btnOk;
+    private Button btnOk, btnFechar;
     private Result<Boolean> rslt = null;
     private Alert alert = null;
     private Usuario usuario;
     
     public DialogInserirFuncionario() {
-        setTitle("Novo funcionário");
+        initStyle(StageStyle.UNDECORATED);
         
         try {
             content = new FXMLLoader(Path.getFXMLURL(layoutName, additionalPath)).load();
@@ -72,9 +76,10 @@ public class DialogInserirFuncionario extends Dialog<Object> {
         txtNumBI = (TextField) findById("txtNumBI", children);
         txtMorada = (TextField) findById("txtMorada", children);
         dataNascimentoInput = (DatePicker) findById("dataNascimentoInput", children);
+        btnOk = (Button) findById("btnOk", children);
+        btnFechar = (Button) findById("btnFechar", children);
+        close = (ImageView) findById("close", children);
         getDialogPane().setContent(content);
-        getDialogPane().getButtonTypes().add(ButtonType.OK);
-        btnOk = (Button) getDialogPane().lookupButton(ButtonType.OK);
     }
     
     private Node findById(String id, ObservableList<Node> children) {
@@ -116,7 +121,10 @@ public class DialogInserirFuncionario extends Dialog<Object> {
         txtNumBI.textProperty().addListener(changeListener);
         txtMorada.textProperty().addListener(changeListener);
         dataNascimentoInput.valueProperty().addListener(changeListener);
-        btnOk.setOnAction(getEventHandler());
+        btnFechar.setOnMouseClicked(getMouseClickedEventHandler());
+        btnOk.setOnMouseClicked(getMouseClickedEventHandler());
+        close.setOnMouseClicked(getMouseClickedEventHandler());
+        setOnCloseRequest(getDialogLifecycleEventHandler());
     }
     
     public void removerListeners() {
@@ -129,7 +137,10 @@ public class DialogInserirFuncionario extends Dialog<Object> {
         txtNumBI.textProperty().removeListener(changeListener);
         txtMorada.textProperty().removeListener(changeListener);
         dataNascimentoInput.valueProperty().removeListener(changeListener);
-        btnOk.setOnAction(null);
+        btnFechar.setOnMouseClicked(null);
+        btnOk.setOnMouseClicked(null);
+        close.setOnMouseClicked(null);
+        setOnCloseRequest(null);
     }
 
     public ChangeListener<Object> getChangeListener() {
@@ -169,7 +180,6 @@ public class DialogInserirFuncionario extends Dialog<Object> {
     
     private void observarEmail(String email) {
         this.email = email;
-        
     }
     
     private void observarNumBilheteId(String numBilheteId) {
@@ -186,63 +196,101 @@ public class DialogInserirFuncionario extends Dialog<Object> {
         }
     }
 
-    public EventHandler<ActionEvent> getEventHandler() {
-        if (eventHandler == null) 
-            eventHandler = new EventHandler<ActionEvent>() {
+    public EventHandler<MouseEvent> getMouseClickedEventHandler() {
+        if (mouseClickedEventHandler == null) 
+            mouseClickedEventHandler = new EventHandler<MouseEvent>() {
                 @Override
-                public void handle(ActionEvent event) {
-                    if (usuario == null || funcionarioRepository == null || !event.getSource().equals(btnOk)) {
-                        event.consume();
+                public void handle(MouseEvent event) {
+                    if (!(event.getEventType() == MouseEvent.MOUSE_CLICKED)) {
                         return;
                     }
                     
-                    List<Boolean> camposInvalidos = new ArrayList<>();
-                    camposInvalidos.add(!FuncionarioValidator.isNomeValid(nome));
-                    camposInvalidos.add(!FuncionarioValidator.isDataNascimentoValid(dataNascimento));
-                    camposInvalidos.add(!FuncionarioValidator.isNumBIValid(numBilheteIdentidade));
-                    camposInvalidos.add(!FuncionarioValidator.isNumTelefoneValid(numTelefoneStr));
-                    camposInvalidos.add(!FuncionarioValidator.isMoradaValid(morada));
-                    camposInvalidos.add(!FuncionarioValidator.isEmailValid(email));
+                    Object source = event.getSource();
                     
-                    if (temCamposInvalidos(camposInvalidos)) {
-                        determinarRestantesCamposInvalidos(camposInvalidos);
-                        
-                        if (!event.isConsumed()) 
-                            event.consume();
-                        
+                    if (!(source.equals(btnFechar) || source.equals(btnOk) || source.equals(close))) {
                         return;
                     }
                     
-                    Funcionario f = new Funcionario();
-                    f.setNome(nome);
-                    f.setDataRegisto(System.currentTimeMillis());
-                    f.setDataNascimento(System.currentTimeMillis());
-                    f.setIdGerente(usuario.getIdTipo());
-                    f.setNumTelefone(numTelefone);
-                    f.setEmail(email);
-                    f.setNumBilheteIdentidade(numBilheteIdentidade);
-                    
-                    getDialogPane().getContent().setMouseTransparent(true);
-                    
-                    rslt = funcionarioRepository.inserirFuncionario(f);
-                    
-                    getDialogPane().getContent().setMouseTransparent(false);
-                    
-                    if (rslt instanceof Result.Error) {
-                        event.consume();
-                        getAlert().setContentText(rslt.getValue().toString());
-                        getAlert().show();
-                    } else {
-                        Result.Success<Boolean> success = (Result.Success<Boolean>) rslt;
-                        
-                        if (!success.getData()) {
-                            event.consume();
-                        }
-                    }
+                    if (source.equals(btnOk))
+                        cliqueBtnOk();
+                    else
+                        cliqueBtnFechar();
                 }
             };
         
-        return eventHandler;
+        return mouseClickedEventHandler;
+    }
+
+    public EventHandler<DialogEvent> getDialogLifecycleEventHandler() {
+        if (dialogLifecycleEventHandler == null) {
+            dialogLifecycleEventHandler = new EventHandler<DialogEvent>() {
+                @Override
+                public void handle(DialogEvent event) {
+                    if (!(event.getEventType().equals(DialogEvent.DIALOG_CLOSE_REQUEST))) {
+                        event.consume();
+                    }
+                }
+            };
+        }
+        
+        return dialogLifecycleEventHandler;
+    }
+    
+    private DialogInserirFuncionario getDialogInserirFuncionario() {
+        return this;
+    }
+    
+    private void cliqueBtnFechar() {
+        setResult(ButtonType.CANCEL);
+        getDialogLifecycleEventHandler().handle(new DialogEvent(getDialogInserirFuncionario(), DialogEvent.DIALOG_CLOSE_REQUEST));
+    }
+    
+    private void cliqueBtnOk() {
+        if (usuario == null || funcionarioRepository == null) {
+            return;
+        }
+
+        List<Boolean> camposInvalidos = new ArrayList<>();
+        camposInvalidos.add(!FuncionarioValidator.isNomeValid(nome));
+        camposInvalidos.add(!FuncionarioValidator.isDataNascimentoValid(dataNascimento));
+        camposInvalidos.add(!FuncionarioValidator.isNumBIValid(numBilheteIdentidade));
+        camposInvalidos.add(!FuncionarioValidator.isNumTelefoneValid(numTelefoneStr));
+        camposInvalidos.add(!FuncionarioValidator.isMoradaValid(morada));
+        camposInvalidos.add(!FuncionarioValidator.isEmailValid(email));
+
+        if (temCamposInvalidos(camposInvalidos)) {
+            determinarRestantesCamposInvalidos(camposInvalidos);
+            return;
+        }
+
+        Funcionario f = new Funcionario();
+        f.setNome(nome);
+        f.setDataRegisto(System.currentTimeMillis());
+        f.setDataNascimento(System.currentTimeMillis());
+        f.setIdGerente(usuario.getIdTipo());
+        f.setNumTelefone(numTelefone);
+        f.setEmail(email);
+        f.setNumBilheteIdentidade(numBilheteIdentidade);
+
+        getDialogPane().getContent().setMouseTransparent(true);
+
+        rslt = funcionarioRepository.inserirFuncionario(f);
+
+        getDialogPane().getContent().setMouseTransparent(false);
+        
+        if (rslt instanceof Result.Error) {
+            getAlert().setContentText(rslt.getValue().toString());
+            getAlert().show();
+        } else {
+            Result.Success<Boolean> success = (Result.Success<Boolean>) rslt;
+
+            if (!success.getData()) {
+                return;
+            }
+            
+            setResult(ButtonType.OK);
+            getDialogLifecycleEventHandler().handle(new DialogEvent(getDialogInserirFuncionario(), DialogEvent.DIALOG_CLOSE_REQUEST));
+        }
     }
     
     private boolean temCamposInvalidos(List<Boolean> camposInvalidos){

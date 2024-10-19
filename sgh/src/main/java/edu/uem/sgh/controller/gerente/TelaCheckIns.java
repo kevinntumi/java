@@ -40,19 +40,20 @@ public class TelaCheckIns extends AbstractController implements EventHandler<Act
     
     private Result<List<CheckIn.Reserva>> rslt;
     private CheckInReservaRepository checkInReservaRepository;
-    private int totalTimesVisible;
+    private boolean firstTimeVisible = true;
     private Usuario usuario;
     
     @Override
     public void adicionarListeners() {
+        if (firstTimeVisible)
+            init();
+        
         btnCarregar.setOnAction(this);
-        root.visibleProperty().addListener(this);
     }
 
     @Override
     public void removerListeners() {
         btnCarregar.setOnAction(null);
-        root.visibleProperty().removeListener(this);
     }
 
     @Override
@@ -67,7 +68,7 @@ public class TelaCheckIns extends AbstractController implements EventHandler<Act
         if (!(source.equals(btnCarregar)))
             return;
         
-        carregarCheckIns();
+        init();
     }
 
     @Override
@@ -117,21 +118,13 @@ public class TelaCheckIns extends AbstractController implements EventHandler<Act
 
     @Override
     public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-        if (!(observable.equals(root.visibleProperty())))
-            return;
-        
-        Boolean isShowing = (Boolean) newValue;
-        
-        if (!(isShowing && totalTimesVisible == 0)) {
-            observable.removeListener(this);
-            return;
-        }
-        
-        if (isShowing && totalTimesVisible == 0) {
-            carregarCheckIns();
-            totalTimesVisible++;
-        }
+       
+    }
 
-        observable.removeListener(this);
+    private void init() {
+        if (firstTimeVisible)
+            firstTimeVisible = false;
+        
+        carregarCheckIns();
     }
 }

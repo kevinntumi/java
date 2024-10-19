@@ -23,6 +23,7 @@ import edu.uem.sgh.repository.funcionario.FuncionarioRepository;
 import edu.uem.sgh.repository.hospede.HospedeRepository;
 import edu.uem.sgh.repository.quarto.QuartoRepository;
 import edu.uem.sgh.repository.servico.ServicoRepository;
+import edu.uem.sgh.repository.servico_quarto.ServicoQuartoRepository;
 import edu.uem.sgh.util.Path;
 import java.net.URL;
 import java.sql.Connection;
@@ -75,6 +76,7 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     private EnumMap<Usuario.Tipo, Map<String, Class<?>>> resourcePathMap;
     private ServicoRepository servicoRepository;
     private AutenticacaoRepository autenticacaoRepository;
+    private ServicoQuartoRepository servicoQuartoRepository;
     private QuartoRepository quartoRepository;
     private HospedeRepository hospedeRepository;
     private FuncionarioRepository funcionarioRepository;
@@ -411,6 +413,11 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         Object source = event.getSource();
     }
 
+    public ServicoQuartoRepository getServicoQuartoRepository() {
+        if (servicoQuartoRepository == null && remoteConnection != null) servicoQuartoRepository = new ServicoQuartoRepository(remoteConnection);
+        return servicoQuartoRepository;
+    }
+    
     public ServicoRepository getServicoRepository() {
         if (servicoRepository == null && remoteConnection != null) servicoRepository = new ServicoRepository(remoteConnection);
         return servicoRepository;
@@ -471,9 +478,11 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         
         if (add) {
             telaServicos.setServicoRepository(getServicoRepository());
+            telaServicos.setServicoQuartoRepository(getServicoQuartoRepository());
             telaServicos.setUsuario(usuario);
         } else {
             telaServicos.setServicoRepository(null);
+            telaServicos.setServicoQuartoRepository(null);
             telaServicos.setUsuario(null);
         }
     }

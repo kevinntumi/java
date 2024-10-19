@@ -61,7 +61,7 @@ public abstract class AbstractServicoRepository extends AbstractRepository {
         
         Result<Boolean> r;
 
-        try (PreparedStatement statement = getConnection().prepareStatement("UPDATE " + tblName + " SET descricao = ? AND situacao = ? WHERE id = ?")){
+        try (PreparedStatement statement = getConnection().prepareStatement("UPDATE " + tblName + " SET descricao = ?, situacao = ? WHERE id = ?")){
             statement.setString(1, servico.getDescricao());
             statement.setString(2, servico.getSituacao());
             statement.setLong(3, servico.getId());
@@ -146,7 +146,7 @@ public abstract class AbstractServicoRepository extends AbstractRepository {
     public Result<Servico> get(long id) {
         Result<Servico> r;
         
-        try (PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM " + tblName + " WHERE id = ?")){
+        try (PreparedStatement statement = getConnection().prepareStatement("SELECT servico.*, gerente.* FROM servico JOIN gerente ON gerente.id = servico.id_gerente WHERE servico.id = ?")){
             statement.setLong(1, id);
             ResultSet rs = statement.executeQuery();
             ResultSetMetaData resultSetMetaData = rs.getMetaData();
@@ -174,20 +174,14 @@ public abstract class AbstractServicoRepository extends AbstractRepository {
                             case "id_gerente":
                                 servico.getGerente().setId(rs.getLong(columnName));
                                     break;
-                            case "gerente_nome":
+                            case "nome":
                                 servico.getGerente().setNome(rs.getString(columnName));
-                                    break;
-                            case "gerente_sexo":
-                                servico.getGerente().setSexo(rs.getString(columnName).charAt(0));
                                     break;
                             case "gerente_num_telefone":
                                 servico.getGerente().setNumTelefone(rs.getInt(columnName));
                                     break;
                             case "gerente_num_bilhete_identidade":
                                 servico.getGerente().setNumBilheteIdentidade(rs.getString(columnName));
-                                    break;
-                            case "gerente_data_nascimento":
-                                servico.getGerente().setDataNascimento(rs.getDate(columnName).getTime());
                                     break;
                             case "situacao": 
                                 servico.setSituacao(ServicoSituacao.obterViaString(rs.getString(columnName)));
@@ -197,6 +191,7 @@ public abstract class AbstractServicoRepository extends AbstractRepository {
                 }
             }
             
+            rs.close();
             r = new Result.Success<>(servico);
         } catch(SQLException e) {
             r = new Result.Error<>(e);

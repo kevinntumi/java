@@ -8,6 +8,7 @@ import edu.uem.sgh.helper.ServicoSituacao;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.repository.servico.ServicoRepository;
+import edu.uem.sgh.schema.Servico;
 import edu.uem.sgh.util.Path;
 import edu.uem.sgh.util.ServicoValidator;
 import java.io.IOException;
@@ -113,8 +114,9 @@ public class DialogEditarServico extends Dialog<Object> {
     
     public void adicionarListeners() {
         if (servico == null) {
-            System.out.println(btnOK.getOnAction());
-            System.out.println(btnOK.getOnMouseClicked());
+            return;
+        } else {
+            initCampos(servico);
         }
         
         if (changeListener == null) {
@@ -143,6 +145,23 @@ public class DialogEditarServico extends Dialog<Object> {
                     return;
                 }
                 
+                boolean isDescricaoNotValid = !ServicoValidator.isDescricaoValid(descricao);
+                
+                if (isDescricaoNotValid) {
+                    mostrarMsgErro("Descrição invalida!");
+                    return;
+                }
+                
+                if (situacao == null) {
+                    mostrarMsgErro("Situação invalida!");
+                    return;
+                }
+                
+                if (servico.getDescricao().equals(descricao) && servico.getSituacao().equals(situacao)) {
+                    mostrarMsgErro("Pelo menos um dos campos deve ser diferente dos dados ja existentes!");
+                    return;
+                }
+                
                 getDialogPane().getContent().setMouseTransparent(true);
                 servico.setDescricao(descricao);
                 servico.setSituacao(situacao);
@@ -157,8 +176,8 @@ public class DialogEditarServico extends Dialog<Object> {
                 
                 if (rslt instanceof Result.Error) {
                     Result.Error<Boolean> error = (Result.Error<Boolean>) rslt;
-                    String descricao1 = (error.getException().getClass().equals(SQLException.class)) ? "Não foi possivel estabelecer uma conexão a base de dados remota." : "Não foi possivel realizar o pedido. Tente novamente em uma outra altura.";
-                    mostrarMsgErro(descricao1);
+                    descricao = (error.getException().getClass().equals(SQLException.class)) ? "Não foi possivel estabelecer uma conexão a base de dados remota." : "Não foi possivel realizar o pedido. Tente novamente em uma outra altura.";
+                    mostrarMsgErro(descricao);
                     consumeEvent = true;
                 } else {
                     Result.Success<Boolean> success = (Result.Success<Boolean>) rslt;
@@ -225,5 +244,32 @@ public class DialogEditarServico extends Dialog<Object> {
     
     private boolean temLinhaSelecionada(int selectedIndex) {
         return selectedIndex != -1;
+    }
+
+    private void initCampos(Servico servico) {
+        if (servico == null) {
+            return;
+        }
+        
+        descricao = servico.getDescricao();
+        txtDescricao.setText(descricao);
+        
+        ObservableList<String> items = cbSituacao.getItems();
+        
+        if (items.isEmpty()) {
+            return;
+        }
+        
+        for (int i = 0 ; i < items.size() ; i++) {
+            String item = items.get(i);
+            
+            if (!item.equals(servico.getSituacao())) {
+                continue;
+            } 
+            
+            cbSituacao.getSelectionModel().select(i);
+            situacao = item;
+            break;
+        }
     }
 }

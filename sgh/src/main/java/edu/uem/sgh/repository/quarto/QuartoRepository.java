@@ -51,12 +51,12 @@ public class QuartoRepository {
         return getRemoteQuartoRepository().get(id);
     }   
 
-    public RemoteQuartoRepository getRemoteQuartoRepository() {
+    private RemoteQuartoRepository getRemoteQuartoRepository() {
         if (remoteQuartoRepository == null) remoteQuartoRepository = new RemoteQuartoRepository(remoteConnection);
         return remoteQuartoRepository;
     }
 
-    public LocalQuartoRepository getLocalQuartoRepository() {
+    private LocalQuartoRepository getLocalQuartoRepository() {
         if (localQuartoRepository == null) localQuartoRepository = new LocalQuartoRepository(localConnection);
         return localQuartoRepository;
     }

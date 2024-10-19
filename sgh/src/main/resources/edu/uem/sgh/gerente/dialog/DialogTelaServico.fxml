@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.Font?>
+
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="454.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1">
+   <stylesheets>
+        <URL value="@/styles/edu/uem/sgh/gerente/dialog_tela_servico.css" />
+   </stylesheets>
+   <children>
+      <AnchorPane maxWidth="1.7976931348623157E308">
+         <children>
+            <Label text="Serviço" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="24.0" AnchorPane.topAnchor="0.0">
+               <font>
+                  <Font name="Inter Regular" size="12.0" />
+               </font>
+            </Label>
+            <Button fx:id="btnCarregar" mnemonicParsing="false" text="Carregar" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="24.0" AnchorPane.topAnchor="0.0">
+               <font>
+                  <Font name="Inter Regular" size="12.0" />
+               </font>
+            </Button>
+         </children>
+         <VBox.margin>
+            <Insets top="12.0" />
+         </VBox.margin>
+      </AnchorPane>
+      <GridPane maxWidth="1.7976931348623157E308">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <VBox.margin>
+            <Insets bottom="24.0" left="24.0" right="24.0" top="16.0" />
+         </VBox.margin>
+         <children>
+            <Label text="Código:">
+               <font>
+                  <Font name="Inter Regular" size="12.0" />
+               </font>
+            </Label>
+            <Label text="Descrição:" GridPane.rowIndex="1">
+               <font>
+                  <Font name="Inter Regular" size="12.0" />
+               </font>
+            </Label>
+            <Label text="Situação:" GridPane.rowIndex="2">
+               <font>
+                  <Font name="Inter Regular" size="12.0" />
+               </font>
+            </Label>
+            <Label text="Data de Registo:" GridPane.rowIndex="3">
+               <font>
+                  <Font name="Inter Regular" size="12.0" />
+               </font>
+            </Label>
+            <Label text="Inserido por:" GridPane.rowIndex="4">
+               <font>
+                  <Font name="Inter Regular" size="12.0" />
+               </font>
+            </Label>
+            <Label fx:id="txtCodigo" text="-" GridPane.columnIndex="1">
+               <font>
+                  <Font name="Inter Regular" size="12.0" />
+               </font>
+            </Label>
+            <Label fx:id="txtDescricao" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1">
+               <font>
+                  <Font name="Inter Regular" size="12.0" />
+               </font>
+            </Label>
+            <Label fx:id="txtSituacao" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2">
+               <font>
+                  <Font name="Inter Regular" size="12.0" />
+               </font>
+            </Label>
+            <Label fx:id="txtDataRegisto" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3">
+               <font>
+                  <Font name="Inter Regular" size="12.0" />
+               </font>
+            </Label>
+            <Label fx:id="txtInseridoPor" text="-" GridPane.columnIndex="1" GridPane.rowIndex="4">
+               <font>
+                  <Font name="Inter Regular" size="12.0" />
+               </font>
+            </Label>
+         </children>
+      </GridPane>
+      <Line endX="406.0" stroke="#cccccc" strokeWidth="0.5">
+         <VBox.margin>
+            <Insets bottom="24.0" left="24.0" right="24.0" />
+         </VBox.margin>
+      </Line>
+      <Label text="Quartos associados">
+         <font>
+            <Font name="Inter Regular" size="12.0" />
+         </font>
+         <VBox.margin>
+            <Insets left="24.0" right="24.0" />
+         </VBox.margin>
+      </Label>
+      <TableView fx:id="tableView" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0">
+        <columns>
+          <TableColumn fx:id="tblColumnCodigoQuarto" maxWidth="1.7976931348623157E308" prefWidth="75.0" text="Código do Quarto" />
+          <TableColumn fx:id="tblColumnDescricaoQuarto" maxWidth="1.7976931348623157E308" prefWidth="75.0" text="Descrição do Quarto" />
+        </columns>
+         <VBox.margin>
+            <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+         </VBox.margin>
+      </TableView>
+   </children>
+</VBox>
