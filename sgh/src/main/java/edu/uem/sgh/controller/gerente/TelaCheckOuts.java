@@ -42,13 +42,18 @@ public class TelaCheckOuts extends AbstractController implements Initializable{
     private TableView<edu.uem.sgh.model.table.CheckOut> tableView;
     
     private CheckOutReservaRepository checkOutReservaRepository;
-    private Result<List<CheckOut>> rslt;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+    private Result<List<CheckOut.Reserva>> rslt;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy, hh:ss");
     private EventHandler<ActionEvent> buttonEventHandler;
+    private boolean firstTimeVisible = true;
     private Alert alert;
             
     @Override
     public void adicionarListeners() {
+        if (firstTimeVisible) {
+            carregarCheckOuts();
+        }
+        
         btnCarregar.setOnAction(getButtonEventHandler());
     }
 
@@ -93,29 +98,51 @@ public class TelaCheckOuts extends AbstractController implements Initializable{
     }
 
     private void carregarCheckOuts() {
+        if (firstTimeVisible) {
+            firstTimeVisible = false;
+        }
+        
         if (checkOutReservaRepository == null) {
             return;
         }
         
         rslt = checkOutReservaRepository.obterTodos();
         
+        if (rslt == null) {
+            return;
+        }
+        
         if (rslt instanceof Result.Error) {
-            Result.Error<List<CheckOut>> error = (Result.Error<List<CheckOut>>) rslt;
+            Result.Error<List<CheckOut.Reserva>> error = (Result.Error<List<CheckOut.Reserva>>) rslt;
             String descricao = (error.getException().getClass().equals(SQLException.class)) ? "Não foi possivel estabelecer uma conexão a base de dados remota." : "Não foi possivel realizar o pedido. Tente novamente em uma outra altura.";
             mostrarMsg(descricao);
         } else {
-            Result.Success<List<CheckOut>> success = (Result.Success<List<CheckOut>>) rslt;
-            List<CheckOut> checkOuts = success.getData();
+            Result.Success<List<CheckOut.Reserva>> success = (Result.Success<List<CheckOut.Reserva>>) rslt;
+            List<CheckOut.Reserva> checkOuts = success.getData();
             
             initTabela();
             limparTabela();
             
-            if (tableView == null || checkOuts.isEmpty())
+            if (tableView == null || checkOuts.isEmpty()) {
                 return;
+            }
                 
-            for (CheckOut checkOut : checkOuts) {
-                edu.uem.sgh.model.table.CheckOut chckout = new edu.uem.sgh.model.table.CheckOut(checkOut.getId(), checkOut.getCheckIn().getReserva().getCliente(), dateFormat.format(new Date(checkOut.getCheckIn().getReserva().getDataReserva())), dateFormat.format(new Date(checkOut.getCheckIn().getDataCheckIn())), dateFormat.format(new Date(checkOut.getCheckIn().getReserva().getDataCheckOut())), dateFormat.format(new Date(checkOut.getDataCheckOut())), checkOut.getCheckIn().getReserva().getPagamento().getValorTotal(), checkOut.getCheckIn().getReserva().getPagamento().getValorTotal(), checkOut.getResponsavel());
-                tableView.getItems().add(chckout);
+            for (CheckOut.Reserva checkOutReserva : checkOuts) {
+                edu.uem.sgh.model.table.CheckOut checkOut = new edu.uem.sgh.model.table.CheckOut();
+                checkOut.setCodigo(checkOutReserva.getId());
+                checkOut.setCodigoCheckIn(checkOutReserva.getCheckIn().getId());
+                checkOut.setCodigoReserva(checkOutReserva.getCheckIn().getReserva().getId());
+                checkOut.setCliente(checkOutReserva.getCheckIn().getReserva().getCliente());
+                checkOut.setDataReserva(dateFormat.format(new Date(checkOutReserva.getCheckIn().getReserva().getDataReserva())));
+                checkOut.setDataCheckIn(dateFormat.format(new Date(checkOutReserva.getCheckIn().getDataCheckIn())));
+                checkOut.setDataEsperadaCheckIn(dateFormat.format(new Date(checkOutReserva.getCheckIn().getReserva().getDataCheckIn())));
+                checkOut.setDataEsperadaCheckOut(dateFormat.format(new Date(checkOutReserva.getCheckIn().getReserva().getDataCheckOut())));
+                checkOut.setDataCheckOut(dateFormat.format(new Date(checkOutReserva.getDataCheckOut())));
+                checkOut.setValorTotal(checkOutReserva.getCheckIn().getReserva().getPagamento().getValorTotal());
+                checkOut.setValorPagoReserva(checkOutReserva.getCheckIn().getReserva().getPagamento().getValorPago());
+                checkOut.setValorPagoCheckOut(checkOutReserva.getValorPago());
+                checkOut.setResponsavel(checkOutReserva.getResponsavel());
+                tableView.getItems().add(checkOut);
             }
         }
     }
@@ -140,6 +167,12 @@ public class TelaCheckOuts extends AbstractController implements Initializable{
                 case "tblColumnCodigo":
                     propertyValueFactory = new PropertyValueFactory("codigo");
                         break;
+                case "tblColumnCodigoCheckIn":
+                    propertyValueFactory = new PropertyValueFactory("codigoCheckIn");
+                        break;
+                case "tblColumnCodigoReserva":
+                    propertyValueFactory = new PropertyValueFactory("codigoReserva");
+                        break;
                 case "tblColumnCliente":
                     propertyValueFactory = new PropertyValueFactory("cliente");
                         break;
@@ -149,6 +182,9 @@ public class TelaCheckOuts extends AbstractController implements Initializable{
                 case "tblColumnDataCheckIn":
                     propertyValueFactory = new PropertyValueFactory("dataCheckIn");
                         break;  
+                case "tblColumnDataEsperadaCheckIn":
+                    propertyValueFactory = new PropertyValueFactory("dataEsperadaCheckIn");
+                        break;
                 case "tblColumnDataEsperadaCheckOut":
                     propertyValueFactory = new PropertyValueFactory("dataEsperadaCheckOut");
                         break;
@@ -158,8 +194,11 @@ public class TelaCheckOuts extends AbstractController implements Initializable{
                 case "tblColumnValorTotal":
                     propertyValueFactory = new PropertyValueFactory("valorTotal");
                         break;
-                case "tblColumnValorPago":
-                    propertyValueFactory = new PropertyValueFactory("valorPago");
+                case "tblColumnValorPagoCheckOut":
+                    propertyValueFactory = new PropertyValueFactory("valorPagoCheckOut");
+                        break;
+                case "tblColumnValorPagoReserva":
+                    propertyValueFactory = new PropertyValueFactory("valorPagoReserva");
                         break;
                 case "tblColumnResponsavel":
                     propertyValueFactory = new PropertyValueFactory("responsavel");

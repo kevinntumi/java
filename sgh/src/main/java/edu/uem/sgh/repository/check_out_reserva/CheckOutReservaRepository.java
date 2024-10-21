@@ -24,40 +24,40 @@ public class CheckOutReservaRepository {
         this.remoteConnection = remoteConnection;
     }
 
-    public void setRemoteConnection(Connection remoteConnection) {
-        this.remoteConnection = remoteConnection;
-    }
-
-    public void setLocalConnection(Connection localConnection) {
-        this.localConnection = localConnection;
-    }
-    
-    public Result<List<CheckOut>> obterTodos() {
+    public Result<List<CheckOut.Reserva>> obterTodos() {
         if (remoteConnection == null)
             return new Result.Error<>(new SQLException());
         
         return getRemoteCheckOutReservaDataSource().obterTodos();
     }
 
-    public Result<List<CheckOut>> obterCheckOutsPorFuncionario(long idFuncionario) {
+    public Result<List<CheckOut.Reserva>> obterCheckOutsPorFuncionario(long idFuncionario) {
         if (remoteConnection == null)
             return new Result.Error<>(new SQLException());
         
-        return remoteCheckOutReservaDataSource.obterCheckOutsPorFuncionario(idFuncionario);
+        return getRemoteCheckOutReservaDataSource().obterCheckOutsPorFuncionario(idFuncionario);
     }
 
-    public Result<List<CheckOut>> obterCheckOutsPorHospede(long idHospede) {
+    public Result<List<CheckOut.Reserva>> obterCheckOutsPorHospede(long idHospede) {
         if (remoteConnection == null)
             return new Result.Error<>(new SQLException());
         
-        return remoteCheckOutReservaDataSource.obterCheckOutsPorHospede(idHospede);
+        return getRemoteCheckOutReservaDataSource().obterCheckOutsPorHospede(idHospede);
     }
 
-    public Result<CheckOut> obterCheckOutPorIdCheckIn(int idCheckIn) {
+    public Result<CheckOut.Reserva> obterCheckOutPorIdCheckIn(int idCheckIn) {
         if (remoteConnection == null)
             return new Result.Error<>(new SQLException());
         
-        return remoteCheckOutReservaDataSource.obterCheckOutPorIdCheckIn(idCheckIn);
+        return getRemoteCheckOutReservaDataSource().obterCheckOutPorIdCheckIn(idCheckIn);
+    }
+    
+    public void setRemoteConnection(Connection remoteConnection) {
+        this.remoteConnection = remoteConnection;
+    }
+
+    public void setLocalConnection(Connection localConnection) {
+        this.localConnection = localConnection;
     }
 
     public RemoteCheckOutReservaDataSource getRemoteCheckOutReservaDataSource() {

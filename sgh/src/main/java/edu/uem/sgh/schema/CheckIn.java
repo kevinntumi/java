@@ -46,15 +46,21 @@ public abstract class CheckIn {
         this.dataCheckOut = dataCheckOut;
     }
     
-    
-   
-    private class Imediato extends CheckIn{
+    public class Imediato extends CheckIn{
         private long idCliente;
         private double valorTotal;
         private double percentagemPaga;
     }
     
-    private class Reserva extends CheckIn {
+    public class Reserva extends CheckIn {
         private long idReserva;
+
+        public long getIdReserva() {
+            return idReserva;
+        }
+
+        public void setIdReserva(long idReserva) {
+            this.idReserva = idReserva;
+        }
     }
 }

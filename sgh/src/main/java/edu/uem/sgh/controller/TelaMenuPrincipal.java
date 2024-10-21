@@ -19,6 +19,7 @@ import static edu.uem.sgh.model.Usuario.Tipo.CLIENTE;
 import static edu.uem.sgh.model.Usuario.Tipo.FUNCIONARIO;
 import static edu.uem.sgh.model.Usuario.Tipo.GERENTE;
 import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
+import edu.uem.sgh.repository.check_in_reserva.CheckInReservaRepository;
 import edu.uem.sgh.repository.check_out_reserva.CheckOutReservaRepository;
 import edu.uem.sgh.repository.funcionario.FuncionarioRepository;
 import edu.uem.sgh.repository.hospede.HospedeRepository;
@@ -26,7 +27,6 @@ import edu.uem.sgh.repository.quarto.QuartoRepository;
 import edu.uem.sgh.repository.reserva.ReservaRepository;
 import edu.uem.sgh.repository.servico.ServicoRepository;
 import edu.uem.sgh.repository.servico_quarto.ServicoQuartoRepository;
-import edu.uem.sgh.repository.check_in_reserva.CheckInReservaRepository;
 import edu.uem.sgh.util.Path;
 import java.net.URL;
 import java.sql.Connection;
@@ -81,10 +81,6 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     private ReservaRepository reservaRepository;
     private CheckInReservaRepository checkInReservaRepository;
     private Connection localConnection, remoteConnection;
-
-    public TelaMenuPrincipal() {
-        super();
-    }
 
     @Override
     public void adicionarListeners() {

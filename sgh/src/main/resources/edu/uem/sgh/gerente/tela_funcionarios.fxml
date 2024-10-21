@@ -37,7 +37,7 @@
             <Insets left="24.0" right="24.0" top="24.0" />
          </VBox.margin>
       </HBox>
-      <TableView fx:id="tableView" maxWidth="1.7976931348623157E308" prefHeight="494.0">
+      <TableView fx:id="tableView" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="494.0" prefWidth="1280.0">
          <columns>
             <TableColumn fx:id="tblColumnCodigo" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Código" />
             <TableColumn fx:id="tblColumnEmail" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Email" />

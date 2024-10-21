@@ -14,29 +14,35 @@ import javafx.beans.property.SimpleStringProperty;
  */
 public class CheckOut {
     private SimpleLongProperty codigo;
+    private SimpleLongProperty codigoReserva;
+    private SimpleLongProperty codigoCheckIn;
     private SimpleStringProperty cliente;
     private SimpleStringProperty dataReserva;
     private SimpleStringProperty dataCheckIn;
+    private SimpleStringProperty dataEsperadaCheckIn;
     private SimpleStringProperty dataEsperadaCheckOut;
     private SimpleStringProperty dataCheckOut;
     private SimpleDoubleProperty valorTotal;
-    private SimpleDoubleProperty valorPago;
+    private SimpleDoubleProperty valorPagoReserva;
+    private SimpleDoubleProperty valorPagoCheckOut;
     private SimpleStringProperty responsavel;
     private edu.uem.sgh.model.Funcionario funcionarioResponsavel;
     private edu.uem.sgh.model.Hospede clienteResponsavel;
 
-    public CheckOut(Long codigo, edu.uem.sgh.model.Hospede cliente, String dataReserva, String dataCheckIn, String dataEsperadaCheckOut, String dataCheckOut, Double valorTotal, Double valorPago, edu.uem.sgh.model.Funcionario responsavel) {
-        this.codigo = new SimpleLongProperty(codigo);
-        this.clienteResponsavel = cliente;
-        this.cliente = new SimpleStringProperty(clienteResponsavel.getNome());
-        this.dataReserva = new SimpleStringProperty(dataReserva);
-        this.dataCheckIn = new SimpleStringProperty(dataCheckIn);
-        this.dataEsperadaCheckOut = new SimpleStringProperty(dataEsperadaCheckOut);
-        this.dataCheckOut = new SimpleStringProperty(dataCheckOut);
-        this.valorTotal = new SimpleDoubleProperty(valorTotal);
-        this.valorPago = new SimpleDoubleProperty(valorPago);
-        this.funcionarioResponsavel = responsavel;
-        this.responsavel = new SimpleStringProperty(funcionarioResponsavel.getNome());
+    public CheckOut() {
+        this.codigo = new SimpleLongProperty();
+        this.codigoReserva = new SimpleLongProperty();
+        this.cliente = new SimpleStringProperty();
+        this.dataReserva = new SimpleStringProperty();
+        this.dataCheckIn = new SimpleStringProperty();
+        this.dataEsperadaCheckOut = new SimpleStringProperty();
+        this.dataCheckOut = new SimpleStringProperty();
+        this.valorTotal = new SimpleDoubleProperty();
+        this.valorPagoCheckOut = new SimpleDoubleProperty();
+        this.valorPagoReserva = new SimpleDoubleProperty();
+        this.dataEsperadaCheckIn = new SimpleStringProperty();
+        this.responsavel = new SimpleStringProperty();
+        this.codigoCheckIn = new  SimpleLongProperty();
     }
 
     public Long getCodigo() {
@@ -45,6 +51,22 @@ public class CheckOut {
 
     public void setCodigo(Long codigo) {
         this.codigo.set(codigo);
+    }
+    
+    public Long getCodigoReserva() {
+        return codigoReserva.get();
+    }
+
+    public void setCodigoReserva(Long codigoReserva) {
+        this.codigoReserva.set(codigoReserva);
+    }
+    
+    public Long getCodigoCheckIn() {
+        return codigoCheckIn.get();
+    }
+
+    public void setCodigoCheckIn(Long codigoCheckIn) {
+        this.codigoCheckIn.set(codigoCheckIn);
     }
 
     public String getCliente() {
@@ -62,6 +84,14 @@ public class CheckOut {
 
     public void setDataReserva(String dataReserva) {
         this.dataReserva.set(dataReserva);
+    }
+    
+    public String getDataEsperadaCheckIn() {
+        return dataEsperadaCheckIn.get();
+    }
+
+    public void setDataEsperadaCheckIn(String dataEsperadaCheckIn) {
+        this.dataEsperadaCheckIn.set(dataEsperadaCheckIn);
     }
 
     public String getDataCheckIn() {
@@ -96,12 +126,20 @@ public class CheckOut {
         this.valorTotal.set(valorTotal);
     }
 
-    public Double getValorPago() {
-        return valorPago.get();
+    public Double getValorPagoReserva() {
+        return valorPagoReserva.get();
     }
 
-    public void setValorPago(Double valorPago) {
-        this.valorPago.set(valorPago);
+    public void setValorPagoReserva(Double valorPagoReserva) {
+        this.valorPagoReserva.set(valorPagoReserva);
+    }
+    
+    public Double getValorPagoCheckOut() {
+        return valorPagoCheckOut.get();
+    }
+
+    public void setValorPagoCheckOut(Double valorPagoCheckOut) {
+        this.valorPagoCheckOut.set(valorPagoCheckOut);
     }
 
     public String getResponsavel() {

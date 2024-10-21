@@ -179,5 +179,10 @@ public abstract class CheckIn {
         public long getId() {
             return super.getId(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
         }
+
+        @Override
+        public String toString() {
+            return "Reserva{" + "reserva=" + reserva + '}';
+        }
     }
 }

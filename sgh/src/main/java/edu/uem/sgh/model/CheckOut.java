@@ -8,9 +8,8 @@ package edu.uem.sgh.model;
  *
  * @author Kevin Ntumi
  */
-public class CheckOut {
+public abstract class CheckOut {
     private Long id;
-    private CheckIn.Reserva checkIn;
     private Long dataCheckOut;
     private Funcionario responsavel;
 
@@ -20,14 +19,6 @@ public class CheckOut {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public CheckIn.Reserva getCheckIn() {
-        return checkIn;
-    }
-
-    public void setCheckIn(CheckIn.Reserva checkIn) {
-        this.checkIn = checkIn;
     }
 
     public Long getDataCheckOut() {
@@ -45,9 +36,29 @@ public class CheckOut {
     public void setResponsavel(Funcionario responsavel) {
         this.responsavel = responsavel;
     }
-    
-    @Override
-    public String toString() {
-        return "CheckOut{" + "id=" + id + ", checkIn=" + checkIn + ", dataCheckOut=" + dataCheckOut + '}';
+
+    public static class Reserva extends CheckOut {
+        private CheckIn.Reserva checkIn;
+        private Double valorPago;
+
+        public Reserva() {
+            super();
+        }
+
+        public CheckIn.Reserva getCheckIn() {
+            return checkIn;
+        }
+
+        public void setCheckIn(CheckIn.Reserva checkIn) {
+            this.checkIn = checkIn;
+        }
+
+        public Double getValorPago() {
+            return valorPago;
+        }
+
+        public void setValorPago(Double valorPago) {
+            this.valorPago = valorPago;
+        }
     }
 }

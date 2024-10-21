@@ -42,15 +42,19 @@
             </HBox>
             <TableView fx:id="tableView" maxWidth="1.7976931348623157E308" prefHeight="494.0">
                <columns>
-                  <TableColumn fx:id="tblColumnCodigo" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Código" />
+                  <TableColumn fx:id="tblColumnCodigo" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Código de Check-Out" />
+                  <TableColumn fx:id="tblColumnCodigoCheckIn" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Código de Check-In" />
+                  <TableColumn fx:id="tblColumnCodigoReserva" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Código de Reserva" />
                   <TableColumn fx:id="tblColumnCliente" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Cliente" />
                   <TableColumn fx:id="tblColumnDataReserva" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Data de Reserva" />
+                  <TableColumn fx:id="tblColumnDataEsperadaCheckIn" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Data Esperada de Check-In" />
                   <TableColumn fx:id="tblColumnDataCheckIn" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Data de Check-In" />
-                  <TableColumn fx:id="tblColumnDataEsperadaCheckOut" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Data Esperada de Check-Out" />
                   <TableColumn fx:id="tblColumnDataCheckOut" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Data de Check-Out" />
+                  <TableColumn fx:id="tblColumnDataEsperadaCheckOut" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Data Esperada de Check-Out" />
                   <TableColumn fx:id="tblColumnValorTotal" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Valor Total" />
-                  <TableColumn fx:id="tblColumnValorPago" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Valor Pago" />
-                  <TableColumn fx:id="tblColumnResponsavel" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Responsável" />
+                  <TableColumn fx:id="tblColumnValorPagoReserva" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Valor Pago da Reserva" />
+                  <TableColumn fx:id="tblColumnValorPagoCheckOut" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Valor Pago do CheckOut" />
+                  <TableColumn fx:id="tblColumnResponsavel" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Efectuado por" />
                </columns>
                <VBox.margin>
                   <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
