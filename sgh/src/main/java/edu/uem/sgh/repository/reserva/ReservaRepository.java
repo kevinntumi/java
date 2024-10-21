@@ -24,15 +24,15 @@ public class ReservaRepository {
     }
 
     public Result<Boolean> inserirReserva(int idCliente, int idFuncionario, long dataCheckIn, long dataCheckOut, double valorPago, double valorTotal) {
-        return remoteReservaDataSource.inserirReserva(idCliente, idFuncionario, dataCheckIn, dataCheckOut, valorPago, valorTotal);
+        return getRemoteReservaDataSource().inserirReserva(idCliente, idFuncionario, dataCheckIn, dataCheckOut, valorPago, valorTotal);
     }
 
     public Result<Boolean> editarReserva(Long dataSituacao, ReservaSituacao reservaSituacao, int id) {
-        return remoteReservaDataSource.editarReserva(dataSituacao, reservaSituacao, id);
+        return getRemoteReservaDataSource().editarReserva(dataSituacao, reservaSituacao, id);
     }
 
     public Result<List<Reserva>> obterTodasReservas() {
-        return remoteReservaDataSource.obterTodasReservas();
+        return getRemoteReservaDataSource().obterTodasReservas();
     }
 
     private RemoteReservaDataSource getRemoteReservaDataSource() {

@@ -30,12 +30,12 @@ public class RemoteCheckInReservaDataSource extends AbstractDataSource {
     public Result<Boolean> efectuar(CheckIn.Reserva checkInReserva) {
         Result<Boolean> r;
         
-        String sql = "INSERT INTO check_in_reserva(num_reserva, num_funcionario, data_check_in) VALUES(?,?,?)";
+        String sql = "INSERT INTO check_in_reserva(id_reserva, id_funcionario, data_check_in) VALUES(?,?,?)";
       
         try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
             statement.setLong(1, checkInReserva.getReserva().getId());
             statement.setLong(2, checkInReserva.getFuncionario().getId());  
-            statement.setDate(3, new java.sql.Date(checkInReserva.getDataCheckIn()));
+            statement.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
             r = new Result.Success<>(statement.executeUpdate() > 0);
         } catch (SQLException e) {
             r = new Result.Error<>(e);
@@ -55,7 +55,6 @@ public class RemoteCheckInReservaDataSource extends AbstractDataSource {
                 
             }
             
-            rs.close();
             r = new Result.Success<>(checkIns);   
         } catch(SQLException e) {
             r = new Result.Error<>(e);

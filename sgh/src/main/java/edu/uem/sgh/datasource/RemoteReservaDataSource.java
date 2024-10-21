@@ -92,7 +92,7 @@ public class RemoteReservaDataSource extends AbstractDataSource{
                     
                     for (int i = 1 ; i <= columnCount ; i++) {
                         String columnName = resultSetMetaData.getColumnLabel(i);
-                       
+                        
                         switch (columnName) {
                             case "id": 
                                 reserva.setId(rs.getLong(columnName));
@@ -101,16 +101,16 @@ public class RemoteReservaDataSource extends AbstractDataSource{
                                 cliente.setId(rs.getLong(columnName));
                                     break;
                             case "data_reserva":
-                                reserva.setDataReserva(rs.getLong(columnName));
+                                reserva.setDataReserva(rs.getTimestamp(columnName).getTime());
                                     break;
                             case "data_situacao":
-                                reserva.setDataSituacao(rs.getLong(columnName));
+                                reserva.setDataSituacao(rs.getTimestamp(columnName).getTime());
                                     break;
                             case "data_check_in":
-                                reserva.setDataCheckIn(rs.getLong(columnName));
+                                reserva.setDataCheckIn(rs.getTimestamp(columnName).getTime());
                                     break;
                             case "data_check_out":
-                                reserva.setDataCheckOut(rs.getLong(columnName));
+                                reserva.setDataCheckOut(rs.getTimestamp(columnName).getTime());
                                     break;
                             case "valor_total":
                                 pagamento.setValorTotal(rs.getDouble(columnName));

@@ -11,6 +11,7 @@ import edu.uem.sgh.repository.reserva.ReservaRepository;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.collections.ObservableList;
@@ -42,12 +43,16 @@ public class TelaReservas extends AbstractController implements Initializable{
     
     private ReservaRepository reservaRepository;
     private Result<List<Reserva>> rslt;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy, hh:mm");
     private EventHandler<ActionEvent> buttonEventHandler;
+    private boolean firstTimeVisible = true;
     private Alert alert;
             
     @Override
     public void adicionarListeners() {
+        if (firstTimeVisible)
+            carregarCheckOuts();
+        
         btnCarregar.setOnAction(getButtonEventHandler());
     }
 
@@ -92,6 +97,10 @@ public class TelaReservas extends AbstractController implements Initializable{
     }
 
     private void carregarCheckOuts() {
+        if (firstTimeVisible) {
+            firstTimeVisible = false;
+        }
+        
         if (reservaRepository == null) {
             return;
         }
@@ -113,7 +122,7 @@ public class TelaReservas extends AbstractController implements Initializable{
                 return;
                 
             for (Reserva reserva : reservas) {
-                edu.uem.sgh.model.table.Reserva rsrv = new edu.uem.sgh.model.table.Reserva();
+                edu.uem.sgh.model.table.Reserva rsrv = new edu.uem.sgh.model.table.Reserva(reserva.getId(), reserva.getCliente(), dateFormat.format(new Date(reserva.getDataReserva())), dateFormat.format(new Date(reserva.getDataCheckIn())), dateFormat.format(new Date(reserva.getDataCheckOut())), reserva.getPagamento().getValorPago(), reserva.getPagamento().getValorTotal(), reserva.getFuncionario(), reserva.getSituacao(), dateFormat.format(new Date(reserva.getDataSituacao())));
                 tableView.getItems().add(rsrv);
             }
         }
@@ -147,9 +156,12 @@ public class TelaReservas extends AbstractController implements Initializable{
                         break;
                 case "tblColumnDataCheckIn":
                     propertyValueFactory = new PropertyValueFactory("dataCheckIn");
-                        break;  
-                case "tblColumnDataEsperadaCheckOut":
-                    propertyValueFactory = new PropertyValueFactory("dataEsperadaCheckOut");
+                        break; 
+                case "tblColumnDataSituacao":
+                    propertyValueFactory = new PropertyValueFactory("dataSituacao");
+                        break;
+                case "tblColumnSituacao":
+                    propertyValueFactory = new PropertyValueFactory("situacao");
                         break;
                 case "tblColumnDataCheckOut":
                     propertyValueFactory = new PropertyValueFactory("dataCheckOut");

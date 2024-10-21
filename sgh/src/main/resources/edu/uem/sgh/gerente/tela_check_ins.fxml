@@ -47,7 +47,6 @@
                   <TableColumn fx:id="tblColumnDataReserva" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Data de Reserva" />
                   <TableColumn fx:id="tblColumnDataCheckIn" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Data de Check-In" />
                   <TableColumn fx:id="tblColumnDataEsperadaCheckOut" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Data Esperada de Check-Out" />
-                  <TableColumn fx:id="tblColumnSituacao" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Situação" />
                   <TableColumn fx:id="tblColumnValorTotal" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Valor Total" />
                   <TableColumn fx:id="valorPago" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Valor Pago" />
                   <TableColumn fx:id="tblColumnResponsavel" maxWidth="1.7976931348623157E308" minWidth="1.0" prefWidth="-1.0" text="Responsável" />
