@@ -9,7 +9,7 @@ import edu.uem.sgh.connection.ConnectionType;
 import edu.uem.sgh.connection.Type;
 import edu.uem.sgh.model.Quarto;
 import edu.uem.sgh.model.Result;
-import java.io.FileInputStream;
+import java.io.File;
 import java.sql.Connection;
 import java.util.List;
 
@@ -31,12 +31,12 @@ public class QuartoRepository {
         this.remoteConnection = remoteConnection;
     }
     
-    public Result<Boolean> add(Quarto t, FileInputStream fis) {
-        return getRemoteQuartoRepository().add(t, fis);
+    public Result<Boolean> add(Quarto t, File file) {
+        return getRemoteQuartoRepository().add(t, file);
     }
 
-    public Result<Boolean> edit(Quarto t, FileInputStream fis) {
-        return getRemoteQuartoRepository().edit(t, fis);
+    public Result<Boolean> edit(Quarto t, File file) {
+        return getRemoteQuartoRepository().edit(t, file);
     }
 
     public Result<Boolean> delete(long id, boolean delete) {

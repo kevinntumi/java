@@ -5,6 +5,7 @@
 package edu.uem.sgh.controller.gerente;
 
 import edu.uem.sgh.controller.AbstractController;
+import edu.uem.sgh.controller.gerente.dialog.DialogEditarQuarto;
 import edu.uem.sgh.controller.gerente.dialog.DialogInserirQuarto;
 import edu.uem.sgh.model.Quarto;
 import edu.uem.sgh.model.Result;
@@ -15,8 +16,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.ReadOnlyIntegerProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -43,7 +42,7 @@ import javafx.scene.text.Text;
  *
  * @author Kevin Ntumi
  */
-public class TelaQuartos extends AbstractController implements ChangeListener<Object>, EventHandler<ActionEvent>, Initializable {
+public class TelaQuartos extends AbstractController implements EventHandler<ActionEvent>, Initializable {
     @FXML
     private StackPane root;
     
@@ -52,6 +51,9 @@ public class TelaQuartos extends AbstractController implements ChangeListener<Ob
     
     @FXML
     private Button btnCarregar;
+    
+    @FXML
+    private Button btnEditar;
     
     @FXML
     private TableView<edu.uem.sgh.model.table.Quarto> tableView;
@@ -73,6 +75,7 @@ public class TelaQuartos extends AbstractController implements ChangeListener<Ob
         
         btnAdicionar.setOnAction(this);
         btnCarregar.setOnAction(this);
+        btnEditar.setOnAction(this);
         tableView.setOnKeyReleased(getEventHandler());
         tableView.setOnMouseClicked(getEventHandler());
         tableView.setOnMouseMoved(getEventHandler());
@@ -82,6 +85,7 @@ public class TelaQuartos extends AbstractController implements ChangeListener<Ob
     public void removerListeners() {
         btnAdicionar.setOnAction(null);
         btnCarregar.setOnAction(null);
+        btnEditar.setOnAction(null);
         tableView.setOnKeyReleased(null);
         tableView.setOnMouseClicked(null);
         tableView.setOnMouseMoved(null);
@@ -93,23 +97,15 @@ public class TelaQuartos extends AbstractController implements ChangeListener<Ob
     }
 
     @Override
-    public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-        
-    }
-
-    @Override
     public void handle(ActionEvent event) {
         Object source = event.getSource();
-        
-        if (!(source.equals(btnAdicionar) || source.equals(btnCarregar))) 
-            return;
-        
+    
         if (source.equals(btnAdicionar))
             adicionarNovoQuarto();
         else if (source.equals(btnCarregar))
-            editarQuarto();
-        else
             carregarQuartos();
+        else if (source.equals(btnEditar))
+            editarQuarto();
     }
 
     @Override
@@ -179,7 +175,7 @@ public class TelaQuartos extends AbstractController implements ChangeListener<Ob
     }
 
     private void initTabela() {
-         if (tableView == null) {
+        if (tableView == null) {
             return;
         }
         
@@ -330,7 +326,12 @@ public class TelaQuartos extends AbstractController implements ChangeListener<Ob
             return;
         }
         
-        
+        DialogEditarQuarto dialogEditarQuarto = new DialogEditarQuarto();
+        dialogEditarQuarto.setQuartoRepository(quartoRepository);
+        dialogEditarQuarto.setUsuario(usuario);
+        dialogEditarQuarto.setQuarto(selectedQuarto);
+        dialogEditarQuarto.adicionarListeners();
+        dialogEditarQuarto.show();
     }
 
     private void abrirTelaQuarto(Long idLng) {

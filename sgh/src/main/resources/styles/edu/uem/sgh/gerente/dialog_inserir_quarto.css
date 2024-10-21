@@ -1,16 +1,33 @@
-#btnRemoverFoto {
+#btnRemoverFoto, #btnEscolherFoto {
     -fx-background-color: none;
     -fx-text-fill: rgba(0, 0, 0, 0.6);
     -fx-font-size: 12;
     -fx-font-family: "Inter Bold";
+    -fx-padding: 0;
     -fx-border-radius: 0;
     -fx-background-radius: 0;
 }
 
-#foto {
+#fotoFrame {
     -fx-border-color: #CCC;
     -fx-border-width: 0.5px;
-    -fx-border-style: solid outside;
+    -fx-border-style: solid inside;
+}
+
+#btnEscolherFoto:hover {
+    -fx-text-fill: rgba(0, 0, 0, 1.0);
+}
+
+#btnEscolherFoto:pressed {
+    -fx-text-fill: rgba(0, 0, 0, 0.87);
+}
+
+#btnRemoverFoto:hover {
+    -fx-text-fill: rgba(0, 0, 0, 1.0);
+}
+
+#btnRemoverFoto:pressed {
+    -fx-text-fill: rgba(0, 0, 0, 0.87);
 }
 
 #btnOk {

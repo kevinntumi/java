@@ -19,9 +19,11 @@ import static edu.uem.sgh.model.Usuario.Tipo.CLIENTE;
 import static edu.uem.sgh.model.Usuario.Tipo.FUNCIONARIO;
 import static edu.uem.sgh.model.Usuario.Tipo.GERENTE;
 import edu.uem.sgh.repository.autenticacao.AutenticacaoRepository;
+import edu.uem.sgh.repository.check_out_reserva.CheckOutReservaRepository;
 import edu.uem.sgh.repository.funcionario.FuncionarioRepository;
 import edu.uem.sgh.repository.hospede.HospedeRepository;
 import edu.uem.sgh.repository.quarto.QuartoRepository;
+import edu.uem.sgh.repository.reserva.ReservaRepository;
 import edu.uem.sgh.repository.servico.ServicoRepository;
 import edu.uem.sgh.repository.servico_quarto.ServicoQuartoRepository;
 import edu.uem.sgh.util.Path;
@@ -45,19 +47,12 @@ import javafx.scene.control.TabPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
 
 /**
  *
  * @author Kevin Ntumi
  */
-public class TelaMenuPrincipal extends AbstractController implements Initializable, ChangeListener<Object>, EventHandler<MouseEvent>{
-    @FXML
-    private ImageView fotoPerfil;
-    
-    @FXML
-    private HBox hBox;
-    
+public class TelaMenuPrincipal extends AbstractController implements Initializable, ChangeListener<Object>{
     @FXML
     private ImageView close;
     
@@ -77,10 +72,12 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     private ServicoRepository servicoRepository;
     private AutenticacaoRepository autenticacaoRepository;
     private ServicoQuartoRepository servicoQuartoRepository;
+    private CheckOutReservaRepository checkOutReservaRepository;
     private QuartoRepository quartoRepository;
     private HospedeRepository hospedeRepository;
     private FuncionarioRepository funcionarioRepository;
     private EventHandler<MouseEvent> parentMouseEventHandler;
+    private ReservaRepository reservaRepository;
     private Connection localConnection, remoteConnection;
 
     public TelaMenuPrincipal() {
@@ -106,7 +103,7 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         if (observable.equals(tabPane.getSelectionModel().selectedItemProperty())) {
             Tab newTab = (Tab) newValue;
             Node newTabNode = newTab.getContent();
-           
+            
             if (oldValue != null) {
                 Tab oldTab = (Tab) oldValue;
                 Node oldTabNode = oldTab.getContent();
@@ -350,15 +347,23 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
                 continue;
             }
             
+            Tab tab = new Tab(tabName, tabContent);
+            tabPane.getTabs().add(tab);
             i++;
-            tabPane.getTabs().add(new Tab(tabName, tabContent));
         }
+        
+        if (tabPane.getTabs().isEmpty()) {
+            return;
+        }
+        
+        tabPane.getSelectionModel().clearSelection();
     }
     
     private AbstractController findControllerByRoot(Node node) {
         for (AbstractController abstractController : tabContentControllers) {
-            if (abstractController.getRoot().equals(node))
+            if (abstractController.getRoot().equals(node)) {
                 return abstractController;
+            }
         }
         
         return null;
@@ -379,19 +384,22 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     }
     
     private Node createTabContentByName(String name, int i) throws Exception {
-        if (name == null || name.isBlank()) 
+        if (name == null || name.isBlank()) {
             throw new RuntimeException();
-        
+        }
+       
         FXMLLoader loader = getFXMLoader(name);
         
-        if (loader == null) 
+        if (loader == null) {
             throw new RuntimeException();
-        
+        }
+            
         Node node = loader.load();
         Object controller = loader.getController();
         
-        if (controller != null && controller instanceof AbstractController)
+        if (controller != null && controller instanceof AbstractController){
             tabContentControllers[i] = loader.getController();
+        }
         
         return node;
     }
@@ -402,13 +410,11 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     }
 
     private void inicializarTabContentsControllers(int size) {
-        if (tabContentControllers != null) return;
+        if (tabContentControllers != null) {
+            return;
+        }
+        
         tabContentControllers = new AbstractController[size];
-    }
-
-    @Override
-    public void handle(MouseEvent event) {
-        Object source = event.getSource();
     }
 
     public ServicoQuartoRepository getServicoQuartoRepository() {
@@ -433,6 +439,21 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     public HospedeRepository getHospedeRepository() {
         if (hospedeRepository == null && remoteConnection != null) hospedeRepository = new HospedeRepository(remoteConnection);
         return hospedeRepository;
+    }
+    
+    public FuncionarioRepository getFuncionarioRepository() {
+        if (funcionarioRepository == null && remoteConnection != null) funcionarioRepository = new FuncionarioRepository(remoteConnection);
+        return funcionarioRepository;
+    }
+
+    public CheckOutReservaRepository getCheckOutReservaRepository() {
+        if (checkOutReservaRepository == null && remoteConnection != null) checkOutReservaRepository = new CheckOutReservaRepository(remoteConnection);
+        return checkOutReservaRepository;
+    }
+
+    public ReservaRepository getReservaRepository() {
+        if (reservaRepository == null && remoteConnection != null) reservaRepository = new ReservaRepository(remoteConnection);
+        return reservaRepository;
     }
     
     private void resolverDependencias(AbstractController abstractController, boolean add) {
@@ -493,10 +514,8 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         
         if (add) {
             telaCheckIns.setCheckInReservaRepository(null);
-            telaCheckIns.setUsuario(usuario);
         } else {
             telaCheckIns.setCheckInReservaRepository(null);
-            telaCheckIns.setUsuario(null);
         }
     }
 
@@ -507,9 +526,9 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         TelaCheckOuts telaCheckOuts = (TelaCheckOuts) abstractController;
         
         if (add) {
-            
+            telaCheckOuts.setCheckOutReservaRepository(getCheckOutReservaRepository());
         } else {
-            
+            telaCheckOuts.setCheckOutReservaRepository(null);
         }
     }
 
@@ -522,7 +541,7 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         if (add) {
             telaFuncionarios.setFuncionarioRepository(getFuncionarioRepository());
             telaFuncionarios.setUsuario(usuario);
-            telaFuncionarios.setAutenticacaoRepository(autenticacaoRepository);
+            telaFuncionarios.setAutenticacaoRepository(getAutenticacaoRepository());
         } else {
             telaFuncionarios.setFuncionarioRepository(null);
             telaFuncionarios.setUsuario(null);
@@ -537,9 +556,9 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
         TelaHospedes telaHospedes = (TelaHospedes) abstractController;
        
         if (add) {
-            
+            telaHospedes.setHospedeRepository(getHospedeRepository());
         } else {
-            
+            telaHospedes.setHospedeRepository(null);
         }
     }
 
@@ -572,20 +591,16 @@ public class TelaMenuPrincipal extends AbstractController implements Initializab
     }
 
     private void resolverDependenciasTelaReservas(AbstractController abstractController, boolean add) {
-        if (abstractController == null || !(abstractController instanceof TelaReservas))
+        if (abstractController == null || !(abstractController instanceof TelaReservas)) {
             return;
+        }
         
         TelaReservas telaReservas = (TelaReservas) abstractController;
         
         if (add) {
-            
+            telaReservas.setReservaRepository(getReservaRepository());
         } else {
-            
+            telaReservas.setReservaRepository(null);
         }
-    }
-
-    public FuncionarioRepository getFuncionarioRepository() {
-        if (funcionarioRepository == null && remoteConnection != null) funcionarioRepository = new FuncionarioRepository(remoteConnection);
-        return funcionarioRepository;
     }
 }

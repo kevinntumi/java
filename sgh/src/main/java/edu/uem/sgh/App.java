@@ -80,8 +80,6 @@ public class App extends Application implements EventHandler<MouseEvent>, Change
         usuario.setTipo(Usuario.Tipo.GERENTE);
         getUsuarioProperty().set(usuario);
         
-        
-        
         //verificarUsuarioAutenticado();
     }
     

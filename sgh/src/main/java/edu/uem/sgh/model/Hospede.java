@@ -15,7 +15,7 @@ public class Hospede {
     private String nome;
     private String morada;
     private long dataNascimento;
-    private long dataRegistrado;
+    private long dataRegisto;
 
     public long getId() {
         return id;
@@ -65,11 +65,11 @@ public class Hospede {
         this.dataNascimento = dataNascimento;
     }
 
-    public long getDataRegistrado() {
-        return dataRegistrado;
+    public long getDataRegisto() {
+        return dataRegisto;
     }
 
-    public void setDataRegistrado(long dataRegistrado) {
-        this.dataRegistrado = dataRegistrado;
+    public void setDataRegisto(long dataRegisto) {
+        this.dataRegisto = dataRegisto;
     }
 }

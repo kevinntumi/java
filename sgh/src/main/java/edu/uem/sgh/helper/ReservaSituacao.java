@@ -11,5 +11,28 @@ package edu.uem.sgh.helper;
 public enum ReservaSituacao {
     CANCELADA,
     POR_CONFIRMAR,
-    CONFIRMADA
+    CONFIRMADA;
+    
+    public static ReservaSituacao obterViaString(String reservaSituacaoStr) {
+        if (reservaSituacaoStr == null || reservaSituacaoStr.isBlank())
+            return null;
+        
+        ReservaSituacao[] reservaSituacoes = ReservaSituacao.values();
+        
+        for (ReservaSituacao reservaSituacao : reservaSituacoes) {
+            String str = reservaSituacao.toString();
+            
+            if (reservaSituacaoStr.equals(str))
+                return reservaSituacao;
+        }
+        
+        return null;
+    }
+    
+    public static String obterPorValor(ReservaSituacao reservaSituacao) {
+        if (reservaSituacao == null)
+            return null;
+        
+        return reservaSituacao.toString();
+    }
 }

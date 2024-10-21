@@ -66,4 +66,9 @@ public class Quarto {
     public void setSituacao(ServicoSituacao situacao) {
         this.situacao = situacao;
     }
+
+    @Override
+    public String toString() {
+        return "Quarto{" + "id=" + id + ", descricao=" + descricao + ", capacidade=" + capacidade + ", foto=" + foto + ", preco=" + preco + ", situacao=" + situacao + '}';
+    }
 }

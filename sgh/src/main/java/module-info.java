@@ -12,6 +12,8 @@ module edu.uem.sgh {
     requires org.controlsfx.controls;
     requires java.base;
     requires com.dlsc.formsfx;
+    requires org.apache.commons.io;
+    requires javafx.swing;
     
     opens edu.uem.sgh to javafx.fxml;
     opens edu.uem.sgh.model.table to javafx.base;

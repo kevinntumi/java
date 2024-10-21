@@ -10,51 +10,54 @@ import edu.uem.sgh.model.Result;
 import edu.uem.sgh.repository.hospede.HospedeRepository;
 import java.net.URL;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
-import javafx.animation.FadeTransition;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.StackPane;
-import javafx.util.Duration;
 
 /**
  *
  * @author Kevin Ntumi
  */
-public class TelaHospedes extends AbstractController implements EventHandler<ActionEvent>, ChangeListener<Object>, Initializable {
+public class TelaHospedes extends AbstractController implements EventHandler<ActionEvent>, Initializable {
     @FXML
     private StackPane root;
     
     @FXML
-    private TableView<Hospede> tableView;
+    private TableView<edu.uem.sgh.model.table.Hospede> tableView;
     
     @FXML
     private Button btnCarregar;
     
     private Result<List<Hospede>> rslt;
     private HospedeRepository hospedeRepository;
-    private int totalTimesVisible;
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+    private Alert alert;
+    private boolean firstTimeVisible = true;
 
     @Override
     public void adicionarListeners() {
-        alterarVisibilidadeRoot(true);
+        if (firstTimeVisible)
+            carregarHospedes();
+        
         btnCarregar.setOnAction(this);
-        root.visibleProperty().addListener(this);
     }
 
     @Override
     public void removerListeners() {
-        alterarVisibilidadeRoot(false);
         btnCarregar.setOnAction(null);
-        root.visibleProperty().removeListener(this);
     }
 
     @Override
@@ -66,22 +69,9 @@ public class TelaHospedes extends AbstractController implements EventHandler<Act
     public void handle(ActionEvent event) {
         Object source = event.getSource();
         
-        if (!source.equals(btnCarregar))
-            return;
-        
-        carregarHospedes();
-    }
-
-    @Override
-    public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-        if (observable.equals(root.visibleProperty())) {
-            if (totalTimesVisible == 0) {
-                carregarHospedes();
-                totalTimesVisible++;
-            }
-
-            observable.removeListener(this);
-        } 
+        if (source.equals(btnCarregar)) {
+            carregarHospedes();
+        }
     }
 
     @Override
@@ -94,59 +84,104 @@ public class TelaHospedes extends AbstractController implements EventHandler<Act
     }
     
     private void limparTabela() {
-        if (tableView.getItems().isEmpty()) 
+        if (tableView == null || tableView.getItems().isEmpty()) 
             return;
         
         tableView.getItems().clear();
-    }
-    
-    private void alterarVisibilidadeRoot(boolean visivel) {
-        System.out.println("visibilidade: " + visivel);
-        if (visivel) {
-            FadeTransition fadeTransition = new FadeTransition(Duration.millis(400), root);
-            fadeTransition.setFromValue(0.0);
-            fadeTransition.setToValue(1.0);
-            fadeTransition.play();
-        }
-        
-        if (!visivel && root.getOpacity() == 1.0) {
-            FadeTransition fadeTransition = new FadeTransition(Duration.millis(400), root);
-            fadeTransition.setFromValue(1.0);
-            fadeTransition.setToValue(0.0);
-            fadeTransition.play();
-        }
     }
     
     private void carregarHospedes() {
         if (hospedeRepository == null) 
             return;
         
-        //mostrarProgressBar();
+        if (firstTimeVisible)
+            firstTimeVisible = false;
         
         rslt = hospedeRepository.obterTodos();
-        
-        //esconderProgressBar();
         
         if (rslt == null) {
             return;
         }
         
-        
         if (rslt instanceof Result.Error) {
             Result.Error<List<Hospede>> error = (Result.Error<List<Hospede>>) rslt;
             String descricao = (error.getException().getClass().equals(SQLException.class)) ? "Não foi possivel estabelecer uma conexão a base de dados remota." : "Não foi possivel realizar o pedido. Tente novamente em uma outra altura.";
+            mostrarMsg(descricao);
         } else {
             Result.Success<List<Hospede>> success = (Result.Success<List<Hospede>>) rslt;
             List<Hospede> hospedes = success.getData();
             
+            initTabela();
             limparTabela();
             
-            if (hospedes.isEmpty())
+            if (hospedes.isEmpty() || tableView == null)
                 return;
                 
             for (Hospede hospede : hospedes) {
-                tableView.getItems().add(hospede);
+                edu.uem.sgh.model.table.Hospede h = new edu.uem.sgh.model.table.Hospede(hospede.getId(), hospede.getNome(), dateFormat.format(new Date(hospede.getDataNascimento())), dateFormat.format(new Date(hospede.getDataRegisto())), hospede.getNumDocumentoIdentidade(), hospede.getMorada());
+                tableView.getItems().add(h);
             }
         }
+    }
+
+    private void initTabela() {
+         if (tableView == null) {
+            return;
+        }
+        
+        ObservableList<TableColumn<edu.uem.sgh.model.table.Hospede, ?>> columns = tableView.getColumns();
+        
+        for (int i = 0 ; i < columns.size() ; i++) {
+            TableColumn<edu.uem.sgh.model.table.Hospede, ?> tableColumn = columns.get(i);
+            
+            if (tableColumn.getCellValueFactory() != null || (tableColumn.getId() == null || tableColumn.getId().isBlank())) {
+                continue;
+            }
+            
+            PropertyValueFactory propertyValueFactory = null;
+            
+            switch (tableColumn.getId()) {
+                case "tblColumnCodigo":
+                    propertyValueFactory = new PropertyValueFactory("codigo");
+                        break;
+                case "tblColumnNome":
+                    propertyValueFactory = new PropertyValueFactory("nome");
+                        break;
+                case "tblColumnDataNasc":
+                    propertyValueFactory = new PropertyValueFactory("dataNascimento");
+                        break;
+                case "tblColumnDataReg":
+                    propertyValueFactory = new PropertyValueFactory("dataRegisto");
+                        break;  
+                case "tblColumnNumBilheteIdentidade":
+                    propertyValueFactory = new PropertyValueFactory("numBilheteIdentidade");
+                        break;
+                case "tblColumnMorada":
+                    propertyValueFactory = new PropertyValueFactory("morada");
+                        break;
+            }
+            
+            if (propertyValueFactory != null)
+                tableColumn.setCellValueFactory(propertyValueFactory);
+        }
+    }
+    
+    private void mostrarMsg(String descricao) {
+        if (descricao == null) {
+            return;
+        }
+        
+        getAlert().setContentText(descricao);
+        getAlert().show();
+    }
+    
+    private Alert getAlert() {
+        if (alert == null) {
+            alert = new Alert(Alert.AlertType.ERROR);
+            alert.setGraphic(null);
+            alert.setHeaderText(null);
+        }
+        
+        return alert;
     }
 }

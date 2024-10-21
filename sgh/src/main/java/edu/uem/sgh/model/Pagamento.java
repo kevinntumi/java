@@ -10,7 +10,7 @@ package edu.uem.sgh.model;
  */
 public class Pagamento {
     private Double valorTotal;
-    private Double percentagemPago;
+    private Double valorPago;
 
     public Double getValorTotal() {
         return valorTotal;
@@ -20,11 +20,16 @@ public class Pagamento {
         this.valorTotal = valorTotal;
     }
 
-    public Double getPercentagemPago() {
-        return percentagemPago;
+    public Double getValorPago() {
+        return valorPago;
     }
 
-    public void setPercentagemPago(Double percentagemPago) {
-        this.percentagemPago = percentagemPago;
+    public void setValorPago(Double valorPago) {
+        this.valorPago = valorPago;
+    }
+
+    @Override
+    public String toString() {
+        return "Pagamento{" + "valorTotal=" + valorTotal + ", valorPago=" + valorPago + '}';
     }
 }

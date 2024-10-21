@@ -4,15 +4,15 @@
  */
 package edu.uem.sgh.util;
 
-import javafx.scene.image.Image;
+import java.io.FileInputStream;
 
 /**
  *
  * @author Kevin Ntumi
  */
 public class QuartoValidator {
-    public static boolean isFotoValid(Image image) {
-        return image != null;
+    public static boolean isFotoValid(FileInputStream fis) {
+        return fis != null;
     }
     
     public static boolean isDescricaoValid(String descricao) {

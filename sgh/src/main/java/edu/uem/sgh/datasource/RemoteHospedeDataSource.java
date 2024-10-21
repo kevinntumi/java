@@ -9,6 +9,7 @@ import edu.uem.sgh.model.Result;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public class RemoteHospedeDataSource extends AbstractDataSource{
     
     public Result<Boolean> inserir(Hospede hospede) {
         Result<Boolean> r;
-        String sql = "INSERT INTO hospedes(num_doc_id, nacionalidade, nome, morada, data_nascimento, data_registrado) VALUES(?,?,?,?,?,?)";
+        String sql = "INSERT INTO hospedes(num_doc_id, nacionalidade, nome, morada, data_nascimento, data_registo) VALUES(?,?,?,?,?,?)";
         
         try {
             PreparedStatement statement = getConnection().prepareStatement(sql);
@@ -38,6 +39,7 @@ public class RemoteHospedeDataSource extends AbstractDataSource{
             statement.setString(3, hospede.getNome());
             statement.setString(4, hospede.getMorada());
             statement.setDate(5, new java.sql.Date(hospede.getDataNascimento()));
+            statement.setDate(6, new java.sql.Date(System.currentTimeMillis()));
             r = new Result.Success<>(statement.executeUpdate() > 0);
         } catch(SQLException e) {
             r = new Result.Error<>(e);
@@ -63,43 +65,52 @@ public class RemoteHospedeDataSource extends AbstractDataSource{
         
         return r;
     }
-
-    public Result<Hospede> obterHospedePorNumDocumentoIdentidade(String numDocIdHospede) {
-        Result<Hospede> r;
-        
-        try {
-            PreparedStatement statement = getConnection().prepareStatement("SELECT num_hospede, nacionalidade, nome, morada, idade, data_registrado FROM hospedes WHERE num_doc_id = ?");
-            ResultSet rs = statement.executeQuery();   
-            Hospede hospede = null;
-            
-            while (rs.next()) {
-                //hospedes.add(new Hospede(rs.getInt("num_hospede"), numDocIdHospede, rs.getString("nacionalidade"), rs.getString("nome"), rs.getString("morada"), rs.getDate("data_nascimento").getTime()));
-            }
-            
-            rs.close();
-            statement.close();
-            r = new Result.Success<>(hospede);
-        } catch(SQLException e) {
-            r = new Result.Error<>(e);
-        }
-        
-        return r;
-    }
     
     public Result<List<Hospede>> obterTodos() {
         Result<List<Hospede>> r;
         
-        try {
-            PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM hospedes");
+        try (PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM hospede")){
             ResultSet rs = statement.executeQuery();
             List<Hospede> hospedes = new ArrayList<>();
+            ResultSetMetaData resultSetMetaData = rs.getMetaData();
+            int columnCount = resultSetMetaData.getColumnCount();
             
-            while (rs.next()) {
-                //hospedes.add(new Hospede(rs.getInt("num_hospede"), rs.getString("num_doc_id"), rs.getString("nacionalidade"), rs.getString("nome"), rs.getString("morada"), rs.getDate("data_nascimento").getTime()));
+            if (columnCount != 0) {
+                while (rs.next()) {
+                    Hospede hospede = new Hospede();
+                    
+                    for (int i = 1 ; i <= columnCount ; i++) {
+                        String columnName = resultSetMetaData.getColumnName(i);
+                        
+                        switch (columnName) {
+                            case "id":
+                                hospede.setId(rs.getLong(columnName));
+                                    break;
+                            case "num_doc_id":
+                                hospede.setNumDocumentoIdentidade(rs.getString(columnName));
+                                    break;
+                            case "nacionalidade":
+                                hospede.setNacionalidade(rs.getString(columnName));
+                                    break;
+                            case "nome":
+                                hospede.setNome(rs.getString(columnName));
+                                    break;
+                            case "data_registo":
+                                hospede.setDataRegisto(rs.getDate(columnName).getTime());
+                                    break;
+                            case "data_nascimento":
+                                hospede.setDataNascimento(rs.getDate(columnName).getTime());
+                                    break;
+                            case "morada":
+                                hospede.setMorada(rs.getString(columnName));
+                                    break;
+                        }
+                    }
+                    
+                    hospedes.add(hospede);
+                }
             }
             
-            rs.close();
-            statement.close();
             r = new Result.Success<>(hospedes);
         } catch(SQLException e) {
             r = new Result.Error<>(e);

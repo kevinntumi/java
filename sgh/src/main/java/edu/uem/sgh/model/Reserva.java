@@ -12,22 +12,22 @@ import java.util.List;
  * @author Kevin Ntumi
  */
 public class Reserva {
-    private long id;
+    private Long id;
     private Hospede cliente;
-    private long dataCheckIn;
-    private long dataCheckOut;
-    private Long dataConfirmada;
-    private long dataReserva;
+    private Long dataCheckIn;
+    private Long dataCheckOut;
+    private Long dataSituacao;
+    private Long dataReserva;
     private Pagamento pagamento;
     private Funcionario funcionario;
     private List<HospedeQuarto> hospedes;
     private ReservaSituacao situacao;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -39,35 +39,35 @@ public class Reserva {
         this.cliente = cliente;
     }
 
-    public long getDataCheckIn() {
+    public Long getDataCheckIn() {
         return dataCheckIn;
     }
 
-    public void setDataCheckIn(long dataCheckIn) {
+    public void setDataCheckIn(Long dataCheckIn) {
         this.dataCheckIn = dataCheckIn;
     }
 
-    public long getDataCheckOut() {
+    public Long getDataCheckOut() {
         return dataCheckOut;
     }
 
-    public void setDataCheckOut(long dataCheckOut) {
+    public void setDataCheckOut(Long dataCheckOut) {
         this.dataCheckOut = dataCheckOut;
     }
 
-    public Long getDataConfirmada() {
-        return dataConfirmada;
+    public Long getDataSituacao() {
+        return dataSituacao;
     }
 
-    public void setDataConfirmada(Long dataConfirmada) {
-        this.dataConfirmada = dataConfirmada;
+    public void setDataSituacao(Long dataSituacao) {
+        this.dataSituacao = dataSituacao;
     }
 
-    public long getDataReserva() {
+    public Long getDataReserva() {
         return dataReserva;
     }
 
-    public void setDataReserva(long dataReserva) {
+    public void setDataReserva(Long dataReserva) {
         this.dataReserva = dataReserva;
     }
 

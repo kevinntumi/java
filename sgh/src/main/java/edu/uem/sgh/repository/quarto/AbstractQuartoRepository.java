@@ -8,7 +8,10 @@ import edu.uem.sgh.helper.ServicoSituacao;
 import edu.uem.sgh.model.Quarto;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.repository.AbstractRepository;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,6 +19,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -31,37 +36,45 @@ public abstract class AbstractQuartoRepository extends AbstractRepository {
         return super.getConnection(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
     }
     
-    public Result<Boolean> add(Quarto quarto, FileInputStream fis) {
+    public Result<Boolean> add(Quarto quarto, File file) {
         Result<Boolean> r;
-
-        try (PreparedStatement statement = getConnection().prepareStatement("INSERT INTO quartos(descricao, capacidade, foto, preco, situacao) VALUES(?,?,?,?,?)")){
+        
+        try (PreparedStatement statement = getConnection().prepareStatement("INSERT INTO quarto(descricao, capacidade, foto, preco, situacao) VALUES(?,?,?,?,?)")){
             statement.setString(1, quarto.getDescricao());
             statement.setInt(2, quarto.getCapacidade());
-            statement.setBlob(3, fis);
+            statement.setBlob(3, new FileInputStream(file), file.length());
             statement.setDouble(4, quarto.getPreco());
-            statement.setString(5, ServicoSituacao.obterPorValor(quarto.getSituacao()));
+            statement.setString(5, ServicoSituacao.obterPorValor(ServicoSituacao.EM_MANUNTENCAO));
             r = new Result.Success<>(statement.executeUpdate() > 0);
-            statement.close();
-        } catch (SQLException e) {
+        } catch (SQLException | FileNotFoundException e) {
             r = new Result.Error<>(e);
-        }
+        } 
         
         return r;
     }
     
-    public Result<Boolean> edit(Quarto t, FileInputStream fis) {
+    public Result<Boolean> edit(Quarto t, File file) {
         Result<Boolean> r;
 
-        try (PreparedStatement statement = getConnection().prepareStatement("UPDATE quartos SET descricao = ?, capacidade = ?, foto = ?, preco = ?, situacao = ? WHERE id = ?")){
+        try (PreparedStatement statement = getConnection().prepareStatement("UPDATE quarto SET descricao = ?, capacidade = ?, foto = ?, preco = ?, situacao = ? WHERE id = ?")){
             statement.setString(1, t.getDescricao());
             statement.setInt(2, t.getCapacidade());
-            statement.setBlob(3, fis);
+            
+            if (file == null) {
+                if (t.getFoto() == null) {
+                    return new Result.Error<>(new NullPointerException());
+                }
+                
+                statement.setBlob(3, t.getFoto());
+            } else {
+                statement.setBlob(3, new FileInputStream(file), file.length());
+            }
+            
             statement.setDouble(4, t.getPreco());
             statement.setString(5, ServicoSituacao.obterPorValor(t.getSituacao()));
             statement.setLong(6, t.getId());
             r = new Result.Success<>(statement.executeUpdate() > 0);
-            statement.close();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             r = new Result.Error<>(e);
         }
     
@@ -133,21 +146,47 @@ public abstract class AbstractQuartoRepository extends AbstractRepository {
     }
     
     public Result<Quarto> get(long id) {
-        Result r;
+        Result<Quarto> r;
         
         try (PreparedStatement statement = getConnection().prepareStatement("SELECT descricao, capacidade, foto, preco, status FROM quartos WHERE id = ?")){
             statement.setLong(1, id);
             ResultSet rs = statement.executeQuery();
-            
+            ResultSetMetaData resultSetMetaData = rs.getMetaData();
+            int columnCount = resultSetMetaData.getColumnCount();
             Quarto quarto = null;
             
-            while (rs.next()) {
-//                quarto = new Quarto(id, rs.getString("descricao"), rs.getInt("capacidade"), rs.getBlob("foto"), rs.getDouble("preco"), rs.getBoolean("status"));
+            if (columnCount != 0) {
+                while (rs.next()) {
+                    quarto = new Quarto();
+                    
+                    for (int i = 1 ; i <= columnCount ; i++) {
+                        String columnName = resultSetMetaData.getColumnName(i);
+                        
+                        switch (columnName) {
+                            case "id":
+                                quarto.setId(rs.getLong(columnName));
+                                    break;
+                            case "descricao":
+                                quarto.setDescricao(rs.getString(columnName));
+                                    break;
+                            case "foto":
+                                quarto.setFoto(rs.getBlob(columnName));
+                                    break;  
+                            case "preco":
+                                quarto.setPreco(rs.getDouble(columnName));
+                                    break;
+                            case "situacao":
+                                quarto.setSituacao(ServicoSituacao.obterViaString(rs.getString(columnName)));
+                                    break;  
+                            case "capacidade":
+                                quarto.setCapacidade(rs.getInt(columnName));
+                                    break;
+                        }
+                    }
+                }
             }
             
             r = new Result.Success<>(quarto);
-            rs.close();
-            statement.close();
         } catch(SQLException e) {
             r = new Result.Error<>(e);
         }

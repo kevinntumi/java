@@ -6,6 +6,7 @@ package edu.uem.sgh.repository.quarto;
 
 import edu.uem.sgh.model.Quarto;
 import edu.uem.sgh.model.Result;
+import java.io.File;
 import java.io.FileInputStream;
 import java.sql.Connection;
 import java.util.List;
@@ -35,12 +36,12 @@ public class LocalQuartoRepository extends AbstractQuartoRepository {
     }
 
     @Override
-    public Result<Boolean> edit(Quarto t, FileInputStream fis) {
-        return super.edit(t, fis);
+    public Result<Boolean> edit(Quarto t, File file) {
+        return super.edit(t, file);
     }
 
     @Override
-    public Result<Boolean> add(Quarto quarto, FileInputStream fis) {
-        return super.add(quarto, fis);
+    public Result<Boolean> add(Quarto quarto, File file) {
+        return super.add(quarto, file);
     }
 }

@@ -11,11 +11,14 @@ import edu.uem.sgh.model.Usuario;
 import edu.uem.sgh.repository.quarto.QuartoRepository;
 import edu.uem.sgh.util.Path;
 import edu.uem.sgh.util.QuartoValidator;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Blob;
 import java.sql.SQLException;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -39,12 +42,14 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.StageStyle;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 /**
  *
  * @author Kevin Ntumi
  */
-public class DialogInserirQuarto extends Dialog<Object> {
+public class DialogEditarQuarto extends Dialog<Object> {
     private QuartoRepository quartoRepository;
     private Usuario usuario;
     private TextField txtDescricao, txtPreco, txtCapacidade;
@@ -53,15 +58,18 @@ public class DialogInserirQuarto extends Dialog<Object> {
     private EventHandler<MouseEvent> mouseEventHandler;
     private EventHandler<DialogEvent> dialogEventHandler;
     private ChangeListener<Object> changeListener;
+    private FileInputStream newFileInputStream;
+    private ByteArrayInputStream originalFileInputStream;
+    private File file = null;
     private Result<Boolean> rslt;
-    private FileInputStream fis;
-    private File file;
     private Integer capacidade = null;
+    private Quarto quarto;
     private Alert alert;
     private Double preco = null;
+    private String descricao = null;
     private FileChooser fileChooser;
     
-    public DialogInserirQuarto() {
+    public DialogEditarQuarto() {
         FXMLLoader fXMLLoader = new FXMLLoader(Path.getFXMLURL("DialogInserirQuarto", "\\gerente\\dialog\\"));
         Parent content;
         
@@ -111,15 +119,20 @@ public class DialogInserirQuarto extends Dialog<Object> {
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
     }
+
+    public void setQuarto(Quarto quarto) {
+        this.quarto = quarto;
+    }
     
     public void adicionarListeners() {
         close.setOnMouseClicked(getMouseEventHandler());
         setOnCloseRequest(getDialogEventHandler());
         
-        if (usuario == null || quartoRepository == null) {
+        if (usuario == null || quarto == null || quartoRepository == null) {
             return;
         }
         
+        init();
         btnOk.setOnMouseClicked(getMouseEventHandler());
         btnEscolherFoto.setOnMouseClicked(getMouseEventHandler());
         txtCapacidade.textProperty().addListener(getChangeListener());
@@ -170,7 +183,7 @@ public class DialogInserirQuarto extends Dialog<Object> {
         return dialogEventHandler;
     }
     
-    private DialogInserirQuarto getDialogInserirQuarto() {
+    private DialogEditarQuarto getDialogEditarQuarto() {
         return this;
     }
 
@@ -181,22 +194,22 @@ public class DialogInserirQuarto extends Dialog<Object> {
             setResult(buttonType);
         }
         
-        getDialogEventHandler().handle(new DialogEvent(getDialogInserirQuarto(), DialogEvent.DIALOG_CLOSE_REQUEST));
+        getDialogEventHandler().handle(new DialogEvent(getDialogEditarQuarto(), DialogEvent.DIALOG_CLOSE_REQUEST));
     }
 
     private void cliqueBtnOK() {
-        if (usuario == null || quartoRepository == null){
+        if (usuario == null || quarto == null || quartoRepository == null){
             return;
         }
         
-        boolean isFotoValid = (QuartoValidator.isFotoValid(fis));
+        boolean hasPickedPhoto = (QuartoValidator.isFotoValid(newFileInputStream));
         
-        if (!isFotoValid) {
-            mostrarMsg("Foto invalida!");
+        if (!hasPickedPhoto && quarto.getFoto() == null) {
+            mostrarMsg("Escolha uma foto!");
             return;
         }
         
-        boolean isDescricaoValid = (QuartoValidator.isDescricaoValid(txtDescricao.getText()));
+        boolean isDescricaoValid = (QuartoValidator.isDescricaoValid(descricao));
         
         if (!isDescricaoValid) {
             mostrarMsg("Descrição invalida!");
@@ -218,33 +231,35 @@ public class DialogInserirQuarto extends Dialog<Object> {
         }
         
         Quarto q = new Quarto();
+        q.setId(quarto.getId());
         q.setCapacidade(capacidade);
-        q.setDescricao(txtDescricao.getText());
+        q.setDescricao(descricao);
         q.setPreco(preco);
         q.setSituacao(ServicoSituacao.EM_MANUNTENCAO);
+        q.setFoto(quarto.getFoto());
         
-        rslt = quartoRepository.add(q, file);
+        rslt = quartoRepository.edit(q, file);
         
         if (rslt == null) {
             return;
         }
         
-        String descricao = null;
+        String msg = null;
     
         if (rslt instanceof Result.Error) {
             Result.Error<Boolean> error = (Result.Error<Boolean>) rslt;
-            descricao = (error.getException().getClass().equals(SQLException.class)) ? "Não foi possivel estabelecer uma conexão a base de dados remota." : "Não foi possivel realizar o pedido. Tente novamente em uma outra altura.";
+            msg = (error.getException().getClass().equals(SQLException.class)) ? "Não foi possivel estabelecer uma conexão a base de dados remota." : "Não foi possivel realizar o pedido. Tente novamente em uma outra altura.";
         } else {
             Result.Success<Boolean> success = (Result.Success<Boolean>) rslt;
                     
             if (success.getData())
                 fecharDialog();
             else
-                descricao = "Não foi possivel realizar o pedido neste momento. Tente novamente numa outra altura.";
+                msg = "Não foi possivel realizar o pedido neste momento. Tente novamente numa outra altura.";
         }
         
-        if (descricao != null) {
-            mostrarMsg(descricao);
+        if (msg != null) {
+            mostrarMsg(msg);
         }
     }
 
@@ -264,17 +279,20 @@ public class DialogInserirQuarto extends Dialog<Object> {
         }
         
         if (url == null) {
+            newFileInputStream = null;
             return;
         }
         
-        fis = obterFileInputStreamViaFile(selectedFile);
-        foto.setImage(new Image(fis));
+        newFileInputStream = obterFileInputStreamViaFile(selectedFile);
         file = selectedFile;
+        foto.setImage(new Image(newFileInputStream));
     }
 
     public ChangeListener<Object> getChangeListener() {
         if (changeListener == null) {
             changeListener = (ObservableValue<? extends Object> observable, Object oldValue, Object newValue) -> {
+                System.out.println(observable + ": " + newValue);
+                
                 if (observable.equals(txtDescricao.textProperty())) 
                     observarDescricao(newValue);
                 else if (observable.equals(txtCapacidade.textProperty()))
@@ -288,11 +306,7 @@ public class DialogInserirQuarto extends Dialog<Object> {
     }
     
     private void observarDescricao(Object newValue) {
-        if (newValue == null) {
-            return;
-        }
-        
-        
+        descricao = (newValue == null) ? null : (String) newValue;
     }
     
     private Alert getAlert() {
@@ -316,6 +330,7 @@ public class DialogInserirQuarto extends Dialog<Object> {
 
     private void observarCapacidade(Object newValue) {
         if (newValue == null) {
+            capacidade = null;
             return;
         }
         
@@ -330,6 +345,7 @@ public class DialogInserirQuarto extends Dialog<Object> {
 
     private void observarPreco(Object newValue) {
         if (newValue == null) {
+            preco = null;
             return;
         }
         
@@ -352,16 +368,71 @@ public class DialogInserirQuarto extends Dialog<Object> {
         
         return fileChooser;
     }
+    
+    private Boolean isSamePhoto (FileInputStream originalPhotoFileInputStream, FileInputStream newPhotoFileInputStream) {
+        Boolean isSamePhoto;
+        
+        if (originalPhotoFileInputStream == null || newPhotoFileInputStream == null) {
+            return null;
+        }
+        
+        try {
+            isSamePhoto = IOUtils.contentEquals(originalPhotoFileInputStream, newPhotoFileInputStream);
+        } catch (IOException iOException) {
+            isSamePhoto = false;
+        }
+        
+        return isSamePhoto;
+    }
 
     private FileInputStream obterFileInputStreamViaFile(File selectedFile) {
         FileInputStream targetStream;
         
         try {
-            targetStream = new FileInputStream(selectedFile);
+            targetStream = FileUtils.openInputStream(selectedFile);
         } catch (IOException e) {
             targetStream = null;
         }
         
         return targetStream;
+    }
+    
+    private InputStream obterInputStreamViaBlob(Blob blob) {
+        if (blob == null) {
+            return null;
+        }
+        
+        InputStream inputStream;
+        
+        try {
+            inputStream = quarto.getFoto().getBinaryStream();
+        } catch (SQLException | NullPointerException e) {
+            inputStream = null;
+        }
+        
+        return inputStream;
+    }
+
+    private void init() {
+        if (usuario == null || quarto == null || quartoRepository == null) {
+            return;
+        }
+        
+        txtCapacidade.setText(quarto.getCapacidade() + "");
+        txtDescricao.setText(quarto.getDescricao());
+        txtPreco.setText(quarto.getPreco() + "");
+        originalFileInputStream  = (ByteArrayInputStream) obterInputStreamViaBlob(quarto.getFoto());
+        
+        if (originalFileInputStream == null)
+            return;
+        
+       
+        Image img = new Image(originalFileInputStream);
+
+        if (img.errorProperty().get()) {
+            return;
+        }
+        
+        foto.setImage(img);
     }
 }

@@ -43,17 +43,13 @@ public class HospedeRepository {
     public Result<Boolean> editar(Hospede hospede) {
         return getRemoteHospedeDataSource().editar(hospede);
     }
-
-    public Result<Hospede> obterHospedePorNumDocumentoIdentidade(String numDocIdHospede) {
-        return getRemoteHospedeDataSource().obterHospedePorNumDocumentoIdentidade(numDocIdHospede);
-    }
     
     public Result<List<Hospede>> obterTodos() {
         return getRemoteHospedeDataSource().obterTodos();
     }
 
     public RemoteHospedeDataSource getRemoteHospedeDataSource() {
-        if (remoteHospedeDataSource == null && remoteConnection == null) remoteHospedeDataSource = new RemoteHospedeDataSource(remoteConnection);
+        if (remoteHospedeDataSource == null && remoteConnection != null) remoteHospedeDataSource = new RemoteHospedeDataSource(remoteConnection);
         return remoteHospedeDataSource;
     }
 
