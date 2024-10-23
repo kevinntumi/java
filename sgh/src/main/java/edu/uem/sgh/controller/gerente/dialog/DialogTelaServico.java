@@ -4,6 +4,7 @@
  */
 package edu.uem.sgh.controller.gerente.dialog;
 
+import edu.uem.sgh.controller.DefaultDialogPane;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Servico;
 import edu.uem.sgh.repository.servico.ServicoRepository;
@@ -13,8 +14,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import javafx.beans.property.SimpleLongProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -24,6 +23,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -43,16 +43,17 @@ public class DialogTelaServico extends Dialog<Object>{
     private Parent content;
     private final String layoutName = "DialogTelaServico", additionalPath = "\\gerente\\dialog\\";
     private Label txtCodigo, txtDescricao, txtSituacao, txtDataRegisto, txtInseridoPor;
-    private TableView<Quarto> tableView;
+    private TableView<edu.uem.sgh.model.table.ServicoQuarto> tableView;
     private Long idServico = null;
     private ServicoQuartoRepository servicoQuartoRepository;
     private ServicoRepository servicoRepository;
-    private Result<List<edu.uem.sgh.model.Quarto>> rsltTwo;
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("d MMM yyyy");
+    private Result<List<edu.uem.sgh.model.ServicoQuarto>> rsltTwo;
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("d MMM yyyy,, hh:mm");
     private Result<Servico> rsltOne;
     private EventHandler<ActionEvent> eventHandler;
+    private EventHandler<DialogEvent> dialogEventHandler;
     private boolean firstTimeVisible = true;
-    private Button btnOk, btnCarregar;
+    private Button btnFechar, btnCarregar;
 
     @SuppressWarnings("unchecked")
     public DialogTelaServico() {
@@ -63,6 +64,7 @@ public class DialogTelaServico extends Dialog<Object>{
         }
         
         initStyle(StageStyle.UNDECORATED);
+        setDialogPane(new DefaultDialogPane());
         ObservableList<Node> children = content.getChildrenUnmodifiable();
         txtCodigo = (Label) findById("txtCodigo", children);
         txtDescricao = (Label) findById("txtDescricao", children);
@@ -70,10 +72,9 @@ public class DialogTelaServico extends Dialog<Object>{
         txtDataRegisto = (Label) findById("txtDataRegisto", children);
         txtInseridoPor = (Label) findById("txtInseridoPor", children);
         btnCarregar = (Button) findById("btnCarregar", children);
-        tableView = (TableView<Quarto>) findById("tableView", children);
+        tableView = (TableView<edu.uem.sgh.model.table.ServicoQuarto>) findById("tableView", children);
+        btnFechar = (Button) findById("btnFechar", children);
         getDialogPane().setContent(content);
-        getDialogPane().getButtonTypes().add(ButtonType.OK);
-        btnOk = (Button) getDialogPane().lookupButton(ButtonType.OK);
     }
 
     public void setIdServico(Long idServico) {
@@ -114,25 +115,23 @@ public class DialogTelaServico extends Dialog<Object>{
             carregar();
         }
         
-        if (btnCarregar == null)
-            return;
+        btnFechar.setOnAction(getEventHandler());
+        setOnCloseRequest(getDialogEventHandler());
         
-        if (eventHandler == null) {
-            eventHandler = (ActionEvent event) -> {
-                if (!event.getSource().equals(btnCarregar)) {
-                    return;
-                }
-                
-                carregar();
-            };
+        if (btnCarregar == null) {
+            return;
         }
         
-        btnCarregar.setOnAction(eventHandler);
+        btnCarregar.setOnAction(getEventHandler());
     }
     
     public void removerListeners() {
-        if (btnCarregar == null) 
+        btnFechar.setOnAction(null);
+        setOnCloseRequest(null);
+        
+        if (btnCarregar == null) {
             return;
+        }
             
         btnCarregar.setOnAction(null);
     }
@@ -142,7 +141,7 @@ public class DialogTelaServico extends Dialog<Object>{
             return;
         }
         
-        btnOk.setMouseTransparent(true);
+        btnFechar.setMouseTransparent(true);
         String loadingPlaceholderText = "A carregar...";
         txtCodigo.setText(loadingPlaceholderText);
         txtDescricao.setText(loadingPlaceholderText);
@@ -153,7 +152,7 @@ public class DialogTelaServico extends Dialog<Object>{
         rsltOne = servicoRepository.get(idServico);
         
         if (rsltOne == null) {
-            btnOk.setMouseTransparent(false);
+            btnFechar.setMouseTransparent(false);
             return;
         }
         
@@ -174,30 +173,33 @@ public class DialogTelaServico extends Dialog<Object>{
             txtInseridoPor.setText(loadingPlaceholderText);
         }
         
-        rsltTwo = servicoQuartoRepository.obterQuartosPorServico(idServico);
+        rsltTwo = servicoQuartoRepository.obterAssociacoesPorServico(idServico);
         
         if (rsltTwo == null) {
-            btnOk.setMouseTransparent(false);
+            btnFechar.setMouseTransparent(false);
             return;
         }
-        
+        System.out.println(rsltTwo.getValue());
         if (rsltTwo instanceof Result.Success) {
             initTabela();
             limparTabela();
             
-            Result.Success<List<edu.uem.sgh.model.Quarto>> success = (Result.Success<List<edu.uem.sgh.model.Quarto>>) rsltTwo;
-            List<edu.uem.sgh.model.Quarto> quartos = success.getData();
+            Result.Success<List<edu.uem.sgh.model.ServicoQuarto>> success = (Result.Success<List<edu.uem.sgh.model.ServicoQuarto>>) rsltTwo;
+            List<edu.uem.sgh.model.ServicoQuarto> servicoQuartos = success.getData();
             
-            if (quartos.isEmpty()) {
+            initTabela();
+            limparTabela();
+            
+            if (servicoQuartos.isEmpty()) {
                 return;
             }
             
-            for (edu.uem.sgh.model.Quarto quarto : quartos) {
-                tableView.getItems().add(new Quarto(quarto.getId(), quarto.getDescricao()));
+            for (edu.uem.sgh.model.ServicoQuarto servicoQuarto : servicoQuartos) {
+                tableView.getItems().add(new edu.uem.sgh.model.table.ServicoQuarto(servicoQuarto.getId(), servicoQuarto.getQuarto().getId(), servicoQuarto.getQuarto().getDescricao(), simpleDateFormat.format(new Date(servicoQuarto.getDataAssociacao())), servicoQuarto.getSituacao(), simpleDateFormat.format(new Date(servicoQuarto.getDataSituacao())), servicoQuarto));
             }
         }
         
-        btnOk.setMouseTransparent(false);
+        btnFechar.setMouseTransparent(false);
     }
     
     private void initTabela() {
@@ -205,10 +207,10 @@ public class DialogTelaServico extends Dialog<Object>{
             return;
         }
         
-        ObservableList<TableColumn<Quarto, ?>> columns = tableView.getColumns();
+        ObservableList<TableColumn<edu.uem.sgh.model.table.ServicoQuarto, ?>> columns = tableView.getColumns();
         
         for (int i = 0 ; i < columns.size() ; i++) {
-            TableColumn<Quarto, ?> tableColumn = columns.get(i);
+            TableColumn<edu.uem.sgh.model.table.ServicoQuarto, ?> tableColumn = columns.get(i);
             
             if (tableColumn.getCellValueFactory() != null || (tableColumn.getId() == null || tableColumn.getId().isBlank())) {
                 continue;
@@ -217,11 +219,23 @@ public class DialogTelaServico extends Dialog<Object>{
             PropertyValueFactory propertyValueFactory = null;
             
             switch (tableColumn.getId()) {
+                case "tblColumnCodigo":
+                    propertyValueFactory = new PropertyValueFactory("codigo");
+                        break;
                 case "tblColumnCodigoQuarto":
                     propertyValueFactory = new PropertyValueFactory("codigoQuarto");
                         break;
                 case "tblColumnDescricaoQuarto":
                     propertyValueFactory = new PropertyValueFactory("descricaoQuarto");
+                        break;
+                case "tblColumnDataAssociacao":
+                    propertyValueFactory = new PropertyValueFactory("dataAssociacao");
+                        break;
+                case "tblColumnDataSituacao":
+                    propertyValueFactory = new PropertyValueFactory("dataSituacao");
+                        break;
+                case "tblColumnSituacao":
+                    propertyValueFactory = new PropertyValueFactory("situacao");
                         break;
             }
             
@@ -235,30 +249,38 @@ public class DialogTelaServico extends Dialog<Object>{
             tableView.getItems().clear();
         }
     }
+
+    public EventHandler<ActionEvent> getEventHandler() {
+        if (eventHandler == null) {
+            eventHandler = (ActionEvent event) -> {
+                if (event.getSource() == null || !(event.getSource().equals(btnCarregar) || event.getSource().equals(btnFechar))) {
+                    return;
+                }
+                
+                if (event.getSource().equals(btnCarregar)) 
+                    carregar();
+                else
+                    fecharDialog();
+            };
+        }
+        
+        return eventHandler;
+    }
     
-    private class Quarto {
-        private final SimpleLongProperty codigoQuarto;
-        private final SimpleStringProperty descricaoQuarto;
-
-        public Quarto(Long codigo, String descricaoQuarto) {
-            this.codigoQuarto = new SimpleLongProperty(codigo);
-            this.descricaoQuarto = new SimpleStringProperty(descricaoQuarto);
+    public EventHandler<DialogEvent> getDialogEventHandler() {
+        if (dialogEventHandler == null) {
+            dialogEventHandler = (DialogEvent event) -> {
+                if (!(event.getEventType().equals(DialogEvent.DIALOG_CLOSE_REQUEST))) {
+                    event.consume();
+                }
+            };
         }
+        
+        return dialogEventHandler;
+    }
 
-        public long getCodigoQuarto() {
-            return codigoQuarto.get();
-        }
-
-        public void setCodigo(long codigo) {
-            this.codigoQuarto.set(codigo);
-        }
-
-        public String getDescricao() {
-            return descricaoQuarto.get();
-        }
-
-        public void setDescricao(String descricao) {
-            this.descricaoQuarto.set(descricao);
-        }
+    private void fecharDialog() {
+        setResult(ButtonType.CLOSE);
+        getDialogEventHandler().handle(new DialogEvent(this, DialogEvent.DIALOG_CLOSE_REQUEST));
     }
 }

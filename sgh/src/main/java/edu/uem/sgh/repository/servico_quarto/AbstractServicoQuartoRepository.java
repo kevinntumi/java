@@ -121,7 +121,7 @@ public class AbstractServicoQuartoRepository extends AbstractRepository{
     }
     
     public Result<ServicoQuarto> get(long id) {
-        Result r;
+        Result<ServicoQuarto> r;
         
         try (PreparedStatement statement = getConnection().prepareStatement("SELECT id_servico, id_quarto, status FROM servico_quarto WHERE id = ?")){
             statement.setLong(1, id);

@@ -14,7 +14,7 @@ public enum ReservaSituacao {
     CONFIRMADA;
     
     public static ReservaSituacao obterViaString(String reservaSituacaoStr) {
-        if (reservaSituacaoStr == null || reservaSituacaoStr.isBlank())
+        if (reservaSituacaoStr == null)
             return null;
         
         ReservaSituacao[] reservaSituacoes = ReservaSituacao.values();

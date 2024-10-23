@@ -69,7 +69,7 @@ public class TelaServicos extends AbstractController implements EventHandler<Eve
     private ServicoRepository servicoRepository;
     private ServicoQuartoRepository servicoQuartoRepository;
     private List<Dialog<?>> dialogs;
-    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("d MMM yyyy");
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("d MMM yyyy,, hh:mm");
     private boolean firstTimeVisible = true;
     private Alert errorAlert;
 

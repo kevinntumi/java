@@ -82,3 +82,18 @@
     -fx-border-width: 0 0.5px 0 0.5px;
     -fx-border-color: transparent #ccc transparent #ccc;
 }
+
+#btnMeuPerfil {
+    -fx-background-color: none;
+    -fx-border-width: 0;
+    -fx-border-radius: 0;
+}
+
+#btnMeuPerfil:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.16);
+    -fx-border-width: 0;
+}
+
+#btnMeuPerfil:pressed {
+    -fx-background-color: rgba(0, 0, 0, 0.08);
+}

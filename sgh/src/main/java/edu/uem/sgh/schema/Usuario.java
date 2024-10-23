@@ -14,7 +14,7 @@ public class Usuario {
     private String nome;
     private String tipo;
     private long dataRegisto;
-    private long dataAlterado;
+    private long dataInicio;
 
     public long getId() {
         return id;
@@ -56,20 +56,20 @@ public class Usuario {
         this.dataRegisto = dataRegisto;
     }
 
-    public long getDataAlterado() {
-        return dataAlterado;
+    public long getDataInicio() {
+        return dataInicio;
     }
 
-    public void setDataAlterado(long dataAlterado) {
-        this.dataAlterado = dataAlterado;
+    public void setDataInicio(long dataInicio) {
+        this.dataInicio = dataInicio;
     }
 
-    public Usuario(long id, long idTipo, String nome, String tipo, long dataRegisto, long dataAlterado) {
+    public Usuario(long id, long idTipo, String nome, String tipo, long dataRegisto, long dataInicio) {
         this.id = id;
         this.idTipo = idTipo;
         this.nome = nome;
         this.tipo = tipo;
         this.dataRegisto = dataRegisto;
-        this.dataAlterado = dataAlterado;
-    }   
+        this.dataInicio = dataInicio;
+    }
 }

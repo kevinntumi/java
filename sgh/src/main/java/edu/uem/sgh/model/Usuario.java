@@ -17,11 +17,10 @@ public class Usuario {
     private Tipo tipo;
     private Long dataInicio;
     private Long dataRegisto;
-    private Blob fotoPerfil;
     private String palavraPasse;
-    private Long dataAlterado;
+    private Boolean manterSessaoIniciada;
     
-    public static Usuario VAZIO = new Usuario();
+    public final static Usuario ANONIMO = new Usuario();
     
     public Usuario() {
     }
@@ -29,14 +28,6 @@ public class Usuario {
     public Usuario(Long dataInicio, Long id) {
         this.dataInicio = dataInicio;
         this.id = id;
-    }
-
-    public Blob getFotoPerfil() {
-        return fotoPerfil;
-    }
-
-    public void setFotoPerfil(Blob fotoPerfil) {
-        this.fotoPerfil = fotoPerfil;
     }
    
     public long getIdTipo() {
@@ -53,14 +44,6 @@ public class Usuario {
 
     public void setDataRegisto(long dataRegisto) {
         this.dataRegisto = dataRegisto;
-    }
-
-    public long getDataAlterado() {
-        return dataAlterado;
-    }
-
-    public void setDataAlterado(long dataAlterado) {
-        this.dataAlterado = dataAlterado;
     }
     
     public long getDataInicio() {
@@ -102,22 +85,20 @@ public class Usuario {
     public void setTipo(Tipo tipo) {
         this.tipo = tipo;
     }
-    
-    public static boolean isVazio(Usuario usuario) {
-        if (usuario == null) return true;
-        return usuario.dataAlterado == null && usuario.dataInicio == null && usuario.dataRegisto == null && usuario.id == null && usuario.idTipo == null && usuario.nome == null && usuario.tipo == null;
+
+    public Boolean getManterSessaoIniciada() {
+        return manterSessaoIniciada;
+    }
+
+    public void setManterSessaoIniciada(Boolean manterSessaoIniciada) {
+        this.manterSessaoIniciada = manterSessaoIniciada;
     }
     
-    public static boolean temTodosAtributos(Usuario usuario) {
-        if (usuario == null) throw new RuntimeException();
-        return (usuario.id != null && usuario.idTipo != null && usuario.nome != null && usuario.palavraPasse != null && usuario.tipo != null && usuario.fotoPerfil != null && usuario.dataAlterado != null && usuario.dataRegisto != null);
-    } 
-
     @Override
     public String toString() {
-        return "Usuario{" + "id=" + id + ", idTipo=" + idTipo + ", nome=" + nome + ", tipo=" + tipo + ", dataInicio=" + dataInicio + ", dataRegisto=" + dataRegisto + ", fotoPerfil=" + fotoPerfil + ", palavraPasse=" + palavraPasse + ", dataAlterado=" + dataAlterado + '}';
+        return "Usuario{" + "id=" + id + ", idTipo=" + idTipo + ", nome=" + nome + ", tipo=" + tipo + ", dataInicio=" + dataInicio + ", dataRegisto=" + dataRegisto + ", palavraPasse=" + palavraPasse + '}';
     }
-    
+
     public enum Tipo {
         CLIENTE,
         FUNCIONARIO,

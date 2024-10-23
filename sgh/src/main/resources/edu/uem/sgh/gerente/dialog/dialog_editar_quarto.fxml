@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" fx:id="root" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/22">
+    <stylesheets>
+        <URL value="@/styles/edu/uem/sgh/gerente/dialog/dialog_editar_quarto.css" />
+    </stylesheets>
+   <children>
+      <AnchorPane fx:id="anchorPane" layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="48.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <ImageView fx:id="close" fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <Label text="Editar quarto" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="24.0" AnchorPane.topAnchor="0.0">
+               <font>
+                  <Font name="Inter SemiBold" size="12.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+      <HBox fx:id="hBoxOne" layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" AnchorPane.leftAnchor="24.0" AnchorPane.rightAnchor="24.0" AnchorPane.topAnchor="72.0">
+         <children>
+            <AnchorPane fx:id="fotoFrame" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="300.0">
+               <children>
+                  <ImageView fx:id="foto" fitHeight="215.0" fitWidth="300.0" pickOnBounds="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+               </children>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </AnchorPane>
+            <GridPane hgap="24.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" vgap="16.0">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <Label text="Descrição:">
+                     <font>
+                        <Font name="Inter Regular" size="12.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="txtDescricao" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" GridPane.columnIndex="1">
+                     <font>
+                        <Font name="Inter Regular" size="12.0" />
+                     </font>
+                  </TextField>
+                  <Label text="Capacidade:" GridPane.rowIndex="1">
+                     <font>
+                        <Font name="Inter Regular" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label text="Preço:" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="Inter Regular" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label text="Situação:" GridPane.rowIndex="3" />
+                  <TextField fx:id="txtCapacidade" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <font>
+                        <Font name="Inter Regular" size="12.0" />
+                     </font>
+                  </TextField>
+                  <TextField fx:id="txtPreco" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="Inter Regular" size="12.0" />
+                     </font>
+                  </TextField>
+                  <Button fx:id="btnEscolherFoto" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" text="Escolher foto" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                     <font>
+                        <Font name="Inter Bold" size="12.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="btnOk" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" text="OK" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                     <font>
+                        <Font name="Inter Bold" size="12.0" />
+                     </font>
+                  </Button>
+                  <ComboBox fx:id="cbSituacao" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+               </children>
+               <HBox.margin>
+                  <Insets left="24.0" />
+               </HBox.margin>
+            </GridPane>
+         </children>
+      </HBox>
+   </children>
+</AnchorPane>

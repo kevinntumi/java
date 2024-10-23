@@ -4,34 +4,20 @@
  */
 package edu.uem.sgh.util;
 
-import java.util.regex.Pattern;
-
 /**
  *
  * @author Kevin Ntumi
  */
 public class LoginValidator {
-    private static final String EMAIL_REGEX_PATTERN = "^(.+)@(\\S+)$";
     private static final int LEAST_LETTER_COUNT = 4;
     private static final int LEAST_NUMBER_COUNT = 1;
     
-    public static boolean isEmailValid(String emailAddress) {
-        return Pattern.compile(EMAIL_REGEX_PATTERN)
-          .matcher(emailAddress)
-          .matches();
-    }
-    
-    public static boolean isIdValid(String id) {
-        if(id == null || id.isBlank()) return false;
-        
-        int numberCount = 0, size = id.length();
-        
-        for (int i = 0 ; i < size ; i++) {
-            if (Character.isDigit(id.charAt(i)))
-                numberCount++;
+    public static boolean isCodigoUsuarioValid(Long codigoUsuario) {
+        if(codigoUsuario == null || codigoUsuario < 0) {
+            return false;
         }
         
-        return numberCount == size;
+        return true;
     }
     
     public static boolean isPasswordValid(String password) {

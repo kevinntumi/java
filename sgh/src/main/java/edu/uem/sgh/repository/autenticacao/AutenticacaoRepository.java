@@ -11,16 +11,14 @@ import edu.uem.sgh.datasource.RemoteAutenticacaoDataSource;
 import edu.uem.sgh.connection.Type;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.Usuario;
-import edu.uem.sgh.model.Usuario.Tipo;
 import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  *
  * @author Kevin Ntumi
  */
 public class AutenticacaoRepository {
-    private String tblName = "usuario";
+    private final String tblName = "usuario";
     private final Connection remoteConnection, localConnection;
     private RemoteAutenticacaoDataSource remoteAutenticacaoDataSource;
     private LocalAutenticacaoDataSource localAutenticacaoDataSource;
@@ -31,31 +29,28 @@ public class AutenticacaoRepository {
         this.localConnection = localConnection;
     }
     
-    public Result<Usuario> getUserByIdTipoETipo(long id, Tipo tipo) {
-        return getRemoteAutenticacaoDataSource().getUserByIdTipoETipo(id, tipo);
-    }
-    
     public Result<Usuario> getUserById(long id) {
         return getRemoteAutenticacaoDataSource().getUserById(id);
     }
 
-    public Result<Usuario> logIn(long id, String password) {
-        if (remoteConnection == null)
-            return new Result.Error<>(new SQLException());
+    public Result<Usuario> logIn(long id, String password, boolean manterSessaoIniciada) {
+        Result<Usuario> result = getRemoteAutenticacaoDataSource().getUserByIdAndPassword(id, password);
         
-        Result<Usuario> result = getRemoteAutenticacaoDataSource().logIn(id, password);
-        
-        if (result instanceof Result.Error) 
-            return new Result.Error<>(((Result.Error<Usuario>) result).getException());        
-        
-        Result.Success<Usuario> success = ((Result.Success<Usuario>) result);
-        Usuario usuario = success.getData();
-        
-        if (usuario == null) {
-            return result;
-        } else {
-            return getLocalAutenticacaoDataSource().logIn(success.getData());
+        if (!(result instanceof Result.Error || result instanceof Result.Success)) {
+            return null;
         }
+        
+        if (result instanceof Result.Error) {
+            return result;
+        }
+        
+        Result.Success<Usuario> success = (Result.Success<Usuario>) result;
+
+        if (success.getData() == null || manterSessaoIniciada == false) {
+            return result;
+        }
+        
+        return getLocalAutenticacaoDataSource().logIn(success.getData());
     }
 
     public Result<Usuario> getCurrentUser() {
@@ -67,12 +62,18 @@ public class AutenticacaoRepository {
     }
     
     private RemoteAutenticacaoDataSource getRemoteAutenticacaoDataSource() {
-        if (remoteAutenticacaoDataSource == null) remoteAutenticacaoDataSource = new RemoteAutenticacaoDataSource(remoteConnection, tblName);
+        if (remoteAutenticacaoDataSource == null) {
+            remoteAutenticacaoDataSource = new RemoteAutenticacaoDataSource(remoteConnection, tblName);
+        }
+        
         return remoteAutenticacaoDataSource;
     }
 
     private LocalAutenticacaoDataSource getLocalAutenticacaoDataSource() {
-        if (localAutenticacaoDataSource == null) localAutenticacaoDataSource = new LocalAutenticacaoDataSource(localConnection, tblName);
+        if (localAutenticacaoDataSource == null) {
+            localAutenticacaoDataSource = new LocalAutenticacaoDataSource(localConnection, tblName);
+        }
+        
         return localAutenticacaoDataSource;
     }   
 }

@@ -4,6 +4,7 @@
  */
 package edu.uem.sgh.controller.gerente.dialog;
 
+import edu.uem.sgh.controller.DefaultDialogPane;
 import edu.uem.sgh.helper.ServicoSituacao;
 import edu.uem.sgh.model.Quarto;
 import edu.uem.sgh.model.Result;
@@ -20,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Blob;
 import java.sql.SQLException;
+import java.util.Arrays;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -30,6 +32,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogEvent;
 import javafx.scene.control.TextField;
@@ -43,7 +46,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.StageStyle;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 /**
  *
@@ -55,6 +57,7 @@ public class DialogEditarQuarto extends Dialog<Object> {
     private TextField txtDescricao, txtPreco, txtCapacidade;
     private Button btnOk, btnEscolherFoto;
     private ImageView close, foto;
+    private ComboBox<ServicoSituacao> cbSituacao;
     private EventHandler<MouseEvent> mouseEventHandler;
     private EventHandler<DialogEvent> dialogEventHandler;
     private ChangeListener<Object> changeListener;
@@ -69,8 +72,9 @@ public class DialogEditarQuarto extends Dialog<Object> {
     private String descricao = null;
     private FileChooser fileChooser;
     
+    @SuppressWarnings("unchecked")
     public DialogEditarQuarto() {
-        FXMLLoader fXMLLoader = new FXMLLoader(Path.getFXMLURL("DialogInserirQuarto", "\\gerente\\dialog\\"));
+        FXMLLoader fXMLLoader = new FXMLLoader(Path.getFXMLURL("dialog_editar_quarto", "\\gerente\\dialog\\"));
         Parent content;
         
         try {
@@ -80,6 +84,7 @@ public class DialogEditarQuarto extends Dialog<Object> {
         }
         
         initStyle(StageStyle.UNDECORATED);
+        setDialogPane(new DefaultDialogPane());
         ObservableList<Node> children = content.getChildrenUnmodifiable();
         txtCapacidade = (TextField) findById("txtCapacidade", children);
         txtPreco = (TextField) findById("txtPreco", children);
@@ -88,6 +93,8 @@ public class DialogEditarQuarto extends Dialog<Object> {
         close = (ImageView) findById("close", children);
         foto = (ImageView) findById("foto", children);
         btnEscolherFoto = (Button) findById("btnEscolherFoto", children);
+        cbSituacao = (ComboBox<ServicoSituacao>) findById("cbSituacao", children);
+        cbSituacao.getItems().addAll(Arrays.asList(ServicoSituacao.values()));
         getDialogPane().setContent(content);
     }
     
@@ -132,12 +139,12 @@ public class DialogEditarQuarto extends Dialog<Object> {
             return;
         }
         
-        init();
         btnOk.setOnMouseClicked(getMouseEventHandler());
         btnEscolherFoto.setOnMouseClicked(getMouseEventHandler());
         txtCapacidade.textProperty().addListener(getChangeListener());
         txtDescricao.textProperty().addListener(getChangeListener());
         txtPreco.textProperty().addListener(getChangeListener());
+        init();
     }
     
     public void removerListeners() {
@@ -230,12 +237,19 @@ public class DialogEditarQuarto extends Dialog<Object> {
             return;
         }
         
+        boolean isSituacaoValid = (cbSituacao.getSelectionModel().getSelectedIndex() != -1);
+        
+        if (!isSituacaoValid) {
+            mostrarMsg("Situacao invalida!");
+            return;
+        }
+        
         Quarto q = new Quarto();
         q.setId(quarto.getId());
         q.setCapacidade(capacidade);
         q.setDescricao(descricao);
         q.setPreco(preco);
-        q.setSituacao(ServicoSituacao.EM_MANUNTENCAO);
+        q.setSituacao(cbSituacao.getSelectionModel().getSelectedItem());
         q.setFoto(quarto.getFoto());
         
         rslt = quartoRepository.edit(q, file);
@@ -368,23 +382,7 @@ public class DialogEditarQuarto extends Dialog<Object> {
         
         return fileChooser;
     }
-    
-    private Boolean isSamePhoto (FileInputStream originalPhotoFileInputStream, FileInputStream newPhotoFileInputStream) {
-        Boolean isSamePhoto;
-        
-        if (originalPhotoFileInputStream == null || newPhotoFileInputStream == null) {
-            return null;
-        }
-        
-        try {
-            isSamePhoto = IOUtils.contentEquals(originalPhotoFileInputStream, newPhotoFileInputStream);
-        } catch (IOException iOException) {
-            isSamePhoto = false;
-        }
-        
-        return isSamePhoto;
-    }
-
+  
     private FileInputStream obterFileInputStreamViaFile(File selectedFile) {
         FileInputStream targetStream;
         
@@ -421,11 +419,12 @@ public class DialogEditarQuarto extends Dialog<Object> {
         txtCapacidade.setText(quarto.getCapacidade() + "");
         txtDescricao.setText(quarto.getDescricao());
         txtPreco.setText(quarto.getPreco() + "");
+        cbSituacao.getSelectionModel().select(quarto.getSituacao());
         originalFileInputStream  = (ByteArrayInputStream) obterInputStreamViaBlob(quarto.getFoto());
         
-        if (originalFileInputStream == null)
+        if (originalFileInputStream == null) {
             return;
-        
+        }
        
         Image img = new Image(originalFileInputStream);
 

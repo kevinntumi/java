@@ -4,7 +4,7 @@
  */
 package edu.uem.sgh.repository.servico_quarto;
 
-import edu.uem.sgh.model.Quarto;
+import edu.uem.sgh.datasource.RemoteServicoQuartoDataSource;
 import edu.uem.sgh.model.Result;
 import edu.uem.sgh.model.ServicoQuarto;
 import java.sql.Connection;
@@ -16,38 +16,34 @@ import java.util.List;
  */
 public class ServicoQuartoRepository {
     private Connection remoteConnection;
-    private RemoteServicoQuartoRepository remoteServicoQuartoRepository;
+    private RemoteServicoQuartoDataSource remoteServicoQuartoDataSource;
 
     public ServicoQuartoRepository(Connection remoteConnection) {
         this.remoteConnection = remoteConnection;
     }
 
-    public Result<ServicoQuarto> get(long id) {
-        return getRemoteServicoQuartoRepository().get(id);
+    public Result<Boolean> associarQuartoEServico(ServicoQuarto servicoQuarto) {
+        return getRemoteServicoQuartoDataSource().associarQuartoEServico(servicoQuarto);
     }
 
-    public Result<List<ServicoQuarto>> getAll() {
-        return getRemoteServicoQuartoRepository().getAll();
+    public Result<Boolean> editarAssociacao(ServicoQuarto servicoQuarto) {
+        return getRemoteServicoQuartoDataSource().editarAssociacao(servicoQuarto);
     }
 
-    public Result<Boolean> deleteOrUndelete(long id, boolean delete) {
-        return getRemoteServicoQuartoRepository().deleteOrUndelete(id, delete);
+    public Result<List<ServicoQuarto>> obterAssociacoesPorQuarto(long idQuarto) {
+        return getRemoteServicoQuartoDataSource().obterAssociacoesPorQuarto(idQuarto);
     }
 
-    public Result<Boolean> edit(edu.uem.sgh.request_body.ServicoQuarto servicoQuarto) {
-        return getRemoteServicoQuartoRepository().edit(servicoQuarto);
+    public Result<List<ServicoQuarto>> obterAssociacoesPorServico(long idServico) {
+        return getRemoteServicoQuartoDataSource().obterAssociacoesPorServico(idServico);
     }
 
-    public Result<Boolean> add(edu.uem.sgh.request_body.ServicoQuarto servicoQuarto) {
-        return getRemoteServicoQuartoRepository().add(servicoQuarto);
+    public Result<ServicoQuarto> obterPorId(long id) {
+        return remoteServicoQuartoDataSource.obterPorId(id);
     }
 
-    public Result<List<Quarto>> obterQuartosPorServico(long idServico) {
-        return getRemoteServicoQuartoRepository().obterQuartosPorServico(idServico);
-    }    
-
-    public RemoteServicoQuartoRepository getRemoteServicoQuartoRepository() {
-        if (remoteServicoQuartoRepository == null || remoteConnection != null) remoteServicoQuartoRepository = new RemoteServicoQuartoRepository(remoteConnection);
-        return remoteServicoQuartoRepository;
+    public RemoteServicoQuartoDataSource getRemoteServicoQuartoDataSource() {
+        if (remoteServicoQuartoDataSource == null && remoteConnection != null) remoteServicoQuartoDataSource = new RemoteServicoQuartoDataSource(remoteConnection);
+        return remoteServicoQuartoDataSource;
     }
 }
